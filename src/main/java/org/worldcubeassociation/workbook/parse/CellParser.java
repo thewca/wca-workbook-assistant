@@ -165,12 +165,7 @@ public class CellParser {
             }
         }
         else {
-            if (aMandatory) {
-                throw new ParseException("misformatted time", 0);
-            }
-            else {
-                return 0L;
-            }
+            throw new ParseException("misformatted time", 0);
         }
     }
 
