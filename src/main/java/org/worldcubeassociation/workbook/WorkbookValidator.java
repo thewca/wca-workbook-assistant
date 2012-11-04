@@ -4,11 +4,14 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.worldcubeassociation.workbook.parse.CellFormatter;
 import org.worldcubeassociation.workbook.parse.CellParser;
 import org.worldcubeassociation.workbook.parse.ParsedGender;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
 
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -17,6 +20,7 @@ import java.util.List;
 public class WorkbookValidator {
 
     private static final String[] ORDER = {"1st", "2nd", "3rd", "4th", "5th"};
+    private static final Long TEN_MINUTES_IN_CENTISECONDS = 10L * 60L * 100L;
 
     public static void validate(MatchedWorkbook aMatchedWorkbook) {
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
@@ -155,37 +159,56 @@ public class WorkbookValidator {
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = sheet.getRow(rowIdx);
 
+            // Validate individual results.
+            boolean allResultsValid = true;
+            boolean allResultsPresent = true;
+            Long[] results = new Long[format.getResultCount()];
             for (int resultIdx = 1; resultIdx <= format.getResultCount(); resultIdx++) {
                 int resultCellCol = RowTokenizer.getResultCell(resultIdx, format, event, columnOrder);
                 Cell resultCell = row.getCell(resultCellCol);
 
                 try {
+                    Long result;
                     if (round.isCombined() && resultIdx > 1) {
-                        CellParser.parseOptionalTime(resultCell, resultFormat, aFormulaEvaluator);
+                        result = CellParser.parseOptionalTime(resultCell, resultFormat, aFormulaEvaluator);
                     }
                     else {
-                        CellParser.parseMandatoryTime(resultCell, resultFormat, aFormulaEvaluator);
+                        result = CellParser.parseMandatoryTime(resultCell, resultFormat, aFormulaEvaluator);
+                    }
+                    results[resultIdx - 1] = result;
+                    if (result == 0) {
+                        allResultsPresent = false;
                     }
                 }
                 catch (ParseException e) {
                     validationErrors.add(new ValidationError(ORDER[resultIdx - 1] + " result: " + e.getMessage(),
                             rowIdx, resultCellCol));
+                    allResultsValid = false;
                 }
-
             }
 
+            // Validate best result.
             if (format.getResultCount() > 1) {
                 int bestCellCol = RowTokenizer.getBestCell(format, event, columnOrder);
                 Cell bestResultCell = row.getCell(bestCellCol);
 
                 try {
-                    CellParser.parseMandatoryTime(bestResultCell, resultFormat, aFormulaEvaluator);
+                    Long bestResult = CellParser.parseMandatoryTime(bestResultCell, resultFormat, aFormulaEvaluator);
+                    if (allResultsValid) {
+                        Long expectedBestResult = calculateBestResult(results);
+                        if (!expectedBestResult.equals(bestResult)) {
+                            String formattedExpectedBest = CellFormatter.formatTime(expectedBestResult, resultFormat);
+                            validationErrors.add(new ValidationError("Best result does not match calculated best result: " + formattedExpectedBest,
+                                    rowIdx, bestCellCol));
+                        }
+                    }
                 }
                 catch (ParseException e) {
                     validationErrors.add(new ValidationError("Best result: " + e.getMessage(), rowIdx, bestCellCol));
                 }
             }
 
+            // Validate single record.
             int singleRecordCellCol = RowTokenizer.getSingleRecordCell(format, event, columnOrder);
             Cell singleRecordCell = row.getCell(singleRecordCellCol);
             try {
@@ -195,22 +218,42 @@ public class WorkbookValidator {
                 validationErrors.add(new ValidationError("Misformatted single record", rowIdx, singleRecordCellCol));
             }
 
+            // Validate average result.
             if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5) {
                 int averageCellCol = RowTokenizer.getAverageCell(format, event);
                 Cell averageResultCell = row.getCell(averageCellCol);
 
                 try {
+                    Long averageResult;
                     if (round.isCombined()) {
-                        CellParser.parseOptionalTime(averageResultCell, resultFormat, aFormulaEvaluator);
+                        averageResult = CellParser.parseOptionalTime(averageResultCell, resultFormat, aFormulaEvaluator);
                     }
                     else {
-                        CellParser.parseMandatoryTime(averageResultCell, resultFormat, aFormulaEvaluator);
+                        averageResult = CellParser.parseMandatoryTime(averageResultCell, resultFormat, aFormulaEvaluator);
+                    }
+
+                    if (allResultsValid) {
+                        if (allResultsPresent) {
+                            Long expectedAverageResult = calculateAverageResult(results, format);
+                            if (!expectedAverageResult.equals(averageResult)) {
+                                String formattedExpectedAverage = CellFormatter.formatTime(expectedAverageResult, resultFormat);
+                                validationErrors.add(new ValidationError("Average result does not match calculated average result: " + formattedExpectedAverage,
+                                        rowIdx, averageCellCol));
+                            }
+                        }
+                        else {
+                            if (!averageResult.equals(0L)) {
+                                validationErrors.add(new ValidationError("Average result should be empty for incomplete average in combined round",
+                                        rowIdx, averageCellCol));
+                            }
+                        }
                     }
                 }
                 catch (ParseException e) {
                     validationErrors.add(new ValidationError("Average result: " + e.getMessage(), rowIdx, averageCellCol));
                 }
 
+                // Validate average record.
                 int averageRecordCellCol = RowTokenizer.getAverageRecordCell(format, event);
                 Cell averageRecordCell = row.getCell(averageRecordCellCol);
                 try {
@@ -220,6 +263,79 @@ public class WorkbookValidator {
                     validationErrors.add(new ValidationError("Misformatted average record", rowIdx, averageRecordCellCol));
                 }
             }
+        }
+    }
+
+    private static Long calculateBestResult(Long[] aResults) {
+        Long best = null;
+        for (Long result : aResults) {
+            if (result > 0) {
+                if (best == null || result < best) {
+                    best = result;
+                }
+            }
+        }
+
+        if (best == null) {
+            return -1L;
+        }
+        else {
+            return best;
+        }
+    }
+
+
+    private static Long calculateAverageResult(Long[] aResults, Format aFormat) {
+        Long[] resultsCopy = Arrays.copyOf(aResults, aResults.length);
+        Arrays.sort(resultsCopy, new Comparator<Long>() {
+            @Override
+            public int compare(Long aFirst, Long aSecond) {
+                if (aFirst == -2 || aFirst == -1) {
+                    if (aSecond == -2 || aSecond == -1) {
+                        // A DNS/DNF is equal to a DNS/DNF.
+                        return 0;
+                    }
+                    else {
+                        // A DNS/DNF is larger than a time.
+                        return 1;
+                    }
+                }
+                else {
+                    if (aSecond == -2 || aSecond == -1) {
+                        // A time is smaller than a DNS/DNF.
+                        return -1;
+                    }
+                    else {
+                        // A lower time is smaller than a larger time.
+                        return (int) (aFirst - aSecond);
+                    }
+                }
+            }
+        });
+        if (aFormat == Format.AVERAGE_OF_5) {
+            resultsCopy = Arrays.copyOfRange(resultsCopy, 1, 4);
+        }
+
+        double sum = 0;
+        for (Long result : resultsCopy) {
+            if (result > 0) {
+                sum += result;
+            }
+            else {
+                return -1L;
+            }
+        }
+
+        long average = Math.round(sum / resultsCopy.length);
+        return roundToNearestSecond(average);
+    }
+
+    private static Long roundToNearestSecond(Long aResult) {
+        if (aResult > TEN_MINUTES_IN_CENTISECONDS) {
+            return Math.round(aResult / 100.0) * 100;
+        }
+        else {
+            return aResult;
         }
     }
 
