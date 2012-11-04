@@ -176,8 +176,17 @@ public class WorkbookValidator {
                         result = CellParser.parseMandatoryTime(resultCell, resultFormat, aFormulaEvaluator);
                     }
                     results[resultIdx - 1] = result;
+
                     if (result == 0) {
                         allResultsPresent = false;
+                    }
+                    else {
+                        if ((resultFormat == ResultFormat.SECONDS || resultFormat == ResultFormat.MINUTES) &&
+                                !roundToNearestSecond(result).equals(result)) {
+                            validationErrors.add(new ValidationError(ORDER[resultIdx - 1] + " result is over 10 minutes and should be rounded to the nearest second",
+                                    rowIdx, resultCellCol));
+                            allResultsValid = false;
+                        }
                     }
                 }
                 catch (ParseException e) {
