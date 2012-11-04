@@ -1,8 +1,11 @@
 package org.worldcubeassociation.workbook;
 
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
 /**
@@ -47,6 +50,13 @@ public abstract class AbstractWorkbookTest {
     protected void endFile() {
         System.out.println();
         System.out.println();
+    }
+
+    protected static Workbook createWorkbook(File aWorkbookFile) throws Exception {
+        FileInputStream fileInputStream = new FileInputStream(aWorkbookFile);
+        Workbook workbook = WorkbookFactory.create(fileInputStream);
+        fileInputStream.close();
+        return workbook;
     }
 
     private void printFormat(MatchedWorkbook workbook) {

@@ -21,7 +21,7 @@ public class ValidateWorkbookTest extends AbstractWorkbookTest {
     @Override
     protected void handleFile(File aWorkbookFile) {
         try {
-            Workbook workbook = WorkbookFactory.create(aWorkbookFile);
+            Workbook workbook = createWorkbook(aWorkbookFile);
             MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, aWorkbookFile.getAbsolutePath());
             WorkbookValidator.validate(matchedWorkbook);
 

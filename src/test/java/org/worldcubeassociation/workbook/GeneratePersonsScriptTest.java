@@ -4,6 +4,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * @author Lars Vandenbergh
@@ -23,7 +25,7 @@ public class GeneratePersonsScriptTest extends AbstractWorkbookTest {
     @Override
     protected void handleFile(File aWorkbookFile) {
         try {
-            Workbook workbook = WorkbookFactory.create(aWorkbookFile);
+            Workbook workbook = createWorkbook(aWorkbookFile);
             MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, aWorkbookFile.getAbsolutePath());
 
             ScriptsGenerator.generateResultsScript(matchedWorkbook, SheetType.REGISTRATIONS);

@@ -23,7 +23,7 @@ public class MatchWorkbookTest extends AbstractWorkbookTest {
     @Override
     protected void handleFile(File aWorkbookFile) {
         try {
-            Workbook workbook = WorkbookFactory.create(aWorkbookFile);
+            Workbook workbook = createWorkbook(aWorkbookFile);
             WorkbookMatcher.match(workbook, aWorkbookFile.getAbsolutePath());
             System.out.println("OK");
         }

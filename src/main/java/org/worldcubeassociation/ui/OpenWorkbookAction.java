@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Executor;
@@ -94,7 +95,9 @@ public class OpenWorkbookAction extends AbstractAction {
             Exception exception = null;
             try {
                 updateStatus(0, "Loading");
-                Workbook workbook = WorkbookFactory.create(fSelectedFile);
+                FileInputStream fileInputStream = new FileInputStream(fSelectedFile);
+                Workbook workbook = WorkbookFactory.create(fileInputStream);
+                fileInputStream.close();
                 updateStatus(25, "Matching sheets");
                 MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, fSelectedFile.getAbsolutePath());
                 updateStatus(50, "Validating sheets");

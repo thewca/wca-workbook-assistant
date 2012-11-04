@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -37,7 +38,9 @@ public class RefreshWorkbookAction extends AbstractAction implements PropertyCha
     public void actionPerformed(ActionEvent aActionEvent) {
         try {
             MatchedWorkbook matchedWorkbook = fEnv.getMatchedWorkbook();
-            Workbook workbook = WorkbookFactory.create(new File(matchedWorkbook.getWorkbookFileName()));
+            FileInputStream fileInputStream = new FileInputStream(new File(matchedWorkbook.getWorkbookFileName()));
+            Workbook workbook = WorkbookFactory.create(fileInputStream);
+            fileInputStream.close();
             if (workbook.getNumberOfSheets() == matchedWorkbook.sheets().size()) {
                 for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                     if (!workbook.getSheetName(i).equals(matchedWorkbook.getWorkbook().getSheetName(i))) {
