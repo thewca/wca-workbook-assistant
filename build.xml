@@ -5,7 +5,7 @@
              classpath="build/lib/proguard.jar"/>
 
     <target name="clean">
-        <deltree dir="target"/>
+        <delete dir="target"/>
     </target>
     <target name="compile">
         <mkdir dir="target/classes"/>
