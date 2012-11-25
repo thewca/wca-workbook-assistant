@@ -1,6 +1,5 @@
 package org.worldcubeassociation.ui;
 
-import com.sun.deploy.util.DialogListener;
 import org.worldcubeassociation.WorkbookUploaderEnv;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.SheetType;
@@ -13,7 +12,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
