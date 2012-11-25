@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<project name="wca-workbook-uploader" default="package">
+    <property file="build.properties"/>
+    <taskdef resource="proguard/ant/task.properties"
+             classpath="build/lib/proguard.jar"/>
+
+    <target name="clean">
+        <deltree dir="target"/>
+    </target>
+    <target name="compile">
+        <mkdir dir="target/classes"/>
+        <javac srcdir="src/main/java" destdir="target/classes" target="1.6">
+            <classpath>
+                <fileset dir="lib" includes="*.jar"/>
+            </classpath>
+        </javac>
+    </target>
+    <target name="jar" depends="compile">
+        <jar basedir="target/classes" jarfile="target/wca-workbook-uploader-lib-${version}.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.worldcubeassociation.WorkbookUploader"/>
+            </manifest>
+        </jar>
+    </target>
+    <target name="obfuscatejar" depends="jar">
+        <proguard note="false" warn="false" obfuscate="false" optimize="false" shrink="false">
+            <libraryjar>
+                <fileset dir="${java.home}/lib" includes="*.jar"/>
+                <fileset dir="${java.home}/../Classes" includes="*.jar"/>
+            </libraryjar>
+            <injar filter="!META-INF/**">
+                <fileset dir="lib" includes="*.jar"/>
+            </injar>
+            <injar file="target/wca-workbook-uploader-lib-${version}.jar"/>
+            <injar file="src/main/resources"/>
+            <outjar file="target/wca-workbook-uploader-${version}.jar"/>
+        </proguard>
+    </target>
+    <target name="package" depends="obfuscatejar"/>
+</project>
