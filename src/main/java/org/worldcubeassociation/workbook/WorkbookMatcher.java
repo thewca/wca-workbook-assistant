@@ -51,7 +51,6 @@ public class WorkbookMatcher {
             }
         }
 
-
         // Change a non-combined round into a combined round if not everyone did all attempts.
         for (MatchedSheet matchedSheet : matchedWorkbook.sheets()) {
             Sheet sheet = matchedSheet.getSheet();
@@ -202,10 +201,9 @@ public class WorkbookMatcher {
             ResultFormat resultFormat = null;
             int dataRow = firstDataRow;
             while (resultFormat == null && dataRow <= lastDataRow) {
-                int dataCol = 4;
-                int lastDataCol = 4 + (format.getResultCount() - 1);
-                while (resultFormat == null && dataCol <= lastDataCol) {
-                    Cell cell = sheet.getRow(dataRow).getCell(dataCol);
+                for (int resultIdx = 1; resultIdx <= format.getResultCount(); resultIdx++) {
+                    int resultCellCol = RowTokenizer.getResultCell(resultIdx, format, event, columnOrder);
+                    Cell cell = sheet.getRow(dataRow).getCell(resultCellCol);
 
                     if (cell != null && (cell.getCellType() == Cell.CELL_TYPE_NUMERIC ||
                             (cell.getCellType() == Cell.CELL_TYPE_FORMULA && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC))) {
@@ -214,8 +212,6 @@ public class WorkbookMatcher {
                         CellFormatResult formattedResult = cellFormat.apply(cell);
                         resultFormat = matchResultFormatFromCellFormat(cellFormatString.toUpperCase(), formattedResult.text);
                     }
-
-                    dataCol++;
                 }
                 dataRow++;
             }
