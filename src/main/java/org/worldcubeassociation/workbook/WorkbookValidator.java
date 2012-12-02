@@ -73,7 +73,8 @@ public class WorkbookValidator {
     }
 
     private static void validateResultsSheet(MatchedSheet aMatchedSheet) {
-        // Validate round, event, format and result format
+        // Validate round, event, format and result format.
+        boolean validResultFormat = true;
         if (aMatchedSheet.getEvent() == null) {
             ValidationError validationError = new ValidationError("Missing event", -1, ValidationError.EVENT_CELL_IDX);
             aMatchedSheet.getValidationErrors().add(validationError);
@@ -91,14 +92,13 @@ public class WorkbookValidator {
             aMatchedSheet.getValidationErrors().add(validationError);
         }
         else if (aMatchedSheet.getEvent() != null) {
-            boolean valid;
             if (aMatchedSheet.getEvent() == Event._333mbf || aMatchedSheet.getEvent() == Event._333fm) {
-                valid = aMatchedSheet.getResultFormat() == ResultFormat.NUMBER;
+                validResultFormat = aMatchedSheet.getResultFormat() == ResultFormat.NUMBER;
             }
             else {
-                valid = aMatchedSheet.getResultFormat() != ResultFormat.NUMBER;
+                validResultFormat = aMatchedSheet.getResultFormat() != ResultFormat.NUMBER;
             }
-            if (!valid) {
+            if (!validResultFormat) {
                 ValidationError validationError = new ValidationError("Illegal result format for event", -1, ValidationError.RESULT_FORMAT_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
@@ -140,7 +140,8 @@ public class WorkbookValidator {
         if (aMatchedSheet.getEvent() != null &&
                 aMatchedSheet.getRound() != null &&
                 aMatchedSheet.getFormat() != null &&
-                aMatchedSheet.getResultFormat() != null) {
+                aMatchedSheet.getResultFormat() != null &&
+                validResultFormat) {
             validateResults(aMatchedSheet, formulaEvaluator);
         }
 
