@@ -6,14 +6,23 @@
 	<body>
 		<h1>WCA Workbook Uploader</h1>
 		<h2>Downloads</h2>
-		<a href="workbookuploader-0.2.jar">Latest release v0.2 (29th October 2012)</a>
+		<a href="workbookuploader-0.3.jar">Latest release v0.3 (2nd December 2012)</a>
 		<h2>Release Notes</h2>
+		<h3>v0.3 (2nd December 2012)</h3>
+		<ul>
+			<li><strong>Bug fix #13</strong><br>The validation kept validating results when the result format was invalid, leading to misleading validation errors. This is now fixed.</li>
+			<li><strong>Bug fix #17</strong><br>The Sheets contents pane sometimes didn't show the best and average results. This is now fixed.</li>
+			<li><strong>Bug fix #22</strong><br>The recognition of the result format for multiple blindfolded was sometimes incorrect if the round had only DNF results. This is now fixed.</li>
+			<li><strong>Bug fix #25</strong><br>Workbooks that contained cell formats with Locale information didn't always open properly. This is now fixed.</li>
+			<li><strong>Improvement #6</strong><br>The Persons query now only updates persons who competed in the uploaded competition.</li>
+			<li><strong>Improvement #27</strong><br>The Persons query now also returns the persons who still have a missing date of birth or gender.</li>
+        </ul>
 		<h3>v0.2 (29th October 2012)</h3>
 		<ul>
-			<li><strong>Bug fix [WCAUPLOADER-1]</strong><br>The workbook file used to be locked by the application under Windows, which prevented making changes using Excel and refreshing from the application. This is now fixed.</li>
-			<li><strong>Bug fix [WCAUPLOADER-15]</strong><br>The validation didn't check that non-empty results are formatted correctly for combined rounds. This is now fixed.</li>
-			<li><strong>Improvement [WCAUPLOADER-2]</strong><br>The validation now also checks for wrongly calculated best and average results.</li>
-			<li><strong>Improvement [WCAUPLOADER-3]</strong><br>The validation now also checks for rounding of times >10 minutes.</li>
+			<li><strong>Bug fix #2</strong><br>The workbook file used to be locked by the application under Windows, which prevented making changes using Excel and refreshing from the application. This is now fixed.</li>
+			<li><strong>Bug fix #5</strong><br>The validation didn't check that non-empty results are formatted correctly for combined rounds. This is now fixed.</li>
+			<li><strong>Improvement #3</strong><br>The validation now also checks for wrongly calculated best and average results.</li>
+			<li><strong>Improvement #4</strong><br>The validation now also checks for rounding of times >10 minutes.</li>
         </ul>
 		<h3>v0.1 (21st August 2012)</h3>
 		<ul>
