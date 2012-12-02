@@ -43,7 +43,7 @@ public class ScriptsGenerator {
             if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS && aType == SheetType.REGISTRATIONS) {
                 script.append("-- Registrations").
                         append("    (sheet '").append(matchedSheet.getSheet().getSheetName()).append("')\n\n");
-                generateRegistrations(script, matchedSheet);
+                generateRegistrations(script, competitionId, matchedSheet);
             }
         }
 
@@ -52,6 +52,7 @@ public class ScriptsGenerator {
     }
 
     public static void generateRegistrations(StringBuffer aScript,
+                                             String aCompetitionId,
                                              MatchedSheet aMatchedSheet) {
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = aMatchedSheet.getSheet().getRow(rowIdx);
@@ -95,6 +96,10 @@ public class ScriptsGenerator {
                     append(country).append("\" limit 5;\n");
 
         }
+
+        aScript.append("select * from Persons where (year=0 or gender='') and " +
+                "id in (select distinct personId from Results where competitionId='")
+                .append(aCompetitionId).append( "');\n");
     }
 
     private static void generateResults(StringBuffer aScript,
