@@ -87,19 +87,23 @@ public class ScriptsGenerator {
 
                 aScript.append("update Persons set year=").append(year).append(",month=").append(month).append(",day=").
                         append(day).append(" where name=\"").append(name).
-                        append("\" and year=0 and countryId=\"").append(country).append("\" limit 5;\n");
+                        append("\" and year=0 and countryId=\"").append(country).append("\" and id in ").
+                        append("(select distinct personId from Results where competitionId='").
+                        append(aCompetitionId).append("') limit 1;\n");
             }
 
             ParsedGender gender = CellParser.parseGender(genderCell);
             aScript.append("update Persons set gender=\"").append(gender).append("\" where name=\"").
                     append(name).append("\" and gender='' and countryId=\"").
-                    append(country).append("\" limit 5;\n");
+                    append(country).append("\" and id in ").
+                    append("(select distinct personId from Results where competitionId='").
+                    append(aCompetitionId).append("') limit 1;\n");
 
         }
 
         aScript.append("select * from Persons where (year=0 or gender='') and " +
                 "id in (select distinct personId from Results where competitionId='")
-                .append(aCompetitionId).append( "');\n");
+                .append(aCompetitionId).append("');\n");
     }
 
     private static void generateResults(StringBuffer aScript,
