@@ -17,8 +17,7 @@ public class WorkbookTableDataExtractorTest extends AbstractWorkbookTest {
 
     @Override
     protected void startFile(String file) {
-//        System.out.print(file);
-//        System.out.print(" ");
+        System.out.println(file);
     }
 
     @Override
@@ -27,7 +26,6 @@ public class WorkbookTableDataExtractorTest extends AbstractWorkbookTest {
             Workbook workbook = createWorkbook(aWorkbookFile);
             MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, aWorkbookFile.getAbsolutePath());
             WorkbookTableDataExtractor.extractTableData(matchedWorkbook);
-          //  System.out.println("OK");
         }
         catch (Exception e) {
             System.out.println("ERROR!");

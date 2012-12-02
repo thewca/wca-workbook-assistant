@@ -209,10 +209,10 @@ public class WorkbookMatcher {
 
                     if (cell != null && (cell.getCellType() == Cell.CELL_TYPE_NUMERIC ||
                             (cell.getCellType() == Cell.CELL_TYPE_FORMULA && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC))) {
-                        String formatString = cell.getCellStyle().getDataFormatString();
-                        CellFormat cellFormat = CellFormat.getInstance(formatString);
+                        String cellFormatString = CellParser.getCellFormatString(cell);
+                        CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
                         CellFormatResult formattedResult = cellFormat.apply(cell);
-                        resultFormat = matchResultFormatFromCellFormat(formatString.toUpperCase(), formattedResult.text);
+                        resultFormat = matchResultFormatFromCellFormat(cellFormatString.toUpperCase(), formattedResult.text);
                     }
 
                     dataCol++;
@@ -471,8 +471,8 @@ public class WorkbookMatcher {
             return false;
         }
 
-        String dataFormat = nameCell.getCellStyle().getDataFormatString();
-        CellFormat cellFormat = CellFormat.getInstance(dataFormat);
+        String cellFormatString = CellParser.getCellFormatString(nameCell);
+        CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
         CellFormatResult formattedName = cellFormat.apply(nameCell);
         return formattedName.text != null && !formattedName.text.isEmpty() && !formattedName.text.equals("?");
     }

@@ -27,8 +27,8 @@ public class CellParser {
             return aMandatory ? null : "";
         }
 
-        String dataFormat = cell.getCellStyle().getDataFormatString();
-        CellFormat cellFormat = CellFormat.getInstance(dataFormat);
+        String cellFormatString = getCellFormatString(cell);
+        CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
         CellFormatResult formatResult = cellFormat.apply(cell);
         String text = formatResult.text.trim();
 
@@ -202,6 +202,14 @@ public class CellParser {
         else {
             throw new ParseException("misformatted record", 0);
         }
+    }
+
+    public static String getCellFormatString(Cell aCell) {
+        String cellFormatString = aCell.getCellStyle().getDataFormatString();
+        if(cellFormatString.contains("]")) {
+            cellFormatString = cellFormatString.split("]")[1];
+        }
+        return cellFormatString;
     }
 
 }
