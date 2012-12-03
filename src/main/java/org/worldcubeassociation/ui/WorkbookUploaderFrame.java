@@ -165,10 +165,11 @@ public class WorkbookUploaderFrame extends JFrame {
                 "Generate Results...",
                 SheetType.RESULTS)), c);
         c.weightx = 0;
-        c.insets.right = 4;
         panel.add(new JButton(new GenerateScriptsAction(fEnv,
                 "Generate Persons...",
                 SheetType.REGISTRATIONS)), c);
+        c.insets.right = 4;
+        panel.add(new JButton(new GenerateJSONAction(fEnv)), c);
 
         return panel;
     }
