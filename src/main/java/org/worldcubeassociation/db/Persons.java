@@ -17,9 +17,7 @@ public class Persons {
     }
 
     public void add(Person aPerson) {
-        Person existingPerson = findById(aPerson.getId());
-        if (existingPerson == null ||
-                existingPerson.getSubId() < aPerson.getSubId()) {
+        if (aPerson.getSubId() == 1) {
             fPersons.put(aPerson.getId(), aPerson);
         }
     }
