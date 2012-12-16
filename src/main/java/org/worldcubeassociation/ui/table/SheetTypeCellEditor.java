@@ -49,7 +49,7 @@ public class SheetTypeCellEditor extends DefaultCellEditor {
             fMatchedSheet.setSheetType(newSheetType);
             fMatchedSheet.setFirstDataRow(4);
             fMatchedSheet.setLastDataRow(fMatchedSheet.getTableData().length - 1);
-            WorkbookValidator.validateSheet(fMatchedSheet);
+            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

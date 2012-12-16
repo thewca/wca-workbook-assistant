@@ -46,7 +46,7 @@ public class EventCellEditor extends DefaultCellEditor {
         Event newEvent = (Event) getCellEditorValue();
         if (newEvent != fMatchedSheet.getEvent()) {
             fMatchedSheet.setEvent(newEvent);
-            WorkbookValidator.validateSheet(fMatchedSheet);
+            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

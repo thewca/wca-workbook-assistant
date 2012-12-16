@@ -47,7 +47,7 @@ public class FormatCellEditor extends DefaultCellEditor {
         Format newFormat = (Format) getCellEditorValue();
         if (newFormat != fMatchedSheet.getFormat()) {
             fMatchedSheet.setFormat(newFormat);
-            WorkbookValidator.validateSheet(fMatchedSheet);
+            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

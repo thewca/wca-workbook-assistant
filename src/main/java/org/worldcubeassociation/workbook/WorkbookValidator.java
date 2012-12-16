@@ -4,6 +4,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.worldcubeassociation.db.Database;
+import org.worldcubeassociation.db.Person;
 import org.worldcubeassociation.workbook.parse.CellFormatter;
 import org.worldcubeassociation.workbook.parse.CellParser;
 import org.worldcubeassociation.workbook.parse.ParsedGender;
@@ -22,26 +24,25 @@ public class WorkbookValidator {
     private static final String[] ORDER = {"1st", "2nd", "3rd", "4th", "5th"};
     private static final Long TEN_MINUTES_IN_CENTISECONDS = 10L * 60L * 100L;
 
-    public static void validate(MatchedWorkbook aMatchedWorkbook) {
+    public static void validate(MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
-            validateSheet(matchedSheet);
+            validateSheet(matchedSheet, aDatabase);
         }
     }
 
-    public static void validateSheet(MatchedSheet aMatchedSheet) {
+    public static void validateSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
         // Clear validation errors.
         aMatchedSheet.getValidationErrors().clear();
         aMatchedSheet.setValidated(false);
 
         if (aMatchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
-            validateRegistrationsSheet(aMatchedSheet);
-        }
-        else if (aMatchedSheet.getSheetType() == SheetType.RESULTS) {
-            validateResultsSheet(aMatchedSheet);
+            validateRegistrationsSheet(aMatchedSheet, aDatabase);
+        } else if (aMatchedSheet.getSheetType() == SheetType.RESULTS) {
+            validateResultsSheet(aMatchedSheet, aDatabase);
         }
     }
 
-    private static void validateRegistrationsSheet(MatchedSheet aMatchedSheet) {
+    private static void validateRegistrationsSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
         // Validate name, country.
         Sheet sheet = aMatchedSheet.getSheet();
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
@@ -67,12 +68,40 @@ public class WorkbookValidator {
                 ValidationError validationError = new ValidationError("Misformatted gender", rowIdx, genderColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
+
+            int wcaColIdx = aMatchedSheet.getWcaIdHeaderColumn();
+            String wcaId = CellParser.parseOptionalText(row.getCell(wcaColIdx));
+            boolean wcaIdEmpty = "".equals(wcaId);
+            boolean wcaIdValid = validateWCAId(wcaId);
+            if (!wcaIdEmpty && !wcaIdValid) {
+                ValidationError validationError = new ValidationError("Misformatted WCA id", rowIdx, 3);
+                aMatchedSheet.getValidationErrors().add(validationError);
+            }
+
+            // If we have a valid WCA id check that it is in the database and check that the name and country matches
+            // what what is in the database.
+            if (wcaIdValid && aDatabase != null) {
+                Person person = aDatabase.getPersons().findById(wcaId);
+                if (person == null) {
+                    ValidationError validationError = new ValidationError("Unknown WCA id", rowIdx, 3);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                } else {
+                    if (name != null && !name.equals(person.getName())) {
+                        ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), rowIdx, 1);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+                    if (country != null && !country.equals(person.getCountry())) {
+                        ValidationError validationError = new ValidationError("Country does not match country in WCA database: " + person.getCountry(), rowIdx, 2);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+                }
+            }
         }
 
         aMatchedSheet.setValidated(true);
     }
 
-    private static void validateResultsSheet(MatchedSheet aMatchedSheet) {
+    private static void validateResultsSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
         // Validate round, event, format and result format.
         boolean validResultFormat = true;
         if (aMatchedSheet.getEvent() == null) {
@@ -104,7 +133,6 @@ public class WorkbookValidator {
             }
         }
 
-
         // Validate position, name, country and WCA ID.
         Sheet sheet = aMatchedSheet.getSheet();
         FormulaEvaluator formulaEvaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
@@ -130,9 +158,30 @@ public class WorkbookValidator {
             }
 
             String wcaId = CellParser.parseOptionalText(row.getCell(3));
-            if (!"".equals(wcaId) && !wcaId.matches("[0-9]{4}[A-Z]{4}[0-9]{2}")) {
+            boolean wcaIdEmpty = "".equals(wcaId);
+            boolean wcaIdValid = validateWCAId(wcaId);
+            if (!wcaIdEmpty && !wcaIdValid) {
                 ValidationError validationError = new ValidationError("Misformatted WCA id", rowIdx, 3);
                 aMatchedSheet.getValidationErrors().add(validationError);
+            }
+
+            // If we have a valid WCA id check that it is in the database and check that the name and country matches
+            // what what is in the database.
+            if (wcaIdValid && aDatabase != null) {
+                Person person = aDatabase.getPersons().findById(wcaId);
+                if (person == null) {
+                    ValidationError validationError = new ValidationError("Unknown WCA id", rowIdx, 3);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                } else {
+                    if (name != null && !name.equals(person.getName())) {
+                        ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), rowIdx, 1);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+                    if (country != null && !country.equals(person.getCountry())) {
+                        ValidationError validationError = new ValidationError("Country does not match country in WCA database: " + person.getCountry(), rowIdx, 2);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+                }
             }
         }
 
@@ -268,12 +317,15 @@ public class WorkbookValidator {
                 Cell averageRecordCell = row.getCell(averageRecordCellCol);
                 try {
                     CellParser.parseRecord(averageRecordCell);
-                }
-                catch (ParseException e) {
+                } catch (ParseException e) {
                     validationErrors.add(new ValidationError("Misformatted average record", rowIdx, averageRecordCellCol));
                 }
             }
         }
+    }
+
+    private static boolean validateWCAId(String aWcaId) {
+        return aWcaId.matches("[0-9]{4}[A-Z]{4}[0-9]{2}");
     }
 
     private static Long calculateBestResult(Long[] aResults) {
@@ -288,12 +340,10 @@ public class WorkbookValidator {
 
         if (best == null) {
             return -1L;
-        }
-        else {
+        } else {
             return best;
         }
     }
-
 
     private static Long calculateAverageResult(Long[] aResults, Format aFormat) {
         Long[] resultsCopy = Arrays.copyOf(aResults, aResults.length);
@@ -304,18 +354,15 @@ public class WorkbookValidator {
                     if (aSecond == -2 || aSecond == -1) {
                         // A DNS/DNF is equal to a DNS/DNF.
                         return 0;
-                    }
-                    else {
+                    } else {
                         // A DNS/DNF is larger than a time.
                         return 1;
                     }
-                }
-                else {
+                } else {
                     if (aSecond == -2 || aSecond == -1) {
                         // A time is smaller than a DNS/DNF.
                         return -1;
-                    }
-                    else {
+                    } else {
                         // A lower time is smaller than a larger time.
                         return (int) (aFirst - aSecond);
                     }
@@ -330,8 +377,7 @@ public class WorkbookValidator {
         for (Long result : resultsCopy) {
             if (result > 0) {
                 sum += result;
-            }
-            else {
+            } else {
                 return -1L;
             }
         }
@@ -343,8 +389,7 @@ public class WorkbookValidator {
     private static Long roundToNearestSecond(Long aResult) {
         if (aResult > TEN_MINUTES_IN_CENTISECONDS) {
             return Math.round(aResult / 100.0) * 100;
-        }
-        else {
+        } else {
             return aResult;
         }
     }

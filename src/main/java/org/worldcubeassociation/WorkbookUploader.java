@@ -1,9 +1,12 @@
 package org.worldcubeassociation;
 
+import org.worldcubeassociation.db.Database;
+import org.worldcubeassociation.db.WCADatabaseExportDecoder;
 import org.worldcubeassociation.ui.WorkbookUploaderFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -18,6 +21,15 @@ public class WorkbookUploader {
         final WorkbookUploaderEnv workbookUploaderEnv = new WorkbookUploaderEnv();
         workbookUploaderEnv.setFontSize(11);
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_TITLE);
+
+        // Attempt to read WCA database export.
+        try {
+            Database database = WCADatabaseExportDecoder.decodeMostRecentExport();
+            workbookUploaderEnv.setDatabase(database);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Init UI.
         SwingUtilities.invokeLater(new Runnable() {

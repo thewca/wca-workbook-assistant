@@ -160,11 +160,13 @@ public class WorkbookUploaderFrame extends JFrame {
         panel.add(increaseFontSizeButton, c);
 
         c.weightx = 1;
+        panel.add(new WCADatabaseExportPanel(fEnv), c);
+
+        c.weightx = 0;
         c.anchor = GridBagConstraints.EAST;
         panel.add(new JButton(new GenerateScriptsAction(fEnv,
                 "Generate Results...",
                 SheetType.RESULTS)), c);
-        c.weightx = 0;
         panel.add(new JButton(new GenerateScriptsAction(fEnv,
                 "Generate Persons...",
                 SheetType.REGISTRATIONS)), c);

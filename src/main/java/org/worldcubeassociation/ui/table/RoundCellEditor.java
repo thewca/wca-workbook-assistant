@@ -46,7 +46,7 @@ public class RoundCellEditor extends DefaultCellEditor {
         Round newValue = (Round) getCellEditorValue();
         if (newValue != fMatchedSheet.getRound()) {
             fMatchedSheet.setRound(newValue);
-            WorkbookValidator.validateSheet(fMatchedSheet);
+            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

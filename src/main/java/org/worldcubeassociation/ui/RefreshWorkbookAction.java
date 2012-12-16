@@ -54,7 +54,7 @@ public class RefreshWorkbookAction extends AbstractAction implements PropertyCha
             }
 
             matchedWorkbook.refresh(workbook);
-            WorkbookValidator.validate(matchedWorkbook);
+            WorkbookValidator.validate(matchedWorkbook, fEnv.getDatabase());
             WorkbookTableDataExtractor.extractTableData(matchedWorkbook);
             fEnv.fireSheetsChanged();
         }

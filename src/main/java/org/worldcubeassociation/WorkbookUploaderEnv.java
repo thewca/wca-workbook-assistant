@@ -1,5 +1,6 @@
 package org.worldcubeassociation;
 
+import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
 
@@ -16,13 +17,17 @@ public class WorkbookUploaderEnv {
     public static final String MATCHED_SELECTED_SHEET = "matchedSelectedSheet";
     public static final String SHEET_CHANGED = "sheetChanged";
     public static final String SHEETS_CHANGED = "sheetsChanged";
+    public static final String DATABASE= "database";
     public static final String FONT_SIZE = "fontSize";
 
     private float fFontSize;
 
     private PropertyChangeSupport fPropertyChangeSupport = new PropertyChangeSupport(this);
+
     private MatchedWorkbook fMatchedWorkbook;
     private MatchedSheet fSelectedSheet;
+
+    private Database fDatabase;
 
     private Window fTopLevelComponent;
 
@@ -44,6 +49,16 @@ public class WorkbookUploaderEnv {
         Object oldValue = fSelectedSheet;
         fSelectedSheet = aSelectedSheet;
         fPropertyChangeSupport.firePropertyChange(MATCHED_SELECTED_SHEET, oldValue, fSelectedSheet);
+    }
+
+    public Database getDatabase() {
+        return fDatabase;
+    }
+
+    public void setDatabase(Database aDatabase) {
+        Object oldValue = fDatabase;
+        fDatabase = aDatabase;
+        fPropertyChangeSupport.firePropertyChange(DATABASE, oldValue, fDatabase);
     }
 
     public void fireSheetChanged(MatchedSheet aSelectedSheet) {

@@ -101,7 +101,7 @@ public class OpenWorkbookAction extends AbstractAction {
                 updateStatus(25, "Matching sheets");
                 MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, fSelectedFile.getAbsolutePath());
                 updateStatus(50, "Validating sheets");
-                WorkbookValidator.validate(matchedWorkbook);
+                WorkbookValidator.validate(matchedWorkbook, fEnv.getDatabase());
                 updateStatus(75, "Building tables");
                 WorkbookTableDataExtractor.extractTableData(matchedWorkbook);
                 updateStatus(100, "Done");
