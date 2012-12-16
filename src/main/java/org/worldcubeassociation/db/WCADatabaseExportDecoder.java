@@ -36,7 +36,7 @@ public class WCADatabaseExportDecoder {
     public static Persons decodePersonsTSV(InputStream aInputStream) {
         Persons persons = new Persons();
 
-        Scanner scanner = new Scanner(aInputStream);
+        Scanner scanner = new Scanner(aInputStream, "UTF-8");
         scanner.useDelimiter("[\t\n\r\f]");
         scanner.nextLine();
         while (scanner.hasNext()) {
