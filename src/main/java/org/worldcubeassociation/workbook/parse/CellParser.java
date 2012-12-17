@@ -31,6 +31,7 @@ public class CellParser {
         CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
         CellFormatResult formatResult = cellFormat.apply(cell);
         String text = formatResult.text.trim();
+        text = text.replace('\u00A0',' ');
 
         if ("".equals(text)) {
             return aMandatory ? null : "";
