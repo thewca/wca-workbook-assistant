@@ -220,10 +220,10 @@ public class WorkbookValidator {
                 try {
                     Long result;
                     if (round.isCombined() && resultIdx > 1) {
-                        result = CellParser.parseOptionalTime(resultCell, resultFormat, aFormulaEvaluator);
+                        result = CellParser.parseOptionalSingleTime(resultCell, resultFormat, aFormulaEvaluator);
                     }
                     else {
-                        result = CellParser.parseMandatoryTime(resultCell, resultFormat, aFormulaEvaluator);
+                        result = CellParser.parseMandatorySingleTime(resultCell, resultFormat, aFormulaEvaluator);
                     }
                     results[resultIdx - 1] = result;
 
@@ -252,7 +252,7 @@ public class WorkbookValidator {
                 Cell bestResultCell = row.getCell(bestCellCol);
 
                 try {
-                    Long bestResult = CellParser.parseMandatoryTime(bestResultCell, resultFormat, aFormulaEvaluator);
+                    Long bestResult = CellParser.parseMandatorySingleTime(bestResultCell, resultFormat, aFormulaEvaluator);
                     if (allResultsValid) {
                         Long expectedBestResult = calculateBestResult(results);
                         if (!expectedBestResult.equals(bestResult)) {
@@ -285,10 +285,10 @@ public class WorkbookValidator {
                 try {
                     Long averageResult;
                     if (round.isCombined()) {
-                        averageResult = CellParser.parseOptionalTime(averageResultCell, resultFormat, aFormulaEvaluator);
+                        averageResult = CellParser.parseOptionalAverageTime(averageResultCell, resultFormat, aFormulaEvaluator);
                     }
                     else {
-                        averageResult = CellParser.parseMandatoryTime(averageResultCell, resultFormat, aFormulaEvaluator);
+                        averageResult = CellParser.parseMandatoryAverageTime(averageResultCell, resultFormat, aFormulaEvaluator);
                     }
 
                     if (allResultsValid) {

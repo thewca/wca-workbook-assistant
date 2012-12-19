@@ -74,17 +74,26 @@ public class CellParser {
         return null;
     }
 
-    public static Long parseOptionalTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
-        return parseTime(aCell, aResultFormat, false, aFormulaEvaluator);
+    public static Long parseOptionalSingleTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, false, false, aFormulaEvaluator);
     }
 
-    public static Long parseMandatoryTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
-        return parseTime(aCell, aResultFormat, true, aFormulaEvaluator);
+    public static Long parseMandatorySingleTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, true, false, aFormulaEvaluator);
+    }
+
+    public static Long parseOptionalAverageTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, false, true, aFormulaEvaluator);
+    }
+
+    public static Long parseMandatoryAverageTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, true, true, aFormulaEvaluator);
     }
 
     public static Long parseTime(Cell cell,
                                  ResultFormat aResultFormat,
                                  boolean aMandatory,
+                                 boolean aAverage,
                                  FormulaEvaluator aFormulaEvaluator) throws ParseException {
         if (cell == null) {
             if (aMandatory) {
@@ -103,13 +112,13 @@ public class CellParser {
                 return parseStringTime(stringCellValue, aMandatory);
             }
             else if (evaluatedCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                return parseNumericTime(evaluatedCell.getNumberValue(), aResultFormat);
+                return parseNumericTime(evaluatedCell.getNumberValue(), aResultFormat, aAverage);
             }
             else {
                 // Desperate attempt
                 try {
                     double cachedNumericValue = cell.getNumericCellValue();
-                    return parseNumericTime(cachedNumericValue, aResultFormat);
+                    return parseNumericTime(cachedNumericValue, aResultFormat, aAverage);
                 }
                 catch (IllegalStateException e) {
                     if (aMandatory) {
@@ -126,7 +135,7 @@ public class CellParser {
             return parseStringTime(stringCellValue, aMandatory);
         }
         else if (cellType == Cell.CELL_TYPE_NUMERIC) {
-            return parseNumericTime(cell.getNumericCellValue(), aResultFormat);
+            return parseNumericTime(cell.getNumericCellValue(), aResultFormat, aAverage);
         }
         else {
             if (aMandatory) {
@@ -138,16 +147,27 @@ public class CellParser {
         }
     }
 
-    private static Long parseNumericTime(double aCellValue, ResultFormat aResultFormat) {
+    private static Long parseNumericTime(double aCellValue, ResultFormat aResultFormat, boolean aAverage) throws ParseException {
         if (aResultFormat == ResultFormat.MINUTES) {
-            return Math.round(aCellValue * 24 * 60 * 60 * 100);
+            double centiSeconds = aCellValue * 24 * 60 * 60 * 100;
+            return roundCentiSeconds(aAverage, centiSeconds);
         }
         else if (aResultFormat == ResultFormat.SECONDS) {
-            return Math.round(aCellValue * 100);
+            double centiSeconds = aCellValue * 100;
+            return roundCentiSeconds(aAverage, centiSeconds);
         }
         else {
             return Math.round(aCellValue);
         }
+    }
+
+    private static long roundCentiSeconds(boolean aAverage, double centiSeconds) throws ParseException {
+        long roundedCentiSeconds = Math.round(centiSeconds);
+        long roundedMilliSeconds = Math.round(centiSeconds*10);
+        if ((!aAverage) && (roundedCentiSeconds*10 !=roundedMilliSeconds)) {
+            throw new ParseException("invisible 3rd digit: " + roundedMilliSeconds / 1000.0, 0);
+        }
+        return roundedCentiSeconds;
     }
 
     private static Long parseStringTime(String aStringCellValue, boolean aMandatory) throws ParseException {

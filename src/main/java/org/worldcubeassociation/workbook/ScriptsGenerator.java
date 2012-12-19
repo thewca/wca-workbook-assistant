@@ -125,15 +125,15 @@ public class ScriptsGenerator {
                 int resultCellCol = RowTokenizer.getResultCell(resultIdx, format, event, columnOrder);
                 Cell resultCell = row.getCell(resultCellCol);
                 results[resultIdx - 1] = (round.isCombined() && resultIdx > 1) ?
-                        CellParser.parseOptionalTime(resultCell, resultFormat, formulaEvaluator) :
-                        CellParser.parseMandatoryTime(resultCell, resultFormat, formulaEvaluator);
+                        CellParser.parseOptionalSingleTime(resultCell, resultFormat, formulaEvaluator) :
+                        CellParser.parseMandatorySingleTime(resultCell, resultFormat, formulaEvaluator);
             }
 
             Long bestResult;
             if (format.getResultCount() > 1) {
                 int bestCellCol = RowTokenizer.getBestCell(format, event, columnOrder);
                 Cell bestResultCell = row.getCell(bestCellCol);
-                bestResult = CellParser.parseMandatoryTime(bestResultCell, resultFormat, formulaEvaluator);
+                bestResult = CellParser.parseMandatorySingleTime(bestResultCell, resultFormat, formulaEvaluator);
             }
             else {
                 bestResult = results[0];
@@ -149,8 +149,8 @@ public class ScriptsGenerator {
                 int averageCellCol = RowTokenizer.getAverageCell(format, event);
                 Cell averageResultCell = row.getCell(averageCellCol);
                 averageResult = round.isCombined() ?
-                        CellParser.parseOptionalTime(averageResultCell, resultFormat, formulaEvaluator) :
-                        CellParser.parseMandatoryTime(averageResultCell, resultFormat, formulaEvaluator);
+                        CellParser.parseOptionalAverageTime(averageResultCell, resultFormat, formulaEvaluator) :
+                        CellParser.parseMandatoryAverageTime(averageResultCell, resultFormat, formulaEvaluator);
 
                 int averageRecordCellCol = RowTokenizer.getAverageRecordCell(format, event);
                 Cell averageRecordCell = row.getCell(averageRecordCellCol);
