@@ -84,6 +84,7 @@ public class JSONGenerator {
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = aMatchedSheet.getSheet().getRow(rowIdx);
             Cell nameCell = row.getCell(aMatchedSheet.getNameHeaderColumn());
+            Cell idCell = row.getCell(aMatchedSheet.getWcaIdHeaderColumn());
             Cell countryCell = row.getCell(aMatchedSheet.getCountryHeaderColumn());
             Cell dobCell = row.getCell(aMatchedSheet.getDobHeaderColumn());
             Cell genderCell = row.getCell(aMatchedSheet.getGenderHeaderColumn());
@@ -104,6 +105,7 @@ public class JSONGenerator {
             }
 
             String name = CellParser.parseMandatoryText(nameCell);
+            String id = CellParser.parseOptionalText(idCell);
             String country = CellParser.parseMandatoryText(countryCell);
             int year = 0;
             int month = 0;
@@ -119,7 +121,7 @@ public class JSONGenerator {
 
             // Write person.
             aStringWriter.append("\n    ");
-            aJSONWriter.array().value(name).value(country).value(gender).value(year).value(month).value(day).endArray();
+            aJSONWriter.array().value(name).value(id).value(country).value(gender).value(year).value(month).value(day).endArray();
         }
     }
 
