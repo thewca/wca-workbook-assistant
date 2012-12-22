@@ -1,5 +1,6 @@
 package org.worldcubeassociation.workbook.parse;
 
+import org.apache.poi.hssf.util.CellReference;
 import org.worldcubeassociation.workbook.ResultFormat;
 
 import java.text.DecimalFormat;
@@ -36,6 +37,10 @@ public class CellFormatter {
                 return minutes + ":" + MINUTES_FORMAT.format(seconds / 100.0);
             }
         }
+    }
+
+    public static String formatCellCoordinates(int aRowId, int aCellId){
+        return new CellReference(aRowId, aCellId, false, false).formatAsString();
     }
 
 }

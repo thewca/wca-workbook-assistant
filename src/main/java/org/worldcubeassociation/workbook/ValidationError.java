@@ -1,5 +1,7 @@
 package org.worldcubeassociation.workbook;
 
+import org.worldcubeassociation.workbook.parse.CellFormatter;
+
 /**
  * @author Lars Vandenbergh
  */
@@ -38,7 +40,7 @@ public class ValidationError {
             return "Sheet: " + fMessage;
         }
         else {
-            return "Row " + (fRowIdx + 1) + ": " + fMessage;
+            return "Cell " + CellFormatter.formatCellCoordinates(fRowIdx, fCellIdx) + ": " + fMessage;
         }
     }
 
