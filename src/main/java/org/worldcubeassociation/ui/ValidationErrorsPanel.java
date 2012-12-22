@@ -1,22 +1,24 @@
 package org.worldcubeassociation.ui;
 
 import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.ui.table.*;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.ValidationError;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 /**
  * @author Lars Vandenbergh
  */
-public class ValidationErrorsPanel extends JList implements PropertyChangeListener {
+public class ValidationErrorsPanel extends JTable implements PropertyChangeListener {
 
     private WorkbookUploaderEnv fEnv;
     private JTable fSlave;
@@ -25,6 +27,7 @@ public class ValidationErrorsPanel extends JList implements PropertyChangeListen
         fEnv = aEnv;
         fSlave = aSlave;
         fEnv.addPropertyChangeListener(this);
+
         updateFont();
         addMouseListener(new DoubleClickListener());
     }
@@ -33,26 +36,23 @@ public class ValidationErrorsPanel extends JList implements PropertyChangeListen
         setFont(getFont().deriveFont(fEnv.getFontSize()));
     }
 
-    private void updateList() {
+    private void updateTable() {
         MatchedSheet selectedSheet = fEnv.getSelectedSheet();
-        if (selectedSheet == null || !selectedSheet.isValidated()) {
-            setListData(new Object[0]);
-        }
-        else {
-            Object[] errors = selectedSheet.getValidationErrors().toArray();
-            setListData(errors);
-        }
+        List<ValidationError> errors = selectedSheet == null ? null : selectedSheet.getValidationErrors();
+        setModel(new ValidationErrorsTableModel(errors));
+        setColumnModel(selectedSheet == null || errors.isEmpty() ? new DefaultTableColumnModel() : new ValidationErrorsTableColumnModel());
+        PackTableUtil.packColumns(this, 2, Integer.MAX_VALUE);
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
         if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) ||
                 WorkbookUploaderEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
-            updateList();
+            updateTable();
         }
         else if (WorkbookUploaderEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName())
                 && fEnv.getSelectedSheet() == aPropertyChangeEvent.getNewValue()) {
-            updateList();
+            updateTable();
         }
         else if (WorkbookUploaderEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
             updateFont();
@@ -62,9 +62,9 @@ public class ValidationErrorsPanel extends JList implements PropertyChangeListen
     private class DoubleClickListener extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent aMouseEvent) {
-            if (aMouseEvent.getClickCount() == 2 && getSelectedIndex() != -1) {
-                ValidationError validationError = (ValidationError) getModel().getElementAt(getSelectedIndex());
-                if (validationError.getCellIdx() != -1 && validationError.getCellIdx() != 1) {
+            if (aMouseEvent.getClickCount() == 2 && getSelectedRow() != -1) {
+                ValidationError validationError = fEnv.getSelectedSheet().getValidationErrors().get(getSelectedRow());
+                if (validationError.getRowIdx() != -1) {
                     Rectangle cellRect = fSlave.getCellRect(validationError.getRowIdx(),
                             validationError.getCellIdx() + 1, false);
                     fSlave.scrollRectToVisible(cellRect);
