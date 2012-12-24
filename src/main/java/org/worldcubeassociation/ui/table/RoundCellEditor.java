@@ -6,7 +6,6 @@ import org.worldcubeassociation.workbook.Round;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +45,7 @@ public class RoundCellEditor extends DefaultCellEditor {
         Round newValue = (Round) getCellEditorValue();
         if (newValue != fMatchedSheet.getRound()) {
             fMatchedSheet.setRound(newValue);
-            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
+            WorkbookValidator.validateSheetsForEvent(fEnv.getMatchedWorkbook(), fMatchedSheet.getEvent(), fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

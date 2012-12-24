@@ -2,13 +2,10 @@ package org.worldcubeassociation.ui.table;
 
 import org.worldcubeassociation.WorkbookUploaderEnv;
 import org.worldcubeassociation.workbook.MatchedSheet;
-import org.worldcubeassociation.workbook.ResultFormat;
 import org.worldcubeassociation.workbook.SheetType;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +46,7 @@ public class SheetTypeCellEditor extends DefaultCellEditor {
             fMatchedSheet.setSheetType(newSheetType);
             fMatchedSheet.setFirstDataRow(4);
             fMatchedSheet.setLastDataRow(fMatchedSheet.getTableData().length - 1);
-            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
+            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

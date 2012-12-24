@@ -12,6 +12,7 @@ import org.worldcubeassociation.workbook.parse.ParsedGender;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -26,11 +27,19 @@ public class WorkbookValidator {
 
     public static void validate(MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
-            validateSheet(matchedSheet, aDatabase);
+            validateSheet(matchedSheet, aMatchedWorkbook, aDatabase);
         }
     }
 
-    public static void validateSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
+    public static void validateSheetsForEvent(MatchedWorkbook aMatchedWorkbook, Event aEvent, Database aDatabase) {
+        for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
+            if (matchedSheet.getSheetType() == SheetType.RESULTS && aEvent.equals(matchedSheet.getEvent())) {
+                validateSheet(matchedSheet, aMatchedWorkbook, aDatabase);
+            }
+        }
+    }
+
+    public static void validateSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
         // Clear validation errors.
         aMatchedSheet.getValidationErrors().clear();
         aMatchedSheet.setValidated(false);
@@ -38,7 +47,7 @@ public class WorkbookValidator {
         if (aMatchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
             validateRegistrationsSheet(aMatchedSheet, aDatabase);
         } else if (aMatchedSheet.getSheetType() == SheetType.RESULTS) {
-            validateResultsSheet(aMatchedSheet, aDatabase);
+            validateResultsSheet(aMatchedSheet, aMatchedWorkbook, aDatabase);
         }
     }
 
@@ -101,7 +110,7 @@ public class WorkbookValidator {
         aMatchedSheet.setValidated(true);
     }
 
-    private static void validateResultsSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
+    private static void validateResultsSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
         // Validate round, event, format and result format.
         boolean validResultFormat = true;
         if (aMatchedSheet.getEvent() == null) {
@@ -129,6 +138,34 @@ public class WorkbookValidator {
             }
             if (!validResultFormat) {
                 ValidationError validationError = new ValidationError("Illegal result format for event", -1, ValidationError.RESULT_FORMAT_CELL_IDX);
+                aMatchedSheet.getValidationErrors().add(validationError);
+            }
+        }
+
+        // Check for duplicate event/round combination.
+        if(aMatchedSheet.getEvent() != null && aMatchedSheet.getRound() != null){
+            List<MatchedSheet> sheets = aMatchedWorkbook.sheets();
+            List<MatchedSheet> duplicateSheets = new ArrayList<MatchedSheet>();
+            for (MatchedSheet sheet : sheets) {
+                if( aMatchedSheet.getEvent().equals(sheet.getEvent()) &&
+                        aMatchedSheet.getRound().isSameRoundAs(sheet.getRound())) {
+                    duplicateSheets.add(sheet);
+                }
+            }
+
+            if (duplicateSheets.size() > 1) {
+                StringBuffer sheetNames = new StringBuffer();
+                for (int i = 0, duplicateSheetsSize = duplicateSheets.size(); i < duplicateSheetsSize; i++) {
+                    if (i == duplicateSheetsSize - 1) {
+                        sheetNames.append(" and ");
+                    }
+                    else if (i > 0) {
+                        sheetNames.append(", ");
+                    }
+                    MatchedSheet duplicateSheet = duplicateSheets.get(i);
+                    sheetNames.append(duplicateSheet.getSheet().getSheetName());
+                }
+                ValidationError validationError = new ValidationError("Duplicate round for event in sheets " + sheetNames, -1, ValidationError.ROUND_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
         }

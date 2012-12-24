@@ -6,7 +6,6 @@ import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,10 +42,12 @@ public class EventCellEditor extends DefaultCellEditor {
 
     @Override
     public boolean stopCellEditing() {
+        Event oldEvent = fMatchedSheet.getEvent();
         Event newEvent = (Event) getCellEditorValue();
-        if (newEvent != fMatchedSheet.getEvent()) {
+        if (newEvent != oldEvent) {
             fMatchedSheet.setEvent(newEvent);
-            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
+            WorkbookValidator.validateSheetsForEvent(fEnv.getMatchedWorkbook(), oldEvent, fEnv.getDatabase());
+            WorkbookValidator.validateSheetsForEvent(fEnv.getMatchedWorkbook(), newEvent, fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

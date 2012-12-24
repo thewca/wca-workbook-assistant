@@ -6,8 +6,6 @@ import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +45,7 @@ public class FormatCellEditor extends DefaultCellEditor {
         Format newFormat = (Format) getCellEditorValue();
         if (newFormat != fMatchedSheet.getFormat()) {
             fMatchedSheet.setFormat(newFormat);
-            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getDatabase());
+            WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();
