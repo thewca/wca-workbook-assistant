@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 /**
  * @author Lars Vandenbergh
@@ -54,9 +55,13 @@ public class WorkbookUploader {
                 WorkbookUploaderFrame workbookUploaderFrame = new WorkbookUploaderFrame(workbookUploaderEnv);
                 workbookUploaderFrame.setSize(900, 600);
                 workbookUploaderFrame.setTitle(APP_TITLE);
+                URL logo16 = WorkbookUploader.class.getClassLoader().getResource("wca_logo_16.png");
+                URL logo32 = WorkbookUploader.class.getClassLoader().getResource("wca_logo_32.png");
                 URL logo = WorkbookUploader.class.getClassLoader().getResource("wca_logo.png");
+                Image logoImage16 = Toolkit.getDefaultToolkit().getImage(logo16);
+                Image logoImage32 = Toolkit.getDefaultToolkit().getImage(logo32);
                 Image logoImage = Toolkit.getDefaultToolkit().getImage(logo);
-                workbookUploaderFrame.setIconImage(logoImage);
+                workbookUploaderFrame.setIconImages(Arrays.asList(logoImage16, logoImage32, logoImage));
                 workbookUploaderFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 workbookUploaderFrame.setLocationRelativeTo(null);
                 workbookUploaderFrame.setVisible(true);
