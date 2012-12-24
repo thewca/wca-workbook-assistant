@@ -27,6 +27,7 @@ public class WorkbookUploaderFrame extends JFrame {
     public WorkbookUploaderFrame(WorkbookUploaderEnv aEnv) {
         super("WCA Workbook Uploader");
         fEnv = aEnv;
+        fEnv.setTopLevelComponent(this);
 
         buildUI();
 
