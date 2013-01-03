@@ -13,17 +13,23 @@ public class ValidationError {
     public static final int RESULT_FORMAT_CELL_IDX = 3;
 
     private String fMessage;
+    private MatchedSheet fSheet;
     private int fRowIdx;
     private int fCellIdx;
 
-    public ValidationError(String aMessage, int aRowIdx, int aCellIdx) {
+    public ValidationError(String aMessage, MatchedSheet aSheet, int aRowIdx, int aCellIdx) {
         fMessage = aMessage;
+        fSheet = aSheet;
         fRowIdx = aRowIdx;
         fCellIdx = aCellIdx;
     }
 
     public String getMessage() {
         return fMessage;
+    }
+
+    public MatchedSheet getSheet() {
+        return fSheet;
     }
 
     public int getRowIdx() {

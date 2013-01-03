@@ -9,12 +9,16 @@ import java.util.List;
 /**
  * @author Lars Vandenbergh
  */
-public class ValidationErrorsTableModel extends AbstractTableModel {
+public abstract class AbstractValidationErrorsTableModel extends AbstractTableModel {
 
     private List<ValidationError> fValidationErrors;
 
-    public ValidationErrorsTableModel(List<ValidationError> aValidationErrors) {
+    public AbstractValidationErrorsTableModel(List<ValidationError> aValidationErrors) {
         fValidationErrors = aValidationErrors;
+    }
+
+    public List<ValidationError> getValidationErrors() {
+        return fValidationErrors;
     }
 
     @Override
@@ -22,26 +26,7 @@ public class ValidationErrorsTableModel extends AbstractTableModel {
         return fValidationErrors == null ? 0 : fValidationErrors.size();
     }
 
-    @Override
-    public int getColumnCount() {
-        return 2;
-    }
-
-    @Override
-    public Object getValueAt(int aRow, int aColumn) {
-        ValidationError validationError = fValidationErrors == null ? null : fValidationErrors.get(aRow);
-        if (validationError != null) {
-            switch (aColumn) {
-                case 0:
-                    return formatErrorCell(validationError);
-                case 1:
-                    return validationError.getMessage();
-            }
-        }
-        return null;
-    }
-
-    private String formatErrorCell(ValidationError aValidationError) {
+    protected String formatErrorCell(ValidationError aValidationError) {
         int rowIdx = aValidationError.getRowIdx();
         int cellIdx = aValidationError.getCellIdx();
         if (rowIdx == -1) {

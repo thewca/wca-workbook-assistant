@@ -1,6 +1,7 @@
 package org.worldcubeassociation.ui;
 
 import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.workbook.MatchedWorkbook;
 import org.worldcubeassociation.workbook.SheetType;
 
 import javax.swing.*;
@@ -12,6 +13,10 @@ import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -23,13 +28,17 @@ public class WorkbookUploaderFrame extends JFrame {
     private WorkbookUploaderEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
     private OpenWorkbookAction fOpenWorkbookAction;
+    private ValidationErrorsPanel fValidationErrorsPanel;
+    private JComboBox fViewComboBox;
 
     public WorkbookUploaderFrame(WorkbookUploaderEnv aEnv) {
         super("WCA Workbook Uploader");
         fEnv = aEnv;
         fEnv.setTopLevelComponent(this);
+        fEnv.addPropertyChangeListener(new EnvPropertyListener());
 
         buildUI();
+        updateEnabledState();
 
         new DropTarget(getRootPane(), DnDConstants.ACTION_COPY, new DropTargetListener());
     }
@@ -121,10 +130,26 @@ public class WorkbookUploaderFrame extends JFrame {
     }
 
     private Component buildValidationPanel() {
-        JScrollPane scrollPane = new JScrollPane(new ValidationErrorsPanel(fEnv, fSheetContentsPanel));
+        fValidationErrorsPanel = new ValidationErrorsPanel(fEnv, fSheetContentsPanel);
+        JScrollPane scrollPane = new JScrollPane(fValidationErrorsPanel);
+
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets.bottom = 4;
+        c.insets.right = 4;
+        c.anchor = GridBagConstraints.WEST;
+        c.weightx = 1;
+        titlePanel.add(new JLabel("Validation errors"), c);
+        c.weightx = 0;
+        titlePanel.add(new JLabel("View: "), c);
+        fViewComboBox = new JComboBox(ValidationErrorsPanel.View.values());
+        fViewComboBox.setSelectedItem(fValidationErrorsPanel.getView());
+        fViewComboBox.addActionListener(new ValidationErrorsViewActionListener());
+        titlePanel.add(fViewComboBox, c);
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Validation errors"), BorderLayout.NORTH);
+        panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.setPreferredSize(new Dimension(400, 150));
         panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -177,6 +202,11 @@ public class WorkbookUploaderFrame extends JFrame {
         return panel;
     }
 
+    private void updateEnabledState() {
+        MatchedWorkbook matchedWorkbook = fEnv.getMatchedWorkbook();
+        fViewComboBox.setEnabled(matchedWorkbook != null);
+    }
+
     private class DropTargetListener extends DropTargetAdapter {
         @Override
         public void drop(DropTargetDropEvent aDropTargetDropEvent) {
@@ -207,6 +237,27 @@ public class WorkbookUploaderFrame extends JFrame {
                 aDropTargetDropEvent.rejectDrop();
             }
         }
+    }
+
+    private class ValidationErrorsViewActionListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JComboBox comboBox = (JComboBox) e.getSource();
+            fValidationErrorsPanel.setView((ValidationErrorsPanel.View) comboBox.getSelectedItem());
+        }
+
+    }
+
+    private class EnvPropertyListener implements PropertyChangeListener {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
+            if("matchedWorkbook".equals(aPropertyChangeEvent.getPropertyName())) {
+                updateEnabledState();
+            }
+        }
+
     }
 
 }

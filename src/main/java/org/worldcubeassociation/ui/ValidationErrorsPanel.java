@@ -7,12 +7,12 @@ import org.worldcubeassociation.workbook.ValidationError;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,16 +20,44 @@ import java.util.List;
  */
 public class ValidationErrorsPanel extends JTable implements PropertyChangeListener {
 
+    public static enum View {
+        SHEET("Selected sheet only"), WORKBOOK("Entire workbook");
+
+        private String fDisplayName;
+
+        private View(String aDisplayName) {
+            fDisplayName = aDisplayName;
+        }
+
+        @Override
+        public String toString() {
+            return fDisplayName;
+        }
+
+    }
+
     private WorkbookUploaderEnv fEnv;
     private JTable fSlave;
+    private View fView;
 
     public ValidationErrorsPanel(WorkbookUploaderEnv aEnv, JTable aSlave) {
         fEnv = aEnv;
         fSlave = aSlave;
         fEnv.addPropertyChangeListener(this);
+        fView = View.SHEET;
 
         updateFont();
+        updateTable();
         addMouseListener(new DoubleClickListener());
+    }
+
+    public View getView() {
+        return fView;
+    }
+
+    public void setView(View aView) {
+        this.fView = aView;
+        updateTable();
     }
 
     private void updateFont() {
@@ -37,21 +65,43 @@ public class ValidationErrorsPanel extends JTable implements PropertyChangeListe
     }
 
     private void updateTable() {
-        MatchedSheet selectedSheet = fEnv.getSelectedSheet();
-        List<ValidationError> errors = selectedSheet == null ? null : selectedSheet.getValidationErrors();
-        setModel(new ValidationErrorsTableModel(errors));
-        setColumnModel(selectedSheet == null || errors.isEmpty() ? new DefaultTableColumnModel() : new ValidationErrorsTableColumnModel());
-        PackTableUtil.packColumns(this, 2, Integer.MAX_VALUE);
+        if (fView == View.SHEET) {
+            MatchedSheet selectedSheet = fEnv == null ? null : fEnv.getSelectedSheet();
+            List<ValidationError> errors = selectedSheet == null ? null : selectedSheet.getValidationErrors();
+            setModel(new ValidationErrorsSheetTableModel(errors));
+            setColumnModel(selectedSheet == null || errors.isEmpty() ? new DefaultTableColumnModel() : new ValidationErrorsSheetTableColumnModel());
+            PackTableUtil.packColumns(this, 2, Integer.MAX_VALUE);
+        }
+        else {
+            List<ValidationError> errors = new ArrayList<ValidationError>();
+
+            if (fEnv.getMatchedWorkbook() != null) {
+                List<MatchedSheet> sheets = fEnv.getMatchedWorkbook().sheets();
+                for (MatchedSheet sheet : sheets) {
+                    errors.addAll(sheet.getValidationErrors());
+                }
+            }
+
+            setModel(new ValidationErrorsWorkbookTableModel(errors));
+            setColumnModel(errors.isEmpty() ? new DefaultTableColumnModel() : new ValidationErrorsWorkbookTableColumnModel());
+            PackTableUtil.packColumns(this, 2, Integer.MAX_VALUE);
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) ||
-                WorkbookUploaderEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
-        else if (WorkbookUploaderEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName())
-                && fEnv.getSelectedSheet() == aPropertyChangeEvent.getNewValue()) {
+        else if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) &&
+                fView == View.SHEET) {
+            updateTable();
+        }
+        else if (WorkbookUploaderEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
+            updateTable();
+        }
+        else if (WorkbookUploaderEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName()) &&
+                (fView == View.WORKBOOK || fEnv.getSelectedSheet() == aPropertyChangeEvent.getNewValue())) {
             updateTable();
         }
         else if (WorkbookUploaderEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
@@ -60,17 +110,33 @@ public class ValidationErrorsPanel extends JTable implements PropertyChangeListe
     }
 
     private class DoubleClickListener extends MouseAdapter {
+
         @Override
         public void mousePressed(MouseEvent aMouseEvent) {
             if (aMouseEvent.getClickCount() == 2 && getSelectedRow() != -1) {
-                ValidationError validationError = fEnv.getSelectedSheet().getValidationErrors().get(getSelectedRow());
-                if (validationError.getRowIdx() != -1) {
+                if (fView == View.SHEET) {
+                    ValidationError validationError = fEnv.getSelectedSheet().getValidationErrors().get(getSelectedRow());
+                    if (validationError.getRowIdx() != -1) {
+                        Rectangle cellRect = fSlave.getCellRect(validationError.getRowIdx(),
+                                validationError.getCellIdx() + 1, false);
+                        fSlave.scrollRectToVisible(cellRect);
+                    }
+                }
+                else {
+                    // Select sheet that contains error.
+                    ValidationErrorsWorkbookTableModel tableModel = (ValidationErrorsWorkbookTableModel) getModel();
+                    List<ValidationError> validationErrors = tableModel.getValidationErrors();
+                    ValidationError validationError = validationErrors.get(getSelectedRow());
+                    fEnv.setSelectedSheet(validationError.getSheet());
+
+                    // Scroll to cell that contains error.
                     Rectangle cellRect = fSlave.getCellRect(validationError.getRowIdx(),
                             validationError.getCellIdx() + 1, false);
                     fSlave.scrollRectToVisible(cellRect);
                 }
             }
         }
+
     }
 
 }

@@ -60,21 +60,21 @@ public class WorkbookValidator {
             int headerColIdx = aMatchedSheet.getNameHeaderColumn();
             String name = CellParser.parseMandatoryText(row.getCell(headerColIdx));
             if (name == null) {
-                ValidationError validationError = new ValidationError("Missing name", rowIdx, headerColIdx);
+                ValidationError validationError = new ValidationError("Missing name", aMatchedSheet, rowIdx, headerColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
             int countryColIdx = aMatchedSheet.getCountryHeaderColumn();
             String country = CellParser.parseMandatoryText(row.getCell(countryColIdx));
             if (country == null) {
-                ValidationError validationError = new ValidationError("Missing country", rowIdx, countryColIdx);
+                ValidationError validationError = new ValidationError("Missing country", aMatchedSheet, rowIdx, countryColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
             int genderColIdx = aMatchedSheet.getGenderHeaderColumn();
             ParsedGender gender = CellParser.parseGender(row.getCell(genderColIdx));
             if (gender == null) {
-                ValidationError validationError = new ValidationError("Misformatted gender", rowIdx, genderColIdx);
+                ValidationError validationError = new ValidationError("Misformatted gender", aMatchedSheet, rowIdx, genderColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
@@ -83,7 +83,7 @@ public class WorkbookValidator {
             boolean wcaIdEmpty = "".equals(wcaId);
             boolean wcaIdValid = validateWCAId(wcaId);
             if (!wcaIdEmpty && !wcaIdValid) {
-                ValidationError validationError = new ValidationError("Misformatted WCA id", rowIdx, 3);
+                ValidationError validationError = new ValidationError("Misformatted WCA id", aMatchedSheet, rowIdx, 3);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
@@ -92,15 +92,15 @@ public class WorkbookValidator {
             if (wcaIdValid && aDatabase != null) {
                 Person person = aDatabase.getPersons().findById(wcaId);
                 if (person == null) {
-                    ValidationError validationError = new ValidationError("Unknown WCA id", rowIdx, 3);
+                    ValidationError validationError = new ValidationError("Unknown WCA id", aMatchedSheet, rowIdx, 3);
                     aMatchedSheet.getValidationErrors().add(validationError);
                 } else {
                     if (name != null && !name.equals(person.getName())) {
-                        ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), rowIdx, 1);
+                        ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), aMatchedSheet, rowIdx, 1);
                         aMatchedSheet.getValidationErrors().add(validationError);
                     }
                     if (country != null && !country.equals(person.getCountry())) {
-                        ValidationError validationError = new ValidationError("Country does not match country in WCA database: " + person.getCountry(), rowIdx, 2);
+                        ValidationError validationError = new ValidationError("Country does not match country in WCA database: " + person.getCountry(), aMatchedSheet, rowIdx, 2);
                         aMatchedSheet.getValidationErrors().add(validationError);
                     }
                 }
@@ -114,19 +114,19 @@ public class WorkbookValidator {
         // Validate round, event, format and result format.
         boolean validResultFormat = true;
         if (aMatchedSheet.getEvent() == null) {
-            ValidationError validationError = new ValidationError("Missing event", -1, ValidationError.EVENT_CELL_IDX);
+            ValidationError validationError = new ValidationError("Missing event", aMatchedSheet, -1, ValidationError.EVENT_CELL_IDX);
             aMatchedSheet.getValidationErrors().add(validationError);
         }
         if (aMatchedSheet.getRound() == null) {
-            ValidationError validationError = new ValidationError("Missing round", -1, ValidationError.ROUND_CELL_IDX);
+            ValidationError validationError = new ValidationError("Missing round", aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
             aMatchedSheet.getValidationErrors().add(validationError);
         }
         if (aMatchedSheet.getFormat() == null) {
-            ValidationError validationError = new ValidationError("Missing format", -1, ValidationError.FORMAT_CELL_IDX);
+            ValidationError validationError = new ValidationError("Missing format", aMatchedSheet, -1, ValidationError.FORMAT_CELL_IDX);
             aMatchedSheet.getValidationErrors().add(validationError);
         }
         if (aMatchedSheet.getResultFormat() == null) {
-            ValidationError validationError = new ValidationError("Missing result format", -1, ValidationError.RESULT_FORMAT_CELL_IDX);
+            ValidationError validationError = new ValidationError("Missing result format", aMatchedSheet, -1, ValidationError.RESULT_FORMAT_CELL_IDX);
             aMatchedSheet.getValidationErrors().add(validationError);
         }
         else if (aMatchedSheet.getEvent() != null) {
@@ -137,7 +137,7 @@ public class WorkbookValidator {
                 validResultFormat = aMatchedSheet.getResultFormat() != ResultFormat.NUMBER;
             }
             if (!validResultFormat) {
-                ValidationError validationError = new ValidationError("Illegal result format for event", -1, ValidationError.RESULT_FORMAT_CELL_IDX);
+                ValidationError validationError = new ValidationError("Illegal result format for event", aMatchedSheet, -1, ValidationError.RESULT_FORMAT_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
         }
@@ -165,7 +165,7 @@ public class WorkbookValidator {
                     MatchedSheet duplicateSheet = duplicateSheets.get(i);
                     sheetNames.append(duplicateSheet.getSheet().getSheetName());
                 }
-                ValidationError validationError = new ValidationError("Duplicate round for event in sheets " + sheetNames, -1, ValidationError.ROUND_CELL_IDX);
+                ValidationError validationError = new ValidationError("Duplicate round for event in sheets " + sheetNames, aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
         }
@@ -178,19 +178,19 @@ public class WorkbookValidator {
 
             Long position = CellParser.parsePosition(row.getCell(0));
             if (position == null) {
-                ValidationError validationError = new ValidationError("Missing position", rowIdx, 0);
+                ValidationError validationError = new ValidationError("Missing position", aMatchedSheet, rowIdx, 0);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
             String name = CellParser.parseMandatoryText(row.getCell(1));
             if (name == null) {
-                ValidationError validationError = new ValidationError("Missing name", rowIdx, 1);
+                ValidationError validationError = new ValidationError("Missing name", aMatchedSheet, rowIdx, 1);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
             String country = CellParser.parseMandatoryText(row.getCell(2));
             if (country == null) {
-                ValidationError validationError = new ValidationError("Missing country", rowIdx, 2);
+                ValidationError validationError = new ValidationError("Missing country", aMatchedSheet, rowIdx, 2);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
@@ -198,7 +198,7 @@ public class WorkbookValidator {
             boolean wcaIdEmpty = "".equals(wcaId);
             boolean wcaIdValid = validateWCAId(wcaId);
             if (!wcaIdEmpty && !wcaIdValid) {
-                ValidationError validationError = new ValidationError("Misformatted WCA id", rowIdx, 3);
+                ValidationError validationError = new ValidationError("Misformatted WCA id", aMatchedSheet, rowIdx, 3);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
@@ -207,15 +207,15 @@ public class WorkbookValidator {
             if (wcaIdValid && aDatabase != null) {
                 Person person = aDatabase.getPersons().findById(wcaId);
                 if (person == null) {
-                    ValidationError validationError = new ValidationError("Unknown WCA id", rowIdx, 3);
+                    ValidationError validationError = new ValidationError("Unknown WCA id", aMatchedSheet, rowIdx, 3);
                     aMatchedSheet.getValidationErrors().add(validationError);
                 } else {
                     if (name != null && !name.equals(person.getName())) {
-                        ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), rowIdx, 1);
+                        ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), aMatchedSheet, rowIdx, 1);
                         aMatchedSheet.getValidationErrors().add(validationError);
                     }
                     if (country != null && !country.equals(person.getCountry())) {
-                        ValidationError validationError = new ValidationError("Country does not match country in WCA database: " + person.getCountry(), rowIdx, 2);
+                        ValidationError validationError = new ValidationError("Country does not match country in WCA database: " + person.getCountry(), aMatchedSheet, rowIdx, 2);
                         aMatchedSheet.getValidationErrors().add(validationError);
                     }
                 }
@@ -271,14 +271,14 @@ public class WorkbookValidator {
                         if ((resultFormat == ResultFormat.SECONDS || resultFormat == ResultFormat.MINUTES) &&
                                 !roundToNearestSecond(result).equals(result)) {
                             validationErrors.add(new ValidationError(ORDER[resultIdx - 1] + " result is over 10 minutes and should be rounded to the nearest second",
-                                    rowIdx, resultCellCol));
+                                    aMatchedSheet, rowIdx, resultCellCol));
                             allResultsValid = false;
                         }
                     }
                 }
                 catch (ParseException e) {
                     validationErrors.add(new ValidationError(ORDER[resultIdx - 1] + " result: " + e.getMessage(),
-                            rowIdx, resultCellCol));
+                            aMatchedSheet, rowIdx, resultCellCol));
                     allResultsValid = false;
                 }
             }
@@ -295,12 +295,12 @@ public class WorkbookValidator {
                         if (!expectedBestResult.equals(bestResult)) {
                             String formattedExpectedBest = CellFormatter.formatTime(expectedBestResult, resultFormat);
                             validationErrors.add(new ValidationError("Best result does not match calculated best result: " + formattedExpectedBest,
-                                    rowIdx, bestCellCol));
+                                    aMatchedSheet, rowIdx, bestCellCol));
                         }
                     }
                 }
                 catch (ParseException e) {
-                    validationErrors.add(new ValidationError("Best result: " + e.getMessage(), rowIdx, bestCellCol));
+                    validationErrors.add(new ValidationError("Best result: " + e.getMessage(), aMatchedSheet, rowIdx, bestCellCol));
                 }
             }
 
@@ -311,7 +311,7 @@ public class WorkbookValidator {
                 CellParser.parseRecord(singleRecordCell);
             }
             catch (ParseException e) {
-                validationErrors.add(new ValidationError("Misformatted single record", rowIdx, singleRecordCellCol));
+                validationErrors.add(new ValidationError("Misformatted single record", aMatchedSheet, rowIdx, singleRecordCellCol));
             }
 
             // Validate average result.
@@ -334,19 +334,19 @@ public class WorkbookValidator {
                             if (!expectedAverageResult.equals(averageResult)) {
                                 String formattedExpectedAverage = CellFormatter.formatTime(expectedAverageResult, resultFormat);
                                 validationErrors.add(new ValidationError("Average result does not match calculated average result: " + formattedExpectedAverage,
-                                        rowIdx, averageCellCol));
+                                        aMatchedSheet, rowIdx, averageCellCol));
                             }
                         }
                         else {
                             if (!averageResult.equals(0L)) {
                                 validationErrors.add(new ValidationError("Average result should be empty for incomplete average in combined round",
-                                        rowIdx, averageCellCol));
+                                        aMatchedSheet, rowIdx, averageCellCol));
                             }
                         }
                     }
                 }
                 catch (ParseException e) {
-                    validationErrors.add(new ValidationError("Average result: " + e.getMessage(), rowIdx, averageCellCol));
+                    validationErrors.add(new ValidationError("Average result: " + e.getMessage(), aMatchedSheet, rowIdx, averageCellCol));
                 }
 
                 // Validate average record.
@@ -355,7 +355,7 @@ public class WorkbookValidator {
                 try {
                     CellParser.parseRecord(averageRecordCell);
                 } catch (ParseException e) {
-                    validationErrors.add(new ValidationError("Misformatted average record", rowIdx, averageRecordCellCol));
+                    validationErrors.add(new ValidationError("Misformatted average record", aMatchedSheet, rowIdx, averageRecordCellCol));
                 }
             }
         }

@@ -121,6 +121,14 @@ public class SheetsListPanel extends JTable implements PropertyChangeListener {
             ((AbstractTableModel) getModel()).fireTableRowsUpdated(sheetIndex, sheetIndex);
             getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
         }
+        else if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) &&
+                aPropertyChangeEvent.getNewValue() != null) {
+            MatchedSheet selectedSheet = (MatchedSheet) aPropertyChangeEvent.getNewValue();
+            int sheetIndex = fEnv.getMatchedWorkbook().getWorkbook().getSheetIndex(selectedSheet.getSheet());
+            if (getSelectionModel().getMinSelectionIndex() != sheetIndex) {
+                getSelectionModel().setSelectionInterval(sheetIndex, sheetIndex);
+            }
+        }
         else if (WorkbookUploaderEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
             updateFont();
         }

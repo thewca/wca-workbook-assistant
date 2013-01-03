@@ -6,9 +6,9 @@ import javax.swing.table.TableColumn;
 /*
  * @author Lars Vandenbergh
  */
-public class ValidationErrorsTableColumnModel extends DefaultTableColumnModel {
+public class ValidationErrorsSheetTableColumnModel extends DefaultTableColumnModel {
 
-    public ValidationErrorsTableColumnModel() {
+    public ValidationErrorsSheetTableColumnModel() {
         TableColumn cellColumn = new TableColumn();
         cellColumn.setHeaderValue("Cell");
         cellColumn.setPreferredWidth(10);
