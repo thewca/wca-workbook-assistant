@@ -8,12 +8,18 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.worldcubeassociation.ui.WorkbookTableDataExtractor;
 import org.worldcubeassociation.workbook.ResultFormat;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author Lars Vandenbergh
  */
 public class CellParser {
+
+    private static DecimalFormat THIRD_DIGIT_SECONDS_FORMAT = new DecimalFormat("#0.000");
+    private static SimpleDateFormat THIRD_DIGIT_MINUTES_FORMAT = new SimpleDateFormat("m:ss.SSS");
 
     public static String parseOptionalText(Cell cell) {
         return parseText(cell, false);
@@ -162,25 +168,32 @@ public class CellParser {
                 throw new ParseException("not formatted in minutes (m:ss.hh)", 0);
             }
             double centiSeconds = aCellValue * 24 * 60 * 60 * 100;
-            return roundCentiSeconds(aAverage, centiSeconds);
+            return roundCentiSeconds(centiSeconds, aAverage, aResultFormat);
         }
         else if (aResultFormat == ResultFormat.SECONDS) {
             if (!cellString.matches("^[0-9]+(\\.[0-9]{1,2})?$")) {
                 throw new ParseException("not formatted in seconds (ss.hh)", 0);
             }
             double centiSeconds = aCellValue * 100;
-            return roundCentiSeconds(aAverage, centiSeconds);
+            return roundCentiSeconds(centiSeconds, aAverage, aResultFormat);
         }
         else {
             return Math.round(aCellValue);
         }
     }
 
-    private static long roundCentiSeconds(boolean aAverage, double centiSeconds) throws ParseException {
+    private static long roundCentiSeconds(double centiSeconds, boolean aAverage, ResultFormat aResultFormat) throws ParseException {
         long roundedCentiSeconds = Math.round(centiSeconds);
         long roundedMilliSeconds = Math.round(centiSeconds*10);
-        if ((!aAverage) && (roundedCentiSeconds*10 !=roundedMilliSeconds)) {
-            throw new ParseException("invisible 3rd digit: " + roundedMilliSeconds / 1000.0, 0);
+        if ((!aAverage) && (roundedCentiSeconds * 10 != roundedMilliSeconds)) {
+            String formattedResult;
+            if (aResultFormat == ResultFormat.SECONDS) {
+                formattedResult = THIRD_DIGIT_SECONDS_FORMAT.format(roundedMilliSeconds / 1000.0);
+            }
+            else {
+                formattedResult = THIRD_DIGIT_MINUTES_FORMAT.format(new Date(roundedMilliSeconds));
+            }
+            throw new ParseException("invisible 3rd digit: " + formattedResult, 0);
         }
         return roundedCentiSeconds;
     }
