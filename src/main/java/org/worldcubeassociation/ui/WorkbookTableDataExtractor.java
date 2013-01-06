@@ -11,7 +11,6 @@ import org.worldcubeassociation.workbook.MatchedWorkbook;
 import org.worldcubeassociation.workbook.parse.CellParser;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -71,39 +70,45 @@ public class WorkbookTableDataExtractor {
             }
             for (int cellIdx = 0; cellIdx <= lastNonEmptyCol; cellIdx++) {
                 Cell cell = row.getCell(cellIdx);
-                if (cell != null) {
-                    String cellFormatString = CellParser.getCellFormatString(cell);
-                    CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
-                    CellFormatResult formatResult = cellFormat.apply(cell);
-
-                    // This is to make sure that only formulas with no cached result are evaluated again.
-                    if (cell.getCellType() == Cell.CELL_TYPE_FORMULA &&
-                            (formatResult.text == null || formatResult.text.equals(""))) {
-                        try {
-                            evaluator.evaluateFormulaCell(cell);
-                            formatResult = cellFormat.apply(cell);
-                        }
-                        catch (Exception e) {
-                            System.out.println("Error evaluating formula in sheet " +
-                                    sheet.getSheetName() + ", row " + (rowIdx + 1) +
-                                    ", col " + (cellIdx + 1));
-                        }
-                    }
-
-                    if (CellFormat.ultimateType(cell) == Cell.CELL_TYPE_NUMERIC && cellFormatString.toUpperCase().contains(":SS")) {
-                        Date dateCellValue = cell.getDateCellValue();
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("m:ss.SSS");
-                        String formattedDate = simpleDateFormat.format(dateCellValue);
-                        data[rowIdx][cellIdx + 1] = formattedDate.substring(0, formattedDate.length() - 1);
-                    }
-                    else {
-                        data[rowIdx][cellIdx + 1] = formatResult.text;
-                    }
+                try {
+                    data[rowIdx][cellIdx + 1] = cellToString(cell, evaluator);
+                }
+                catch (Exception e) {
+                    System.out.println("Error evaluating formula in sheet " +
+                            sheet.getSheetName() + ", row " + (rowIdx + 1) +
+                            ", col " + (cellIdx + 1));
                 }
             }
         }
 
         aMatchedSheet.setTableData(data);
+    }
+
+    public static String cellToString(Cell aCell, FormulaEvaluator aEvaluator) {
+        if (aCell != null) {
+            String cellFormatString = CellParser.getCellFormatString(aCell);
+            CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
+            CellFormatResult formatResult = cellFormat.apply(aCell);
+
+            // This is to make sure that only formulas with no cached result are evaluated again.
+            if (aCell.getCellType() == Cell.CELL_TYPE_FORMULA &&
+                    (formatResult.text == null || formatResult.text.equals(""))) {
+                    aEvaluator.evaluateFormulaCell(aCell);
+                    formatResult = cellFormat.apply(aCell);
+            }
+
+            if (CellFormat.ultimateType(aCell) == Cell.CELL_TYPE_NUMERIC && cellFormatString.toUpperCase().contains(":SS")) {
+                Date dateCellValue = aCell.getDateCellValue();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("m:ss.SSS");
+                String formattedDate = simpleDateFormat.format(dateCellValue);
+                return formattedDate.substring(0, formattedDate.length() - 1);
+            }
+            else {
+                return formatResult.text;
+            }
+        }
+
+        return null;
     }
 
 }

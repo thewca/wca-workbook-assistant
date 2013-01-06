@@ -5,6 +5,7 @@ import org.apache.poi.ss.format.CellFormatResult;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.worldcubeassociation.ui.WorkbookTableDataExtractor;
 import org.worldcubeassociation.workbook.ResultFormat;
 
 import java.text.ParseException;
@@ -31,7 +32,7 @@ public class CellParser {
         CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
         CellFormatResult formatResult = cellFormat.apply(cell);
         String text = formatResult.text.trim();
-        text = text.replace('\u00A0',' ');
+        text = text.replace('\u00A0', ' ');
 
         if ("".equals(text)) {
             return aMandatory ? null : "";
@@ -112,13 +113,13 @@ public class CellParser {
                 return parseStringTime(stringCellValue, aMandatory);
             }
             else if (evaluatedCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                return parseNumericTime(evaluatedCell.getNumberValue(), aResultFormat, aAverage);
+                return parseNumericTime(cell, evaluatedCell.getNumberValue(), aResultFormat, aAverage, aFormulaEvaluator);
             }
             else {
                 // Desperate attempt
                 try {
                     double cachedNumericValue = cell.getNumericCellValue();
-                    return parseNumericTime(cachedNumericValue, aResultFormat, aAverage);
+                    return parseNumericTime(cell, cachedNumericValue, aResultFormat, aAverage, aFormulaEvaluator);
                 }
                 catch (IllegalStateException e) {
                     if (aMandatory) {
@@ -135,7 +136,7 @@ public class CellParser {
             return parseStringTime(stringCellValue, aMandatory);
         }
         else if (cellType == Cell.CELL_TYPE_NUMERIC) {
-            return parseNumericTime(cell.getNumericCellValue(), aResultFormat, aAverage);
+            return parseNumericTime(cell, cell.getNumericCellValue(), aResultFormat, aAverage, aFormulaEvaluator);
         }
         else {
             if (aMandatory) {
@@ -147,12 +148,26 @@ public class CellParser {
         }
     }
 
-    private static Long parseNumericTime(double aCellValue, ResultFormat aResultFormat, boolean aAverage) throws ParseException {
+    private static Long parseNumericTime(Cell aCell, double aCellValue, ResultFormat aResultFormat, boolean aAverage, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        String cellString;
+        try {
+            cellString = WorkbookTableDataExtractor.cellToString(aCell, aFormulaEvaluator);
+        }
+        catch (Exception e) {
+            throw new ParseException("could not evaluate formula", 0);
+        }
+
         if (aResultFormat == ResultFormat.MINUTES) {
+            if (!cellString.matches("^[0-9]+:[0-9]{1,2}\\.[0-9]{1,2}$")) {
+                throw new ParseException("not formatted in minutes (m:ss.hh)", 0);
+            }
             double centiSeconds = aCellValue * 24 * 60 * 60 * 100;
             return roundCentiSeconds(aAverage, centiSeconds);
         }
         else if (aResultFormat == ResultFormat.SECONDS) {
+            if (!cellString.matches("^[0-9]+(\\.[0-9]{1,2})?$")) {
+                throw new ParseException("not formatted in seconds (ss.hh)", 0);
+            }
             double centiSeconds = aCellValue * 100;
             return roundCentiSeconds(aAverage, centiSeconds);
         }
@@ -227,9 +242,14 @@ public class CellParser {
 
     public static String getCellFormatString(Cell aCell) {
         String cellFormatString = aCell.getCellStyle().getDataFormatString();
-        if(cellFormatString.contains("]")) {
-            cellFormatString = cellFormatString.split("]")[1];
-        }
+
+        // Remove locale from cell format
+        cellFormatString = cellFormatString.replaceAll("\\[\\$-[0-9]+\\]", "");
+
+        // Remove spaces used for lining up values
+        cellFormatString = cellFormatString.replaceAll("_.", "");
+        cellFormatString = cellFormatString.replaceAll("\\*.", "");
+
         return cellFormatString;
     }
 
