@@ -45,6 +45,9 @@ public class ValidationError {
         if (fRowIdx == -1) {
             return "Sheet: " + fMessage;
         }
+        else if (fCellIdx == -1) {
+            return "Row " + (fRowIdx + 1) + ":" + fMessage;
+        }
         else {
             return "Cell " + CellFormatter.formatCellCoordinates(fRowIdx, fCellIdx) + ": " + fMessage;
         }

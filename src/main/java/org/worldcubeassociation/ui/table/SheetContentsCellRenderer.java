@@ -50,16 +50,24 @@ public class SheetContentsCellRenderer extends DefaultTableCellRenderer {
         Component rendererComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
         boolean hasError = false;
+        boolean hasRowError = false;
         for (ValidationError validationError : fMatchedSheet.getValidationErrors()) {
-            if (validationError.getRowIdx() == row &&
-                    validationError.getCellIdx() + 1 == column) {
-                hasError = true;
-                break;
+            if (validationError.getRowIdx() == row) {
+                if (validationError.getCellIdx() + 1 == column) {
+                    hasError = true;
+                    break;
+                }
+                else if (validationError.getCellIdx() == -1) {
+                    hasRowError = true;
+                }
             }
         }
 
         if (hasError) {
             ((JLabel) rendererComponent).setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.RED));
+        }
+        else if (hasRowError) {
+            ((JLabel) rendererComponent).setBorder(BorderFactory.createMatteBorder(2, 0, 2, 0, Color.RED));
         }
         else {
             ((JLabel) rendererComponent).setBorder(null);

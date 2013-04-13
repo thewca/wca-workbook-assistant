@@ -1,10 +1,5 @@
 package org.worldcubeassociation.ui.table;
 
-import org.apache.poi.ss.format.CellFormat;
-import org.apache.poi.ss.format.CellFormatResult;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.worldcubeassociation.workbook.MatchedSheet;
 
 import javax.swing.table.DefaultTableModel;

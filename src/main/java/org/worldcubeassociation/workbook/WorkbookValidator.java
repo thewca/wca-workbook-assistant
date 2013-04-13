@@ -12,10 +12,7 @@ import org.worldcubeassociation.workbook.parse.ParsedGender;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Lars Vandenbergh
@@ -46,7 +43,8 @@ public class WorkbookValidator {
 
         if (aMatchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
             validateRegistrationsSheet(aMatchedSheet, aDatabase);
-        } else if (aMatchedSheet.getSheetType() == SheetType.RESULTS) {
+        }
+        else if (aMatchedSheet.getSheetType() == SheetType.RESULTS) {
             validateResultsSheet(aMatchedSheet, aMatchedWorkbook, aDatabase);
         }
     }
@@ -94,7 +92,8 @@ public class WorkbookValidator {
                 if (person == null) {
                     ValidationError validationError = new ValidationError("Unknown WCA id", aMatchedSheet, rowIdx, 3);
                     aMatchedSheet.getValidationErrors().add(validationError);
-                } else {
+                }
+                else {
                     if (name != null && !name.equals(person.getName())) {
                         ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), aMatchedSheet, rowIdx, 1);
                         aMatchedSheet.getValidationErrors().add(validationError);
@@ -143,11 +142,11 @@ public class WorkbookValidator {
         }
 
         // Check for duplicate event/round combination.
-        if(aMatchedSheet.getEvent() != null && aMatchedSheet.getRound() != null){
+        if (aMatchedSheet.getEvent() != null && aMatchedSheet.getRound() != null) {
             List<MatchedSheet> sheets = aMatchedWorkbook.sheets();
             List<MatchedSheet> duplicateSheets = new ArrayList<MatchedSheet>();
             for (MatchedSheet sheet : sheets) {
-                if( aMatchedSheet.getEvent().equals(sheet.getEvent()) &&
+                if (aMatchedSheet.getEvent().equals(sheet.getEvent()) &&
                         aMatchedSheet.getRound().isSameRoundAs(sheet.getRound())) {
                     duplicateSheets.add(sheet);
                 }
@@ -203,13 +202,14 @@ public class WorkbookValidator {
             }
 
             // If we have a valid WCA id check that it is in the database and check that the name and country matches
-            // what what is in the database.
+            // with what is in the database.
             if (wcaIdValid && aDatabase != null) {
                 Person person = aDatabase.getPersons().findById(wcaId);
                 if (person == null) {
                     ValidationError validationError = new ValidationError("Unknown WCA id", aMatchedSheet, rowIdx, 3);
                     aMatchedSheet.getValidationErrors().add(validationError);
-                } else {
+                }
+                else {
                     if (name != null && !name.equals(person.getName())) {
                         ValidationError validationError = new ValidationError("Name does not match name in WCA database: " + person.getName(), aMatchedSheet, rowIdx, 1);
                         aMatchedSheet.getValidationErrors().add(validationError);
@@ -243,12 +243,18 @@ public class WorkbookValidator {
         ResultFormat resultFormat = aMatchedSheet.getResultFormat();
         ColumnOrder columnOrder = aMatchedSheet.getColumnOrder();
 
-        for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
-            Row row = sheet.getRow(rowIdx);
+        boolean allRowsValid = true;
+        int nbDataRows = aMatchedSheet.getLastDataRow() - aMatchedSheet.getFirstDataRow() + 1;
+        Long[] bestResults = new Long[nbDataRows];
+        Long[] averageResults = new Long[nbDataRows];
+
+        for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
+            Row row = sheet.getRow(rowIdx + aMatchedSheet.getFirstDataRow());
+            int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
 
             // Validate individual results.
-            boolean allResultsValid = true;
-            boolean allResultsPresent = true;
+            boolean allResultsInRowValid = true;
+            boolean allResultsInRowPresent = true;
             Long[] results = new Long[format.getResultCount()];
             for (int resultIdx = 1; resultIdx <= format.getResultCount(); resultIdx++) {
                 int resultCellCol = RowTokenizer.getResultCell(resultIdx, format, event, columnOrder);
@@ -265,21 +271,23 @@ public class WorkbookValidator {
                     results[resultIdx - 1] = result;
 
                     if (result == 0) {
-                        allResultsPresent = false;
+                        allResultsInRowPresent = false;
                     }
                     else {
                         if ((resultFormat == ResultFormat.SECONDS || resultFormat == ResultFormat.MINUTES) &&
                                 !roundToNearestSecond(result).equals(result)) {
                             validationErrors.add(new ValidationError(ORDER[resultIdx - 1] + " result is over 10 minutes and should be rounded to the nearest second",
-                                    aMatchedSheet, rowIdx, resultCellCol));
-                            allResultsValid = false;
+                                    aMatchedSheet, sheetRow, resultCellCol));
+                            allResultsInRowValid = false;
+                            allRowsValid = false;
                         }
                     }
                 }
                 catch (ParseException e) {
                     validationErrors.add(new ValidationError(ORDER[resultIdx - 1] + " result: " + e.getMessage(),
-                            aMatchedSheet, rowIdx, resultCellCol));
-                    allResultsValid = false;
+                            aMatchedSheet, sheetRow, resultCellCol));
+                    allResultsInRowValid = false;
+                    allRowsValid = false;
                 }
             }
 
@@ -290,18 +298,24 @@ public class WorkbookValidator {
 
                 try {
                     Long bestResult = CellParser.parseMandatorySingleTime(bestResultCell, resultFormat, aFormulaEvaluator);
-                    if (allResultsValid) {
+                    bestResults[rowIdx] = bestResult;
+                    if (allResultsInRowValid) {
                         Long expectedBestResult = calculateBestResult(results);
                         if (!expectedBestResult.equals(bestResult)) {
                             String formattedExpectedBest = CellFormatter.formatTime(expectedBestResult, resultFormat);
                             validationErrors.add(new ValidationError("Best result does not match calculated best result: " + formattedExpectedBest,
-                                    aMatchedSheet, rowIdx, bestCellCol));
+                                    aMatchedSheet, sheetRow, bestCellCol));
+                            allRowsValid = false;
                         }
                     }
                 }
                 catch (ParseException e) {
-                    validationErrors.add(new ValidationError("Best result: " + e.getMessage(), aMatchedSheet, rowIdx, bestCellCol));
+                    validationErrors.add(new ValidationError("Best result: " + e.getMessage(), aMatchedSheet, sheetRow, bestCellCol));
+                    allRowsValid = false;
                 }
+            }
+            else {
+                bestResults[rowIdx] = results[0];
             }
 
             // Validate single record.
@@ -311,7 +325,7 @@ public class WorkbookValidator {
                 CellParser.parseRecord(singleRecordCell);
             }
             catch (ParseException e) {
-                validationErrors.add(new ValidationError("Misformatted single record", aMatchedSheet, rowIdx, singleRecordCellCol));
+                validationErrors.add(new ValidationError("Misformatted single record", aMatchedSheet, sheetRow, singleRecordCellCol));
             }
 
             // Validate average result.
@@ -327,26 +341,30 @@ public class WorkbookValidator {
                     else {
                         averageResult = CellParser.parseMandatoryAverageTime(averageResultCell, resultFormat, aFormulaEvaluator);
                     }
+                    averageResults[rowIdx] = averageResult;
 
-                    if (allResultsValid) {
-                        if (allResultsPresent) {
+                    if (allResultsInRowValid) {
+                        if (allResultsInRowPresent) {
                             Long expectedAverageResult = calculateAverageResult(results, format);
                             if (!expectedAverageResult.equals(averageResult)) {
                                 String formattedExpectedAverage = CellFormatter.formatTime(expectedAverageResult, resultFormat);
                                 validationErrors.add(new ValidationError("Average result does not match calculated average result: " + formattedExpectedAverage,
-                                        aMatchedSheet, rowIdx, averageCellCol));
+                                        aMatchedSheet, sheetRow, averageCellCol));
+                                allRowsValid = false;
                             }
                         }
                         else {
                             if (!averageResult.equals(0L)) {
                                 validationErrors.add(new ValidationError("Average result should be empty for incomplete average in combined round",
-                                        aMatchedSheet, rowIdx, averageCellCol));
+                                        aMatchedSheet, sheetRow, averageCellCol));
+                                allRowsValid = false;
                             }
                         }
                     }
                 }
                 catch (ParseException e) {
-                    validationErrors.add(new ValidationError("Average result: " + e.getMessage(), aMatchedSheet, rowIdx, averageCellCol));
+                    validationErrors.add(new ValidationError("Average result: " + e.getMessage(), aMatchedSheet, sheetRow, averageCellCol));
+                    allRowsValid = false;
                 }
 
                 // Validate average record.
@@ -354,11 +372,45 @@ public class WorkbookValidator {
                 Cell averageRecordCell = row.getCell(averageRecordCellCol);
                 try {
                     CellParser.parseRecord(averageRecordCell);
-                } catch (ParseException e) {
-                    validationErrors.add(new ValidationError("Misformatted average record", aMatchedSheet, rowIdx, averageRecordCellCol));
+                }
+                catch (ParseException e) {
+                    validationErrors.add(new ValidationError("Misformatted average record", aMatchedSheet, sheetRow, averageRecordCellCol));
                 }
             }
         }
+
+        if (allRowsValid) {
+            // Check sorting
+            List<ResultRow> resultRows = new ArrayList<ResultRow>();
+            for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
+                int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
+                ResultRow resultRow = new ResultRow(sheetRow, bestResults[rowIdx], averageResults[rowIdx]);
+                resultRows.add(resultRow);
+            }
+
+            if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5) {
+                Collections.sort(resultRows, new AverageResultRowComparator());
+            }
+            else {
+                Collections.sort(resultRows, new BestResultRowComparator());
+            }
+
+            for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
+                int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
+                ResultRow sortedResultRow = resultRows.get(rowIdx);
+                int rowDifference = sortedResultRow.getRowIdx() - sheetRow;
+                if (rowDifference != 0) {
+                    String direction = rowDifference > 0 ? "higher" : "lower";
+                    int absRowDiff = Math.abs(rowDifference);
+                    String number = absRowDiff > 1 ? "rows" : "row";
+                    validationErrors.add(new ValidationError("Bad sorting: row should be " + absRowDiff + " " + number + " " + direction,
+                            aMatchedSheet, sortedResultRow.getRowIdx(), -1));
+                }
+            }
+        }
+
+        // Sort validation errors by row and cell.
+        Collections.sort(validationErrors, new ValidationErrorComparator());
     }
 
     private static boolean validateWCAId(String aWcaId) {
@@ -377,35 +429,15 @@ public class WorkbookValidator {
 
         if (best == null) {
             return -1L;
-        } else {
+        }
+        else {
             return best;
         }
     }
 
     private static Long calculateAverageResult(Long[] aResults, Format aFormat) {
         Long[] resultsCopy = Arrays.copyOf(aResults, aResults.length);
-        Arrays.sort(resultsCopy, new Comparator<Long>() {
-            @Override
-            public int compare(Long aFirst, Long aSecond) {
-                if (aFirst == -2 || aFirst == -1) {
-                    if (aSecond == -2 || aSecond == -1) {
-                        // A DNS/DNF is equal to a DNS/DNF.
-                        return 0;
-                    } else {
-                        // A DNS/DNF is larger than a time.
-                        return 1;
-                    }
-                } else {
-                    if (aSecond == -2 || aSecond == -1) {
-                        // A time is smaller than a DNS/DNF.
-                        return -1;
-                    } else {
-                        // A lower time is smaller than a larger time.
-                        return (int) (aFirst - aSecond);
-                    }
-                }
-            }
-        });
+        Arrays.sort(resultsCopy, new ResultComparator());
         if (aFormat == Format.AVERAGE_OF_5) {
             resultsCopy = Arrays.copyOfRange(resultsCopy, 1, 4);
         }
@@ -414,7 +446,8 @@ public class WorkbookValidator {
         for (Long result : resultsCopy) {
             if (result > 0) {
                 sum += result;
-            } else {
+            }
+            else {
                 return -1L;
             }
         }
@@ -426,9 +459,111 @@ public class WorkbookValidator {
     private static Long roundToNearestSecond(Long aResult) {
         if (aResult > TEN_MINUTES_IN_CENTISECONDS) {
             return Math.round(aResult / 100.0) * 100;
-        } else {
+        }
+        else {
             return aResult;
         }
+    }
+
+    private static class ResultComparator implements Comparator<Long> {
+        @Override
+        public int compare(Long aFirst, Long aSecond) {
+            if (aFirst == -2 || aFirst == -1) {
+                if (aSecond == -2 || aSecond == -1) {
+                    // A DNS/DNF is equal to a DNS/DNF.
+                    return 0;
+                }
+                else {
+                    // A DNS/DNF is larger than a time.
+                    return 1;
+                }
+            }
+            else {
+                if (aSecond == -2 || aSecond == -1) {
+                    // A time is smaller than a DNS/DNF.
+                    return -1;
+                }
+                else {
+                    // A lower time is smaller than a larger time.
+                    return (int) (aFirst - aSecond);
+                }
+            }
+        }
+    }
+
+    private static class AverageResultRowComparator implements Comparator<ResultRow> {
+
+        private ResultComparator fResultComparator = new ResultComparator();
+
+        @Override
+        public int compare(ResultRow aFirstResultRow, ResultRow aSecondResultRow) {
+            int bestCompare = fResultComparator.compare(aFirstResultRow.getBestResult(),
+                    aSecondResultRow.getBestResult());
+            if (aFirstResultRow.getAverageResult() != 0L && aSecondResultRow.getAverageResult() != 0L) {
+                int averageCompare = fResultComparator.compare(aFirstResultRow.getAverageResult(),
+                        aSecondResultRow.getAverageResult());
+                if (averageCompare != 0) {
+                    return averageCompare;
+                }
+                else {
+                    return bestCompare;
+                }
+            }
+            else if (aFirstResultRow.getAverageResult() != 0L && aSecondResultRow.getAverageResult() == 0L) {
+                return -1;
+            }
+            else {
+                return bestCompare;
+            }
+        }
+
+    }
+
+    private static class BestResultRowComparator implements Comparator<ResultRow> {
+
+        private ResultComparator fResultComparator = new ResultComparator();
+
+        @Override
+        public int compare(ResultRow aFirstResultRow, ResultRow aSecondResultRow) {
+            return fResultComparator.compare(aFirstResultRow.getBestResult(), aSecondResultRow.getBestResult());
+        }
+
+    }
+
+    private static class ValidationErrorComparator implements Comparator<ValidationError> {
+
+        @Override
+        public int compare(ValidationError aFirstValidationError, ValidationError aSecondValidationError) {
+            if ( aFirstValidationError.getRowIdx() == -1) {
+                return -1;
+            }
+            else {
+                if ( aSecondValidationError.getRowIdx() == -1) {
+                    return 1;
+                }
+                else {
+                    if (aFirstValidationError.getCellIdx() == -1 && aSecondValidationError.getCellIdx() != -1) {
+                        return -1;
+                    }
+                    else if (aFirstValidationError.getCellIdx() != -1 && aSecondValidationError.getCellIdx() == -1) {
+                        return 1;
+                    }
+                    else if (aFirstValidationError.getCellIdx() == -1 && aSecondValidationError.getCellIdx() == -1) {
+                        return aFirstValidationError.getRowIdx() - aSecondValidationError.getRowIdx();
+                    }
+                    else {
+                        int rowDifference = aFirstValidationError.getRowIdx() - aSecondValidationError.getRowIdx();
+                        if(rowDifference == 0){
+                            return aFirstValidationError.getCellIdx() - aSecondValidationError.getCellIdx();
+                        }
+                        else{
+                            return rowDifference;
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
 }

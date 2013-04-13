@@ -30,7 +30,7 @@ public abstract class AbstractValidationErrorsTableModel extends AbstractTableMo
         int rowIdx = aValidationError.getRowIdx();
         int cellIdx = aValidationError.getCellIdx();
         if (rowIdx == -1) {
-            switch (cellIdx){
+            switch (cellIdx) {
                 case ValidationError.EVENT_CELL_IDX:
                     return "Event";
                 case ValidationError.FORMAT_CELL_IDX:
@@ -40,6 +40,9 @@ public abstract class AbstractValidationErrorsTableModel extends AbstractTableMo
                 case ValidationError.ROUND_CELL_IDX:
                     return "Round";
             }
+        }
+        else if (cellIdx == -1) {
+            return "Row " + (rowIdx + 1);
         }
         else {
             return CellFormatter.formatCellCoordinates(rowIdx, cellIdx);
