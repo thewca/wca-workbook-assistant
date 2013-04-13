@@ -379,8 +379,8 @@ public class WorkbookValidator {
             }
         }
 
+        // Check sorting.
         if (allRowsValid) {
-            // Check sorting
             List<ResultRow> resultRows = new ArrayList<ResultRow>();
             for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
                 int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
@@ -388,13 +388,16 @@ public class WorkbookValidator {
                 resultRows.add(resultRow);
             }
 
+            Comparator<ResultRow> resultRowComparator;
             if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5) {
-                Collections.sort(resultRows, new AverageResultRowComparator());
+                resultRowComparator = new AverageResultRowComparator();
             }
             else {
-                Collections.sort(resultRows, new BestResultRowComparator());
+                resultRowComparator = new BestResultRowComparator();
             }
+            Collections.sort(resultRows, resultRowComparator);
 
+            boolean isSorted = true;
             for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
                 int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
                 ResultRow sortedResultRow = resultRows.get(rowIdx);
@@ -405,9 +408,35 @@ public class WorkbookValidator {
                     String number = absRowDiff > 1 ? "rows" : "row";
                     validationErrors.add(new ValidationError("Bad sorting: row should be " + absRowDiff + " " + number + " " + direction,
                             aMatchedSheet, sortedResultRow.getRowIdx(), -1));
+                    isSorted = false;
+                }
+            }
+
+            // Check positions.
+            if (isSorted) {
+                Long expectedPosition = 1L;
+                for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
+                    if (rowIdx > 0) {
+                        ResultRow lastRow = resultRows.get(rowIdx - 1);
+                        ResultRow currentRow = resultRows.get(rowIdx);
+                        if (resultRowComparator.compare(lastRow, currentRow) != 0) {
+                            expectedPosition = rowIdx + 1L;
+                        }
+                    }
+                    else {
+                        expectedPosition = 1L;
+                    }
+                    int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
+                    Row row = sheet.getRow(sheetRow);
+                    Long position = CellParser.parsePosition(row.getCell(0));
+                    if (position != null && !expectedPosition.equals(position)) {
+                        validationErrors.add(new ValidationError("Position does not match expected position: " + expectedPosition,
+                                aMatchedSheet, sheetRow, 0));
+                    }
                 }
             }
         }
+
 
         // Sort validation errors by row and cell.
         Collections.sort(validationErrors, new ValidationErrorComparator());
@@ -534,11 +563,11 @@ public class WorkbookValidator {
 
         @Override
         public int compare(ValidationError aFirstValidationError, ValidationError aSecondValidationError) {
-            if ( aFirstValidationError.getRowIdx() == -1) {
+            if (aFirstValidationError.getRowIdx() == -1) {
                 return -1;
             }
             else {
-                if ( aSecondValidationError.getRowIdx() == -1) {
+                if (aSecondValidationError.getRowIdx() == -1) {
                     return 1;
                 }
                 else {
@@ -553,10 +582,10 @@ public class WorkbookValidator {
                     }
                     else {
                         int rowDifference = aFirstValidationError.getRowIdx() - aSecondValidationError.getRowIdx();
-                        if(rowDifference == 0){
+                        if (rowDifference == 0) {
                             return aFirstValidationError.getCellIdx() - aSecondValidationError.getCellIdx();
                         }
-                        else{
+                        else {
                             return rowDifference;
                         }
                     }
