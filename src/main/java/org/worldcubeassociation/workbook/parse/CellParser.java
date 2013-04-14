@@ -104,7 +104,7 @@ public class CellParser {
                                  FormulaEvaluator aFormulaEvaluator) throws ParseException {
         if (cell == null) {
             if (aMandatory) {
-                throw new ParseException("missing time", 0);
+                throw new ParseException("missing value", 0);
             }
             else {
                 return 0L;
@@ -129,7 +129,7 @@ public class CellParser {
                 }
                 catch (IllegalStateException e) {
                     if (aMandatory) {
-                        throw new ParseException("missing time", 0);
+                        throw new ParseException("missing value", 0);
                     }
                     else {
                         return 0L;
@@ -146,7 +146,7 @@ public class CellParser {
         }
         else {
             if (aMandatory) {
-                throw new ParseException("missing time", 0);
+                throw new ParseException("missing value", 0);
             }
             else {
                 return 0L;
@@ -178,13 +178,24 @@ public class CellParser {
             return roundCentiSeconds(centiSeconds, aAverage, aResultFormat);
         }
         else {
-            return Math.round(aCellValue);
+            long roundedValue = Math.round(aCellValue);
+            if (roundedValue == aCellValue) {
+                return roundedValue;
+            }
+            else {
+                if (cellString.contains(".")) {
+                    throw new ParseException("not formatted as a whole number", 0);
+                }
+                else {
+                    throw new ParseException("invisible digits after decimal point: " + aCellValue, 0);
+                }
+            }
         }
     }
 
     private static long roundCentiSeconds(double centiSeconds, boolean aAverage, ResultFormat aResultFormat) throws ParseException {
         long roundedCentiSeconds = Math.round(centiSeconds);
-        long roundedMilliSeconds = Math.round(centiSeconds*10);
+        long roundedMilliSeconds = Math.round(centiSeconds * 10);
         if ((!aAverage) && (roundedCentiSeconds * 10 != roundedMilliSeconds)) {
             String formattedResult;
             if (aResultFormat == ResultFormat.SECONDS) {
@@ -207,14 +218,14 @@ public class CellParser {
         }
         else if ("".equals(aStringCellValue)) {
             if (aMandatory) {
-                throw new ParseException("missing time", 0);
+                throw new ParseException("missing value", 0);
             }
             else {
                 return 0L;
             }
         }
         else {
-            throw new ParseException("misformatted time", 0);
+            throw new ParseException("misformatted value", 0);
         }
     }
 

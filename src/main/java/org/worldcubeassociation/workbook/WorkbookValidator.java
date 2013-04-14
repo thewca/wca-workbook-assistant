@@ -291,6 +291,137 @@ public class WorkbookValidator {
                 }
             }
 
+            // For multiple blindfolded, check that the score is calculated correctly.
+            if (event == Event._333mbf) {
+                for (int resultIdx = 1; resultIdx <= format.getResultCount(); resultIdx++) {
+                    int resultCellCol = RowTokenizer.getResultCell(resultIdx, format, event, columnOrder);
+                    Long result = results[resultIdx - 1];
+
+                    // Validate # tried cubes, solve cubes and seconds individually.
+                    int cubesTriedCol = RowTokenizer.getCubesTriedCell(resultIdx);
+                    Cell cubesTriedCell = row.getCell(cubesTriedCol);
+                    int cubesSolvedCol = RowTokenizer.getCubesSolvedCell(resultIdx);
+                    Cell cubesSolvedCell = row.getCell(cubesSolvedCol);
+                    int secondsCol = RowTokenizer.getSecondsCell(resultIdx);
+                    Cell secondsCell = row.getCell(secondsCol);
+
+                    boolean cubesTriedValid = true;
+                    Long cubesTried = null;
+                    try {
+                        cubesTried = CellParser.parseOptionalSingleTime(cubesTriedCell, ResultFormat.NUMBER, aFormulaEvaluator);
+
+                        if (cubesTried == null || cubesTried == 0) {
+                            if (resultIdx == 1 || !round.isCombined()) {
+                                validationErrors.add(new ValidationError(Severity.HIGH, "# tried cubes: missing value", aMatchedSheet, sheetRow, cubesTriedCol));
+                                cubesTriedValid = false;
+                            }
+                        }
+                        else if (cubesTried != -2 && cubesTried != -1 && cubesTried < 2) {
+                            validationErrors.add(new ValidationError(Severity.HIGH, "# tried cubes should be at least 2", aMatchedSheet, sheetRow, cubesTriedCol));
+                            cubesTriedValid = false;
+                        }
+                    }
+                    catch (ParseException e) {
+                        validationErrors.add(new ValidationError(Severity.HIGH, "# tried cubes: " + e.getMessage(), aMatchedSheet, sheetRow, cubesTriedCol));
+                        cubesTriedValid = false;
+                    }
+
+                    Long cubesSolved = null;
+                    boolean cubesSolvedValid = true;
+                    try {
+                        cubesSolved = CellParser.parseOptionalSingleTime(cubesSolvedCell, ResultFormat.NUMBER, aFormulaEvaluator);
+
+                        if (cubesSolved == null) {
+                            if (cubesTriedValid) {
+                                validationErrors.add(new ValidationError(Severity.HIGH, "# solved cubes: missing value", aMatchedSheet, sheetRow, cubesSolvedCol));
+                                cubesSolvedValid = false;
+                            }
+                        }
+                        else if (cubesSolved < 0) {
+                            validationErrors.add(new ValidationError(Severity.HIGH, "# solved cubes should be a positive number", aMatchedSheet, sheetRow, cubesSolvedCol));
+                            cubesSolvedValid = false;
+                        }
+                    }
+                    catch (ParseException e) {
+                        validationErrors.add(new ValidationError(Severity.HIGH, "# solved cubes: " + e.getMessage(), aMatchedSheet, sheetRow, cubesSolvedCol));
+                        cubesSolvedValid = false;
+                    }
+
+                    Long seconds = null;
+                    boolean secondsValid = true;
+                    try {
+                        seconds = CellParser.parseOptionalSingleTime(secondsCell, ResultFormat.NUMBER, aFormulaEvaluator);
+
+                        if (seconds == null) {
+                            if (cubesTriedValid && cubesSolvedValid && (cubesTried - cubesSolved <= cubesSolved)) {
+                                validationErrors.add(new ValidationError(Severity.HIGH, "Seconds: missing value", aMatchedSheet, sheetRow, secondsCol));
+                                secondsValid = false;
+                            }
+                        }
+                        else if (seconds < 0) {
+                            validationErrors.add(new ValidationError(Severity.HIGH, "Seconds should be a positive number", aMatchedSheet, sheetRow, secondsCol));
+                            secondsValid = false;
+                        }
+                        else if (seconds > 3600) {
+                            validationErrors.add(new ValidationError(Severity.HIGH, "Seconds should not exceed 3600 (1 hour)", aMatchedSheet, sheetRow, secondsCol));
+                            secondsValid = false;
+                        }
+                    }
+                    catch (ParseException e) {
+                        validationErrors.add(new ValidationError(Severity.HIGH, "Seconds: " + e.getMessage(), aMatchedSheet, sheetRow, secondsCol));
+                        secondsValid = false;
+                    }
+
+                    // If # tried cubes, solve cubes and seconds are valid, calculate and check score.
+                    if (cubesTriedValid && cubesSolvedValid && secondsValid && result != null) {
+                        if (cubesTried == null || cubesTried == 0) {
+                            if (result != 0) {
+                                validationErrors.add(new ValidationError(Severity.HIGH, "Score should be empty if # tried cubes is empty", aMatchedSheet, sheetRow, cubesTriedCol));
+                                allResultsInRowValid = false;
+                                allRowsValid = false;
+                            }
+                        }
+                        else if (cubesTried == -2) {
+                            if (result != -2) {
+                                validationErrors.add(new ValidationError(Severity.HIGH, "Score should be -2 if # tried cubes is DNS", aMatchedSheet, sheetRow, resultCellCol));
+                                allResultsInRowValid = false;
+                                allRowsValid = false;
+                            }
+                        }
+                        else if (cubesTried == -1) {
+                            if (result != -1) {
+                                validationErrors.add(new ValidationError(Severity.HIGH, "Score should be -1 if # tried cubes is DNF", aMatchedSheet, sheetRow, resultCellCol));
+                                allResultsInRowValid = false;
+                                allRowsValid = false;
+                            }
+                        }
+                        else {
+                            long cubesUnsolved = cubesTried - cubesSolved;
+                            if (cubesSolved >= cubesUnsolved) {
+                                long cubeScore = 99 - (cubesSolved - cubesUnsolved);
+                                long expectedScore = cubeScore * 10000000 + 100 * seconds + cubesUnsolved;
+                                if (result != expectedScore) {
+                                    validationErrors.add(new ValidationError(Severity.HIGH, "Score does not match calculated score: " + expectedScore, aMatchedSheet, sheetRow, resultCellCol));
+                                    allResultsInRowValid = false;
+                                    allRowsValid = false;
+                                }
+                            }
+                            else {
+                                if (result != -1) {
+                                    validationErrors.add(new ValidationError(Severity.HIGH, "Score should be -1 if # unsolved cubes is larger then # solved cubes", aMatchedSheet, sheetRow, resultCellCol));
+                                    allResultsInRowValid = false;
+                                    allRowsValid = false;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        allResultsInRowValid = false;
+                        allRowsValid = false;
+                    }
+                }
+            }
+
             // Validate best result.
             if (format.getResultCount() > 1) {
                 int bestCellCol = RowTokenizer.getBestCell(format, event, columnOrder);

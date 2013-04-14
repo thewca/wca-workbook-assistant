@@ -91,4 +91,16 @@ public class RowTokenizer {
         }
     }
 
+    public static int getCubesTriedCell(int aResult) {
+        return 4 * aResult;
+    }
+
+    public static int getCubesSolvedCell(int aResult) {
+        return 1 + 4 * aResult;
+    }
+
+    public static int getSecondsCell(int aResult) {
+        return 2 + 4 * aResult;
+    }
+
 }
