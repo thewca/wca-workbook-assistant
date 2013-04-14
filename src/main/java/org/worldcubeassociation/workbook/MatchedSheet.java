@@ -199,4 +199,15 @@ public class MatchedSheet {
     public List<ValidationError> getValidationErrors() {
         return fValidationErrors;
     }
+
+    public List<ValidationError> getValidationErrors(Severity aSeverity) {
+        ArrayList<ValidationError> errors = new ArrayList<ValidationError>();
+        for (ValidationError validationError : fValidationErrors) {
+            if(validationError.getSeverity() == aSeverity){
+                errors.add(validationError);
+            }
+        }
+        return errors;
+    }
+
 }

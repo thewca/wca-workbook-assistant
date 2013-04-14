@@ -12,16 +12,22 @@ public class ValidationError {
     public static final int FORMAT_CELL_IDX = 2;
     public static final int RESULT_FORMAT_CELL_IDX = 3;
 
+    private Severity fSeverity;
     private String fMessage;
     private MatchedSheet fSheet;
     private int fRowIdx;
     private int fCellIdx;
 
-    public ValidationError(String aMessage, MatchedSheet aSheet, int aRowIdx, int aCellIdx) {
+    public ValidationError(Severity aSeverity, String aMessage, MatchedSheet aSheet, int aRowIdx, int aCellIdx) {
+        fSeverity = aSeverity;
         fMessage = aMessage;
         fSheet = aSheet;
         fRowIdx = aRowIdx;
         fCellIdx = aCellIdx;
+    }
+
+    public Severity getSeverity() {
+        return fSeverity;
     }
 
     public String getMessage() {

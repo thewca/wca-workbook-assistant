@@ -2,40 +2,32 @@ package org.worldcubeassociation.ui;
 
 import org.worldcubeassociation.WorkbookUploaderEnv;
 import org.worldcubeassociation.workbook.JSONGenerator;
-import org.worldcubeassociation.workbook.MatchedSheet;
+import org.worldcubeassociation.workbook.SheetType;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * @author Lars Vandenbergh
  */
-public class GenerateJSONAction extends AbstractAction implements PropertyChangeListener {
+public class GenerateJSONAction extends AbstractGenerateAction implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
     private JDialog fDialog;
     private JTextArea fTextArea;
 
     public GenerateJSONAction(WorkbookUploaderEnv aEnv) {
-        super("Generate JSON...");
-        fEnv = aEnv;
-        fEnv.addPropertyChangeListener(this);
+        super("Generate JSON...", aEnv);
 
         initUI();
         updateEnabledState();
     }
 
-    private void updateEnabledState() {
-        setEnabled(fEnv.getMatchedWorkbook() != null);
-    }
-
     private void initUI() {
-        fDialog = new JDialog(fEnv.getTopLevelComponent(), "Generate JSON", Dialog.ModalityType.APPLICATION_MODAL);
+        fDialog = new JDialog(getEnv().getTopLevelComponent(), "Generate JSON", Dialog.ModalityType.APPLICATION_MODAL);
         fDialog.getContentPane().setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -68,36 +60,23 @@ public class GenerateJSONAction extends AbstractAction implements PropertyChange
 
     @Override
     public void actionPerformed(ActionEvent aActionEvent) {
-        List<MatchedSheet> sheets = fEnv.getMatchedWorkbook().sheets();
-        for (MatchedSheet sheet : sheets) {
-            if (!sheet.getValidationErrors().isEmpty()) {
-                JOptionPane.showMessageDialog(fEnv.getTopLevelComponent(),
-                        "Some sheets still contain validation errors and will be skipped!",
-                        "Generate JSON",
-                        JOptionPane.WARNING_MESSAGE);
-                break;
-            }
+        boolean approved = warnForErrors(Arrays.asList(SheetType.values()));
+        if (!approved) {
+            return;
         }
 
         try {
-            String scripts = JSONGenerator.generateJSON(fEnv.getMatchedWorkbook());
+            String scripts = JSONGenerator.generateJSON(getEnv().getMatchedWorkbook());
             fTextArea.setText(scripts);
 
-            fDialog.setLocationRelativeTo(fEnv.getTopLevelComponent());
+            fDialog.setLocationRelativeTo(getEnv().getTopLevelComponent());
             fDialog.setVisible(true);
         }
         catch (Exception e) {
-            JOptionPane.showMessageDialog(fEnv.getTopLevelComponent(),
+            JOptionPane.showMessageDialog(getEnv().getTopLevelComponent(),
                     "An unexpected validation error occurred in one of the sheets!",
                     "Generate JSON",
                     JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
-            updateEnabledState();
         }
     }
 

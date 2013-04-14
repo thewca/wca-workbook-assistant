@@ -1,6 +1,9 @@
 package org.worldcubeassociation.workbook;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
 import org.worldcubeassociation.workbook.parse.CellParser;
 import org.worldcubeassociation.workbook.parse.ParsedGender;
 import org.worldcubeassociation.workbook.parse.ParsedRecord;
@@ -10,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Lars Vandenbergh
@@ -27,28 +31,38 @@ public class ScriptsGenerator {
                         append("    ").append(matchedSheet.getFormat()).
                         append("    (sheet '").append(matchedSheet.getSheet().getSheetName()).append("')\n\n");
 
-                if (!matchedSheet.getValidationErrors().isEmpty()) {
-                    script.append("-- SKIPPED! Sheet has ").
-                            append(matchedSheet.getValidationErrors().size()).
-                            append(" validation errors, fix them first.\n");
-                }
-                else {
+                if (checkErrors(script, matchedSheet)) {
                     generateResults(script, competitionId, matchedSheet);
                 }
+
                 script.append("\n");
             }
-        }
-
-        for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
-            if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS && aType == SheetType.REGISTRATIONS) {
+            else if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS && aType == SheetType.REGISTRATIONS) {
                 script.append("-- Registrations").
                         append("    (sheet '").append(matchedSheet.getSheet().getSheetName()).append("')\n\n");
-                generateRegistrations(script, competitionId, matchedSheet);
+
+                if (checkErrors(script, matchedSheet)) {
+                    generateRegistrations(script, competitionId, matchedSheet);
+                }
+
+                script.append("\n");
             }
         }
 
 
         return script.toString();
+    }
+
+    private static boolean checkErrors(StringBuffer aScript, MatchedSheet matchedSheet) {
+        List<ValidationError> severErrors = matchedSheet.getValidationErrors(Severity.HIGH);
+        if (!severErrors.isEmpty()) {
+            aScript.append("-- SKIPPED! Sheet has ").
+                    append(severErrors.size()).
+                    append(" severe validation errors, fix them first.\n");
+            return false;
+        }
+
+        return true;
     }
 
     public static void generateRegistrations(StringBuffer aScript,

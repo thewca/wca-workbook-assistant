@@ -46,7 +46,8 @@ public class JSONGenerator {
         jsonWriter.key("persons").array();
 
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
-            if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
+            if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS &&
+                    matchedSheet.getValidationErrors(Severity.HIGH).isEmpty()) {
                 generateRegistrations(stringWriter, jsonWriter, matchedSheet);
             }
         }
@@ -60,10 +61,9 @@ public class JSONGenerator {
         jsonWriter.key("results").array();
 
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
-            if (matchedSheet.getSheetType() == SheetType.RESULTS) {
-                if (matchedSheet.getValidationErrors().isEmpty()) {
-                    generateResults(stringWriter, jsonWriter, aMatchedWorkbook.getCompetitionId(), matchedSheet);
-                }
+            if (matchedSheet.getSheetType() == SheetType.RESULTS &&
+                    matchedSheet.getValidationErrors(Severity.HIGH).isEmpty()) {
+                generateResults(stringWriter, jsonWriter, aMatchedWorkbook.getCompetitionId(), matchedSheet);
             }
         }
 
