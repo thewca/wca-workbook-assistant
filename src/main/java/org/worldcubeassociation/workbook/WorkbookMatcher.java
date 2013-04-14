@@ -201,18 +201,48 @@ public class WorkbookMatcher {
             ResultFormat resultFormat = null;
             int dataRow = firstDataRow;
             while (resultFormat == null && dataRow <= lastDataRow) {
-                for (int resultIdx = 1; resultIdx <= format.getResultCount(); resultIdx++) {
+                boolean formatMatched = true;
+                ResultFormat lineFormat = null;
+                for (int resultIdx = 1; resultIdx <= format.getResultCount() && formatMatched; resultIdx++) {
                     int resultCellCol = RowTokenizer.getResultCell(resultIdx, format, event, columnOrder);
                     Cell cell = sheet.getRow(dataRow).getCell(resultCellCol);
 
                     if (cell != null && (cell.getCellType() == Cell.CELL_TYPE_NUMERIC ||
                             (cell.getCellType() == Cell.CELL_TYPE_FORMULA && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC))) {
+                        // Derive result format from cell.
                         String cellFormatString = CellParser.getCellFormatString(cell);
                         CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
                         CellFormatResult formattedResult = cellFormat.apply(cell);
-                        resultFormat = matchResultFormatFromCellFormat(cellFormatString.toUpperCase(), formattedResult.text);
+                        ResultFormat cellResultFormat = matchResultFormatFromCellFormat(cellFormatString.toUpperCase(), formattedResult.text);
+
+                        // Combine it with the result format we had derived so far on this line.
+                        if (lineFormat == null) {
+                            lineFormat = cellResultFormat;
+                        }
+                        else if (lineFormat == ResultFormat.MINUTES && cellResultFormat != ResultFormat.MINUTES) {
+                            formatMatched = false;
+                        }
+                        else if (lineFormat == ResultFormat.SECONDS) {
+                            if (cellResultFormat == ResultFormat.MINUTES) {
+                                formatMatched = false;
+                            }
+                        }
+                        else if (lineFormat == ResultFormat.NUMBER) {
+                            if (cellResultFormat == ResultFormat.MINUTES) {
+                                formatMatched = false;
+                            }
+                            else if (cellResultFormat == ResultFormat.SECONDS) {
+                                lineFormat = ResultFormat.SECONDS;
+                            }
+                        }
                     }
                 }
+
+                // If all result formats in a line are consistent, use it.
+                if (formatMatched) {
+                    resultFormat = lineFormat;
+                }
+
                 dataRow++;
             }
 
