@@ -422,6 +422,21 @@ public class WorkbookValidator {
                 }
             }
 
+            // Check for only DNS rows.
+            if (allResultsInRowValid) {
+                boolean onlyDNS = true;
+                for (int i = 0, resultsLength = results.length; i < resultsLength && onlyDNS; i++) {
+                    Long result = results[i];
+                    if (result != null && result != -2) {
+                        onlyDNS = false;
+                    }
+                }
+
+                if (onlyDNS) {
+                    validationErrors.add(new ValidationError(Severity.HIGH, "Rows with only DNS results should be removed", aMatchedSheet, sheetRow, -1));
+                }
+            }
+
             // Validate best result.
             if (format.getResultCount() > 1) {
                 int bestCellCol = RowTokenizer.getBestCell(format, event, columnOrder);
