@@ -1,6 +1,5 @@
 package org.worldcubeassociation.ui;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.worldcubeassociation.WorkbookUploaderEnv;
@@ -13,8 +12,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -26,44 +23,19 @@ public class OpenWorkbookAction extends AbstractAction {
     private Executor fExecutor = Executors.newSingleThreadExecutor();
     private WorkbookUploaderEnv fEnv;
     private JFileChooser fFileChooser;
-    private JDialog fProgressDialog;
-    private JLabel fStatusLabel;
-    private JProgressBar fProgressBar;
+    private ProgressDialog fProgressDialog;
 
     public OpenWorkbookAction(WorkbookUploaderEnv aEnv) {
         super("Open...");
         fEnv = aEnv;
+
         fFileChooser = new JFileChooser();
         fFileChooser.setMultiSelectionEnabled(false);
         fFileChooser.setFileFilter(new WorkbookFileFilter());
 
-        initUI();
+        fProgressDialog = new ProgressDialog(fEnv.getTopLevelComponent(), "Open workbook", Dialog.ModalityType.APPLICATION_MODAL);
     }
 
-    private void initUI() {
-        fProgressDialog = new JDialog(fEnv.getTopLevelComponent(), "Open workbook", Dialog.ModalityType.APPLICATION_MODAL);
-        fProgressDialog.getContentPane().setLayout(new GridBagLayout());
-
-        fStatusLabel = new JLabel("Loading...");
-        fProgressBar = new JProgressBar(0, 0, 100);
-        fProgressBar.setPreferredSize(new Dimension(400, 24));
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(8, 8, 0, 8);
-        fProgressDialog.add(fStatusLabel, c);
-
-        c.gridy++;
-        c.insets.bottom = 8;
-        fProgressDialog.add(fProgressBar, c);
-
-        fProgressDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        fProgressDialog.setResizable(false);
-        fProgressDialog.pack();
-    }
 
     @Override
     public void actionPerformed(ActionEvent aActionEvent) {
@@ -124,8 +96,7 @@ public class OpenWorkbookAction extends AbstractAction {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    fProgressBar.setValue(0);
-                    fStatusLabel.setText("");
+                    fProgressDialog.setStatus(0, "", "");
                     fProgressDialog.setLocationRelativeTo(fEnv.getTopLevelComponent());
                     fProgressDialog.setVisible(true);
                 }
@@ -136,8 +107,7 @@ public class OpenWorkbookAction extends AbstractAction {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    fProgressBar.setValue(aProgress);
-                    fStatusLabel.setText(aMessage);
+                    fProgressDialog.setStatus(aProgress, aMessage, "");
                     fProgressDialog.setLocationRelativeTo(fEnv.getTopLevelComponent());
                     fProgressDialog.setVisible(true);
                 }

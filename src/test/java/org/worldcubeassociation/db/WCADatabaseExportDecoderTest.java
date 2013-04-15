@@ -8,7 +8,7 @@ import java.io.IOException;
 public class WCADatabaseExportDecoderTest {
 
     public static void main(String[] args) throws IOException {
-        Database database = WCADatabaseExportDecoder.decodeMostRecentExport();
+        Database database = WCADatabaseExportDecoder.decodeMostRecentExport(null);
 
         Persons persons = database.getPersons();
         System.out.println("Number of persons: "+persons.count());

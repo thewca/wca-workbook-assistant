@@ -1,12 +1,10 @@
 package org.worldcubeassociation.workbook;
 
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.db.WCADatabaseExportDecoder;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * @author Lars Vandenbergh
@@ -22,7 +20,7 @@ public class ValidateWorkbookTest extends AbstractWorkbookTest {
     @Override
     public void start(String aPath) {
         try {
-            fDatabase = WCADatabaseExportDecoder.decodeMostRecentExport();
+            fDatabase = WCADatabaseExportDecoder.decodeMostRecentExport(null);
         }
         catch (Exception e) {
             e.printStackTrace();

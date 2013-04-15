@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -13,22 +14,30 @@ import java.util.zip.ZipFile;
  */
 public class WCADatabaseExportDecoder {
 
-    public static Database decodeMostRecentExport() throws IOException {
+    public static Database decodeMostRecentExport(Database aCurrentDatabase) throws IOException {
         String[] exportFiles = new File(".").list(new WCADatabaseFilenameFilter());
-        if(exportFiles.length>0){
+        if (exportFiles.length > 0) {
             Arrays.sort(exportFiles);
             String mostRecentExportFile = exportFiles[exportFiles.length - 1];
-            return decodeDatabaseZippedTSV(mostRecentExportFile);
+            if (aCurrentDatabase != null && mostRecentExportFile.equals(aCurrentDatabase.getFileName())) {
+                return aCurrentDatabase;
+            }
+            else {
+                return decodeDatabaseZippedTSV(mostRecentExportFile);
+            }
         }
         return null;
     }
 
     public static Database decodeDatabaseZippedTSV(String aFileName) throws IOException {
         ZipFile zipFile = new ZipFile(aFileName);
-
         ZipEntry personsEntry = zipFile.getEntry("WCA_export_Persons.tsv");
         InputStream personsInputStream = zipFile.getInputStream(personsEntry);
+
         Persons persons = decodePersonsTSV(personsInputStream);
+
+        personsInputStream.close();
+        zipFile.close();
 
         return new Database(aFileName, persons);
     }
@@ -57,7 +66,7 @@ public class WCADatabaseExportDecoder {
 
         @Override
         public boolean accept(File dir, String name) {
-            return name.startsWith("WCA_export") &&  name.endsWith(".tsv.zip");
+            return name.startsWith("WCA_export") && name.endsWith(".tsv.zip");
         }
 
     }

@@ -23,9 +23,9 @@ public class WorkbookUploader {
         workbookUploaderEnv.setFontSize(11);
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_TITLE);
 
-        // Attempt to read WCA database export.
+        // Attempt to read WCA database export for the first time.
         try {
-            Database database = WCADatabaseExportDecoder.decodeMostRecentExport();
+            Database database = WCADatabaseExportDecoder.decodeMostRecentExport(null);
             workbookUploaderEnv.setDatabase(database);
         }
         catch (IOException e) {

@@ -41,7 +41,8 @@ public class WCADatabaseExportPanel extends JLabel implements PropertyChangeList
             setText("No WCA database export found for checking person data!");
             setIcon(ERROR_ICON);
             setForeground(new Color(100, 0, 0));
-        } else {
+        }
+        else {
             setText("Using " + fEnv.getDatabase().getFileName() + " for checking person data");
             setIcon(OK_ICON);
             setForeground(new Color(0, 100, 0));
@@ -50,7 +51,9 @@ public class WCADatabaseExportPanel extends JLabel implements PropertyChangeList
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-
+        if (WorkbookUploaderEnv.DATABASE.equals(evt.getPropertyName())) {
+            updateLabel();
+        }
     }
 
 }

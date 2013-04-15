@@ -15,21 +15,33 @@ import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * @author Lars Vandenbergh
  */
 public class WorkbookUploaderFrame extends JFrame {
 
+    private static final Icon REFRESH_ICON;
+
     private WorkbookUploaderEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
     private OpenWorkbookAction fOpenWorkbookAction;
     private ValidationErrorsPanel fValidationErrorsPanel;
     private JComboBox fViewComboBox;
+    private UpdateWCAExportAction fUpdateWCAExportAction;
+
+    static {
+        URL refreshURL = WorkbookUploaderFrame.class.getClassLoader().
+                getResource("org/worldcubeassociation/ui/refresh_icon.png");
+        REFRESH_ICON = new ImageIcon(refreshURL);
+    }
 
     public WorkbookUploaderFrame(WorkbookUploaderEnv aEnv) {
         super("WCA Workbook Uploader");
@@ -186,7 +198,32 @@ public class WorkbookUploaderFrame extends JFrame {
         panel.add(increaseFontSizeButton, c);
 
         c.weightx = 1;
+        c.anchor = GridBagConstraints.EAST;
+        c.fill = GridBagConstraints.NONE;
         panel.add(new WCADatabaseExportPanel(fEnv), c);
+
+        c.anchor = GridBagConstraints.WEST;
+        JLabel refreshIcon = new JLabel(REFRESH_ICON);
+        refreshIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        fUpdateWCAExportAction = new UpdateWCAExportAction(fEnv, refreshIcon);
+        refreshIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent aMouseEvent) {
+                if (aMouseEvent.getButton() == MouseEvent.BUTTON1 && aMouseEvent.getClickCount() == 1) {
+                    fUpdateWCAExportAction.actionPerformed(new ActionEvent(this, 0, UpdateWCAExportAction.UPDATE));
+                }
+            }
+        });
+        panel.add(refreshIcon, c);
+
+        Timer updateTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent aActionEvent) {
+                fUpdateWCAExportAction.actionPerformed(new ActionEvent(this, 0, UpdateWCAExportAction.UPDATE_SILENTLY));
+            }
+        });
+        updateTimer.setRepeats(false);
+        updateTimer.start();
 
         c.weightx = 0;
         c.anchor = GridBagConstraints.EAST;
@@ -253,7 +290,7 @@ public class WorkbookUploaderFrame extends JFrame {
 
         @Override
         public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-            if("matchedWorkbook".equals(aPropertyChangeEvent.getPropertyName())) {
+            if ("matchedWorkbook".equals(aPropertyChangeEvent.getPropertyName())) {
                 updateEnabledState();
             }
         }
