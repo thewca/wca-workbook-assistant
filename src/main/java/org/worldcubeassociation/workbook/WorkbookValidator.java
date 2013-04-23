@@ -427,7 +427,7 @@ public class WorkbookValidator {
                 boolean onlyDNS = true;
                 for (int i = 0, resultsLength = results.length; i < resultsLength && onlyDNS; i++) {
                     Long result = results[i];
-                    if (result != null && result != -2) {
+                    if (result != null && result != 0 && result != -2) {
                         onlyDNS = false;
                     }
                 }
