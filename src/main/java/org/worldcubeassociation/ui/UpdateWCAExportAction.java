@@ -88,9 +88,10 @@ public class UpdateWCAExportAction extends AbstractAction {
                 }
                 reader.close();
 
-                boolean updateAvailable = fEnv.getDatabase().getFileName().compareTo(exportRelativeUrl) < 0;
+                boolean updateAvailable = fEnv.getDatabase() == null ||
+                        fEnv.getDatabase().getFileName().compareTo(exportRelativeUrl) < 0;
 
-                if (fEnv.getDatabase() == null || updateAvailable) {
+                if ( updateAvailable ) {
                     int option = JOptionPane.showConfirmDialog(fEnv.getTopLevelComponent(),
                             "A more recent WCA database export has been found: " + exportRelativeUrl + "\n" +
                                     "Would you like to download it?",
