@@ -50,6 +50,9 @@ public class WorkbookValidator {
     }
 
     private static void validateRegistrationsSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
+        List<NewPerson> newPersons = new ArrayList<NewPerson>();
+        Set<NewPerson> duplicateNewPersons = new HashSet<>();
+
         // Validate name, country.
         Sheet sheet = aMatchedSheet.getSheet();
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
@@ -85,6 +88,18 @@ public class WorkbookValidator {
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
+            // If we have a name and country but don't have a WCA ID, consider it as a new person and check
+            // that it is distinguishable from other new persons.
+            if (name != null && country != null && wcaIdEmpty) {
+                NewPerson newPerson = new NewPerson(rowIdx, name, country);
+                int existingNewPersonIdx = newPersons.indexOf(newPerson);
+                if (existingNewPersonIdx >= 0) {
+                    duplicateNewPersons.add(newPerson);
+                    duplicateNewPersons.add(newPersons.get(existingNewPersonIdx));
+                }
+                newPersons.add(newPerson);
+            }
+
             // If we have a valid WCA id check that it is in the database and check that the name and country matches
             // what what is in the database.
             if (wcaIdValid && aDatabase != null) {
@@ -104,6 +119,13 @@ public class WorkbookValidator {
                     }
                 }
             }
+        }
+
+        // Report new persons that can't be distinguished from each other.
+        for (NewPerson duplicateNewPerson : duplicateNewPersons) {
+            ValidationError validationError = new ValidationError(Severity.HIGH,
+                    "Duplicate name and country", aMatchedSheet, duplicateNewPerson.getRow(), -1);
+            aMatchedSheet.getValidationErrors().add(validationError);
         }
 
         aMatchedSheet.setValidated(true);
@@ -736,6 +758,51 @@ public class WorkbookValidator {
                     }
                 }
             }
+        }
+
+    }
+
+    private static class NewPerson {
+
+        private int fRow;
+        private String fName;
+        private String fCountry;
+
+        private NewPerson(int aRow, String aName, String aCountry) {
+            fRow = aRow;
+            fName = aName;
+            fCountry = aCountry;
+        }
+
+        private int getRow() {
+            return fRow;
+        }
+
+        private void setRow(int aRow) {
+            fRow = aRow;
+        }
+
+        private String getName() {
+            return fName;
+        }
+
+        private void setName(String aName) {
+            fName = aName;
+        }
+
+        private String getCountry() {
+            return fCountry;
+        }
+
+        private void setCountry(String aCountry) {
+            fCountry = aCountry;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof NewPerson &&
+                    ((NewPerson) obj).fName.equals(fName) &&
+                    ((NewPerson) obj).fCountry.equals(fCountry);
         }
 
     }
