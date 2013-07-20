@@ -23,24 +23,45 @@ public class WorkbookValidator {
     private static final Long TEN_MINUTES_IN_CENTISECONDS = 10L * 60L * 100L;
 
     public static void validate(MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
+        // Find registration sheet.
+        MatchedSheet registrationSheet = null;
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
-            validateSheet(matchedSheet, aMatchedWorkbook, aDatabase);
+            matchedSheet.getValidationErrors().clear();
+            if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
+                if (registrationSheet == null) {
+                    registrationSheet = matchedSheet;
+                }
+                else {
+                    matchedSheet.getValidationErrors().add(new ValidationError(Severity.HIGH,
+                            "Workbook can have only one registration sheet, ignoring this sheet",
+                            matchedSheet, -1, ValidationError.SHEET_TYPE_CELL_IDX));
+                }
+            }
+        }
+
+        // Validate registration sheet.
+        if (registrationSheet != null) {
+            List<NewPerson> newPersons = validateRegistrationsSheet(registrationSheet, aDatabase);
+            aMatchedWorkbook.getNewPersons().addAll(newPersons);
+        }
+
+        // Validate results sheets.
+        for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
+            if (matchedSheet.getSheetType() == SheetType.RESULTS) {
+                validateResultsSheet(matchedSheet, aMatchedWorkbook, aDatabase);
+            }
         }
     }
 
     public static void validateSheetsForEvent(MatchedWorkbook aMatchedWorkbook, Event aEvent, Database aDatabase) {
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.RESULTS && aEvent.equals(matchedSheet.getEvent())) {
-                validateSheet(matchedSheet, aMatchedWorkbook, aDatabase);
+                validateResultsSheet(matchedSheet, aMatchedWorkbook, aDatabase);
             }
         }
     }
 
     public static void validateSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
-        // Clear validation errors.
-        aMatchedSheet.getValidationErrors().clear();
-        aMatchedSheet.setValidated(false);
-
         if (aMatchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
             validateRegistrationsSheet(aMatchedSheet, aDatabase);
         }
@@ -49,7 +70,11 @@ public class WorkbookValidator {
         }
     }
 
-    private static void validateRegistrationsSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
+    public static List<NewPerson> validateRegistrationsSheet(MatchedSheet aMatchedSheet, Database aDatabase) {
+        // Clear validation errors.
+        aMatchedSheet.getValidationErrors().clear();
+        aMatchedSheet.setValidated(false);
+
         List<NewPerson> newPersons = new ArrayList<NewPerson>();
         Set<NewPerson> duplicateNewPersons = new HashSet<>();
 
@@ -129,9 +154,17 @@ public class WorkbookValidator {
         }
 
         aMatchedSheet.setValidated(true);
+
+        return newPersons;
     }
 
-    private static void validateResultsSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
+    public static void validateResultsSheet(MatchedSheet aMatchedSheet,
+                                             MatchedWorkbook aMatchedWorkbook,
+                                             Database aDatabase) {
+        // Clear validation errors.
+        aMatchedSheet.getValidationErrors().clear();
+        aMatchedSheet.setValidated(false);
+
         // Validate round, event, format and result format.
         boolean validResultFormat = true;
         if (aMatchedSheet.getEvent() == null) {
@@ -221,6 +254,17 @@ public class WorkbookValidator {
             if (!wcaIdEmpty && !wcaIdValid) {
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Misformatted WCA id", aMatchedSheet, rowIdx, 3);
                 aMatchedSheet.getValidationErrors().add(validationError);
+            }
+
+            // If we have a name and country but don't have a WCA ID, consider it as a new person and check
+            // that it matches with a row in the registration sheet.
+            if (name != null && country != null && wcaIdEmpty) {
+                NewPerson newPerson = new NewPerson(rowIdx, name, country);
+                if (!aMatchedWorkbook.getNewPersons().contains(newPerson)) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH,
+                            "Name and country does not match any new person in registration sheet", aMatchedSheet, rowIdx, -1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
             }
 
             // If we have a valid WCA id check that it is in the database and check that the name and country matches
@@ -758,51 +802,6 @@ public class WorkbookValidator {
                     }
                 }
             }
-        }
-
-    }
-
-    private static class NewPerson {
-
-        private int fRow;
-        private String fName;
-        private String fCountry;
-
-        private NewPerson(int aRow, String aName, String aCountry) {
-            fRow = aRow;
-            fName = aName;
-            fCountry = aCountry;
-        }
-
-        private int getRow() {
-            return fRow;
-        }
-
-        private void setRow(int aRow) {
-            fRow = aRow;
-        }
-
-        private String getName() {
-            return fName;
-        }
-
-        private void setName(String aName) {
-            fName = aName;
-        }
-
-        private String getCountry() {
-            return fCountry;
-        }
-
-        private void setCountry(String aCountry) {
-            fCountry = aCountry;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof NewPerson &&
-                    ((NewPerson) obj).fName.equals(fName) &&
-                    ((NewPerson) obj).fCountry.equals(fCountry);
         }
 
     }

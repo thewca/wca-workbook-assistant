@@ -30,10 +30,6 @@ public class ValidateWorkbookTest extends AbstractWorkbookTest {
     }
 
     @Override
-    protected void startFile(String file) {
-    }
-
-    @Override
     protected void handleFile(File aWorkbookFile) {
         try {
             Workbook workbook = createWorkbook(aWorkbookFile);
@@ -48,11 +44,11 @@ public class ValidateWorkbookTest extends AbstractWorkbookTest {
             }
 
             if (!errors) {
+                System.out.println("No errors");
+                System.out.println();
                 return;
             }
 
-            System.out.println(matchedWorkbook.getWorkbookFileName());
-            System.out.println();
 
             for (MatchedSheet matchedSheet : matchedWorkbook.sheets()) {
                 if (matchedSheet.getValidationErrors().isEmpty()) {
@@ -69,6 +65,7 @@ public class ValidateWorkbookTest extends AbstractWorkbookTest {
         }
         catch (Exception e) {
             e.printStackTrace(System.out);
+            System.out.println();
         }
     }
 

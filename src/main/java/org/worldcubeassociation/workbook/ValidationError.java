@@ -11,6 +11,7 @@ public class ValidationError {
     public static final int ROUND_CELL_IDX = 1;
     public static final int FORMAT_CELL_IDX = 2;
     public static final int RESULT_FORMAT_CELL_IDX = 3;
+    public static final int SHEET_TYPE_CELL_IDX = 4;
 
     private Severity fSeverity;
     private String fMessage;
