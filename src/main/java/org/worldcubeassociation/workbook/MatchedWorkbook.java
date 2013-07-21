@@ -13,7 +13,7 @@ public class MatchedWorkbook {
     private Workbook fWorkbook;
     private String fWorkbookFileName;
     private List<MatchedSheet> fMatchedSheets = new ArrayList<MatchedSheet>();
-    private List<NewPerson> fNewPersons = new ArrayList<NewPerson>();
+    private List<Person> fNewPersons = new ArrayList<Person>();
     private String fCompetitionId;
 
     public MatchedWorkbook(Workbook aWorkbook, String aWorkbookFileName) {
@@ -45,7 +45,7 @@ public class MatchedWorkbook {
         fMatchedSheets.add(aMatchedSheet);
     }
 
-    public List<NewPerson> getNewPersons() {
+    public List<Person> getPersons() {
         return fNewPersons;
     }
 

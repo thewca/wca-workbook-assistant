@@ -3,16 +3,18 @@ package org.worldcubeassociation.workbook;
 /**
  * @author Lars Vandenbergh
  */
-class NewPerson {
+class Person {
 
     private int fRow;
     private String fName;
     private String fCountry;
+    private String fWcaId;
 
-    public NewPerson(int aRow, String aName, String aCountry) {
+    public Person(int aRow, String aName, String aCountry, String wcaId) {
         fRow = aRow;
         fName = aName;
         fCountry = aCountry;
+        fWcaId = wcaId;
     }
 
     public int getRow() {
@@ -27,11 +29,16 @@ class NewPerson {
         return fCountry;
     }
 
+    String getWcaId() {
+        return fWcaId;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof NewPerson &&
-                ((NewPerson) obj).fName.equals(fName) &&
-                ((NewPerson) obj).fCountry.equals(fCountry);
+        return obj instanceof Person &&
+                ((Person) obj).fName.equals(fName) &&
+                ((Person) obj).fCountry.equals(fCountry)&&
+                ((Person) obj).fWcaId.equals(fWcaId);
     }
 
 }
