@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.worldcubeassociation.db.Database;
+import org.worldcubeassociation.db.Person;
 import org.worldcubeassociation.workbook.parse.CellFormatter;
 import org.worldcubeassociation.workbook.parse.CellParser;
 import org.worldcubeassociation.workbook.parse.ParsedGender;
@@ -41,8 +42,7 @@ public class WorkbookValidator {
         // Validate registration sheet.
         aMatchedWorkbook.getPersons().clear();
         if (registrationSheet != null) {
-            List<Person> persons = validateRegistrationsSheet(registrationSheet, aMatchedWorkbook, aDatabase);
-            aMatchedWorkbook.getPersons().addAll(persons);
+            validateRegistrationsSheet(registrationSheet, aMatchedWorkbook, aDatabase);
         }
 
         // Validate results sheets.
@@ -70,7 +70,7 @@ public class WorkbookValidator {
         }
     }
 
-    public static List<Person> validateRegistrationsSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
+    public static void validateRegistrationsSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
         // Clear validation errors.
         aMatchedSheet.getValidationErrors().clear();
         aMatchedSheet.setValidated(false);
@@ -78,8 +78,8 @@ public class WorkbookValidator {
         // Clear persons
         aMatchedWorkbook.getPersons().clear();
 
-        List<Person> persons = new ArrayList<Person>();
-        Set<Person> duplicatePersons = new HashSet<>();
+        List<RegisteredPerson> persons = new ArrayList<RegisteredPerson>();
+        Set<RegisteredPerson> duplicatePersons = new HashSet<>();
 
         // Validate name, country.
         Sheet sheet = aMatchedSheet.getSheet();
@@ -116,10 +116,10 @@ public class WorkbookValidator {
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
-            // If we have a valid name, country and WCA id, consider it as a valid person and check
-            // that it is distinguishable from other valid persons.
-            if (name != null && country != null && wcaIdEmpty) {
-                Person person = new Person(rowIdx, name, country, wcaId);
+            // If we have a name and a country, check that the name, country and WCA ID it is distinguishable from other
+            // persons.
+            if (name != null && country != null) {
+                RegisteredPerson person = new RegisteredPerson(rowIdx, name, country, wcaId);
                 int existingPersonIdx = persons.indexOf(person);
                 if (existingPersonIdx >= 0) {
                     duplicatePersons.add(person);
@@ -131,7 +131,7 @@ public class WorkbookValidator {
             // If we have a valid WCA id check that it is in the database and check that the name and country matches
             // what what is in the database.
             if (wcaIdValid && aDatabase != null) {
-                org.worldcubeassociation.db.Person person = aDatabase.getPersons().findById(wcaId);
+                Person person = aDatabase.getPersons().findById(wcaId);
                 if (person == null) {
                     ValidationError validationError = new ValidationError(Severity.HIGH, "Unknown WCA id", aMatchedSheet, rowIdx, 3);
                     aMatchedSheet.getValidationErrors().add(validationError);
@@ -150,7 +150,7 @@ public class WorkbookValidator {
         }
 
         // Report new persons that can't be distinguished from each other.
-        for (Person duplicatePerson : duplicatePersons) {
+        for (RegisteredPerson duplicatePerson : duplicatePersons) {
             ValidationError validationError = new ValidationError(Severity.HIGH,
                     "Duplicate name and country", aMatchedSheet, duplicatePerson.getRow(), -1);
             aMatchedSheet.getValidationErrors().add(validationError);
@@ -158,7 +158,7 @@ public class WorkbookValidator {
 
         aMatchedSheet.setValidated(true);
 
-        return persons;
+        aMatchedWorkbook.getPersons().addAll(persons);
     }
 
     public static void validateResultsSheet(MatchedSheet aMatchedSheet,
@@ -256,7 +256,7 @@ public class WorkbookValidator {
             // If we have a name and a country, check that the name, country and WCA id matches with a row in the
             // registration sheet.
             if (name != null && country != null) {
-                Person person = new Person(rowIdx, name, country, wcaId);
+                RegisteredPerson person = new RegisteredPerson(rowIdx, name, country, wcaId);
                 if (!aMatchedWorkbook.getPersons().contains(person)) {
                     ValidationError validationError = new ValidationError(Severity.HIGH,
                             "Name, country and WCA id does not match any row in registration sheet", aMatchedSheet, rowIdx, -1);
