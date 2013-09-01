@@ -267,7 +267,7 @@ public class WorkbookValidator {
                 persons.add(person);
 
                 if (!aMatchedWorkbook.getPersons().contains(person)) {
-                    ValidationError validationError = new ValidationError(Severity.HIGH,
+                    ValidationError validationError = new ValidationError(Severity.LOW,
                             "Name, country and WCA id do not match any row in registration sheet", aMatchedSheet, rowIdx, -1);
                     aMatchedSheet.getValidationErrors().add(validationError);
                 }
