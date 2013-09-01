@@ -9,7 +9,7 @@
     </target>
     <target name="compile">
         <mkdir dir="target/classes"/>
-        <javac srcdir="src/main/java" destdir="target/classes" target="1.6">
+        <javac srcdir="src/main/java" destdir="target/classes" target="1.7">
             <classpath>
                 <fileset dir="lib" includes="*.jar"/>
             </classpath>
@@ -26,7 +26,7 @@
         <proguard note="false" warn="false" obfuscate="false" optimize="false" shrink="false">
             <libraryjar>
                 <fileset dir="${java.home}/lib" includes="*.jar"/>
-                <fileset dir="${java.home}/../Classes" includes="*.jar"/>
+                <!--<fileset dir="${java.home}/../Classes" includes="*.jar"/>-->
             </libraryjar>
             <injar filter="!META-INF/**">
                 <fileset dir="lib" includes="*.jar"/>
