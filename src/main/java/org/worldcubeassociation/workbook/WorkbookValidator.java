@@ -78,7 +78,7 @@ public class WorkbookValidator {
         // Clear persons
         aMatchedWorkbook.getPersons().clear();
 
-        List<RegisteredPerson> persons = new ArrayList<RegisteredPerson>();
+        List<RegisteredPerson> persons = new ArrayList<>();
         Set<RegisteredPerson> duplicatePersons = new HashSet<>();
 
         // Validate name, country.
@@ -116,7 +116,7 @@ public class WorkbookValidator {
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
-            // If we have a name and a country, check that the name, country and WCA ID it is distinguishable from other
+            // If we have a name and a country, check that the name, country and WCA ID is distinguishable from other
             // persons.
             if (name != null && country != null) {
                 RegisteredPerson person = new RegisteredPerson(rowIdx, name, country, wcaId);
@@ -149,10 +149,10 @@ public class WorkbookValidator {
             }
         }
 
-        // Report new persons that can't be distinguished from each other.
+        // Report persons that can't be distinguished from each other.
         for (RegisteredPerson duplicatePerson : duplicatePersons) {
             ValidationError validationError = new ValidationError(Severity.HIGH,
-                    "Duplicate name and country", aMatchedSheet, duplicatePerson.getRow(), -1);
+                    "Duplicate name, country and WCA id", aMatchedSheet, duplicatePerson.getRow(), -1);
             aMatchedSheet.getValidationErrors().add(validationError);
         }
 
@@ -230,6 +230,8 @@ public class WorkbookValidator {
         // Validate position, name, country and WCA ID.
         Sheet sheet = aMatchedSheet.getSheet();
         FormulaEvaluator formulaEvaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+        List<RegisteredPerson> persons = new ArrayList<>();
+        Set<RegisteredPerson> duplicatePersons = new HashSet<>();
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = sheet.getRow(rowIdx);
 
@@ -253,16 +255,30 @@ public class WorkbookValidator {
 
             String wcaId = CellParser.parseOptionalText(row.getCell(3));
 
-            // If we have a name and a country, check that the name, country and WCA id matches with a row in the
-            // registration sheet.
+            // If we have a name and a country, check that the name, country and WCA id are unique within this round and
+            // that they match with a row in the registration sheet.
             if (name != null && country != null) {
                 RegisteredPerson person = new RegisteredPerson(rowIdx, name, country, wcaId);
+                int existingPersonIdx = persons.indexOf(person);
+                if (existingPersonIdx >= 0) {
+                    duplicatePersons.add(person);
+                    duplicatePersons.add(persons.get(existingPersonIdx));
+                }
+                persons.add(person);
+
                 if (!aMatchedWorkbook.getPersons().contains(person)) {
                     ValidationError validationError = new ValidationError(Severity.HIGH,
-                            "Name, country and WCA id does not match any row in registration sheet", aMatchedSheet, rowIdx, -1);
+                            "Name, country and WCA id do not match any row in registration sheet", aMatchedSheet, rowIdx, -1);
                     aMatchedSheet.getValidationErrors().add(validationError);
                 }
             }
+        }
+
+        // Report persons that can't be distinguished from each other.
+        for (RegisteredPerson duplicatePerson : duplicatePersons) {
+            ValidationError validationError = new ValidationError(Severity.HIGH,
+                    "Duplicate name, country and WCA id", aMatchedSheet, duplicatePerson.getRow(), -1);
+            aMatchedSheet.getValidationErrors().add(validationError);
         }
 
         // Validate results.
