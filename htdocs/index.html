@@ -1,65 +1,65 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN">
-<html>
-	<head>
-		<title>WCA Workbook Uploader</title>
-	</head>
-	<body>
-		<h1>WCA Workbook Uploader</h1>
-		<h2>Downloads</h2>
-		<a href="https://www.worldcubeassociation.org/files/wca-workbook-uploader-1.2.jar">Latest release v1.2 (1st September 2013)</a>
-		<h2>Release Notes</h2>
-        <h3>v1.2 (1st September 2013)</h3>
-        <ul>
-             <li><strong>Improvement #46</strong><br>The validation now also checks that persons in the registrations sheet are distinguishable from each other.</li>
-             <li><strong>Improvement #47</strong><br>The validation now also checks that each result can be linked to a person in the registration sheet.</li>
-             <li><strong>Improvement #49</strong><br>The validation now also checks that persons inside one round are distinguishable from each other.</li>
-        </ul>
-        <h3>v1.1.1 (23rd April 2013)</h3>
-        <ul>
-             <li><strong>Bug fix #42</strong><br>Updating the WCA database export didn't work if no database export was downloaded previously. This has now been fixed.</li>
-             <li><strong>Bug fix #43</strong><br>Rows with only DNS results where not always reported as a validation error in combined rounds. This has now been fixed.</li>
-        </ul>
-        <h3>v1.1 (16th April 2013)</h3>
-        <ul>
-            <li><strong>Improvement #37</strong><br>The validation now also checks for wrongly sorted results.</li>
-            <li><strong>Improvement #38</strong><br>The validation now also checks for wrongly calculated positions.</li>
-            <li><strong>Improvement #12</strong><br>The validation now also checks for wrongly calculated multiple blindfolded scores.</li>
-            <li><strong>Improvement #9</strong><br>The validation now also checks for rows with only DNS results.</li>
-            <li><strong>Improvement #39</strong><br>Mistakes in names and countries no longer prevent the user from generating database scripts. This is useful when the name or country in the database is wrong.</li>
-            <li><strong>Improvement #41</strong><br>The WCA database export can be downloaded directly from the application and the application automatically checks for updates to the database export on startup.</li>
-            <li><strong>Bug fix #24</strong><br>Sheets in seconds were sometimes recognized as numbers if the first result happened to be a whole number. This has now been fixed.</li>
-        </ul>
-        <h3>v1.0 (13th January 2013)</h3>
-        <ul>
-            <li><strong>Bug fix #15</strong><br>The validation now checks that all results in a sheet have the expected result format.</li>
-            <li><strong>Improvement #7</strong><br>Results can now be exported to JSON for automated uploading.</li>
-            <li><strong>Improvement #8</strong><br>The validation now also checks WCA ID's and names based on WCA database exports.</li>
-            <li><strong>Improvement #26</strong><br>The validation now also checks for invisible 3rd digits after the decimal point.</li>
-            <li><strong>Improvement #30</strong><br>The validation now also checks for duplicate event/round combinations.</li>
-            <li><strong>Improvement #32</strong><br>Validation errors now refer to the cell address instead of just the row number.</li>
-            <li><strong>Improvement #33</strong><br>Validation errors are now displayed in a table instead of a flat list.</li>
-            <li><strong>Improvement #36</strong><br>Validation errors panel now has an option to show all errors in all sheets.</li>
-            <li><strong>Improvement #34 and #35</strong><br>Better window icons.</li>
-        </ul>
-		<h3>v0.3 (2nd December 2012)</h3>
-		<ul>
-			<li><strong>Bug fix #13</strong><br>The validation kept validating results when the result format was invalid, leading to misleading validation errors. This is now fixed.</li>
-			<li><strong>Bug fix #17</strong><br>The Sheets contents pane sometimes didn't show the best and average results. This is now fixed.</li>
-			<li><strong>Bug fix #22</strong><br>The recognition of the result format for multiple blindfolded was sometimes incorrect if the round had only DNF results. This is now fixed.</li>
-			<li><strong>Bug fix #25</strong><br>Workbooks that contained cell formats with Locale information didn't always open properly. This is now fixed.</li>
-			<li><strong>Improvement #6</strong><br>The Persons query now only updates persons who competed in the uploaded competition.</li>
-			<li><strong>Improvement #27</strong><br>The Persons query now also returns the persons who still have a missing date of birth or gender.</li>
-        </ul>
-		<h3>v0.2 (29th October 2012)</h3>
-		<ul>
-			<li><strong>Bug fix #2</strong><br>The workbook file used to be locked by the application under Windows, which prevented making changes using Excel and refreshing from the application. This is now fixed.</li>
-			<li><strong>Bug fix #5</strong><br>The validation didn't check that non-empty results are formatted correctly for combined rounds. This is now fixed.</li>
-			<li><strong>Improvement #3</strong><br>The validation now also checks for wrongly calculated best and average results.</li>
-			<li><strong>Improvement #4</strong><br>The validation now also checks for rounding of times >10 minutes.</li>
-        </ul>
-		<h3>v0.1 (21st August 2012)</h3>
-		<ul>
-			<li>Initial release</li>
-		</ul>
-	</body>
-</html>
+<h2>Downloads</h2>
+<br/>
+<a href="https://www.worldcubeassociation.org/files/wca-workbook-uploader-1.2.1.jar">Latest release v1.2.1 (7th September 2013)</a>
+<br/>
+<!--break-->
+<br/>
+<h2>Release Notes</h2>
+<br/>
+<h3>v1.2.1 (7th September 2013)</h3>
+<ul>
+    <li><strong>Bug #51</strong><br>Detecting whether the WCA database export has to be updated failed if the export counter passed 999. This has now been fixed.</li>
+</ul>
+<h3>v1.2 (1st September 2013)</h3>
+<ul>
+    <li><strong>Improvement #46</strong><br>The validation now also checks that persons in the registrations sheet are distinguishable from each other.</li>
+    <li><strong>Improvement #47</strong><br>The validation now also checks that each result can be linked to a person in the registration sheet.</li>
+    <li><strong>Improvement #49</strong><br>The validation now also checks that persons inside one round are distinguishable from each other.</li>
+</ul>
+<h3>v1.1.1 (23rd April 2013)</h3>
+<ul>
+    <li><strong>Bug fix #42</strong><br>Updating the WCA database export didn't work if no database export was downloaded previously. This has now been fixed.</li>
+    <li><strong>Bug fix #43</strong><br>Rows with only DNS results where not always reported as a validation error in combined rounds. This has now been fixed.</li>
+</ul>
+<h3>v1.1 (16th April 2013)</h3>
+<ul>
+    <li><strong>Improvement #37</strong><br>The validation now also checks for wrongly sorted results.</li>
+    <li><strong>Improvement #38</strong><br>The validation now also checks for wrongly calculated positions.</li>
+    <li><strong>Improvement #12</strong><br>The validation now also checks for wrongly calculated multiple blindfolded scores.</li>
+    <li><strong>Improvement #9</strong><br>The validation now also checks for rows with only DNS results.</li>
+    <li><strong>Improvement #39</strong><br>Mistakes in names and countries no longer prevent the user from generating database scripts. This is useful when the name or country in the database is wrong.</li>
+    <li><strong>Improvement #41</strong><br>The WCA database export can be downloaded directly from the application and the application automatically checks for updates to the database export on startup.</li>
+    <li><strong>Bug fix #24</strong><br>Sheets in seconds were sometimes recognized as numbers if the first result happened to be a whole number. This has now been fixed.</li>
+</ul>
+<h3>v1.0 (13th January 2013)</h3>
+<ul>
+    <li><strong>Bug fix #15</strong><br>The validation now checks that all results in a sheet have the expected result format.</li>
+    <li><strong>Improvement #7</strong><br>Results can now be exported to JSON for automated uploading.</li>
+    <li><strong>Improvement #8</strong><br>The validation now also checks WCA ID's and names based on WCA database exports.</li>
+    <li><strong>Improvement #26</strong><br>The validation now also checks for invisible 3rd digits after the decimal point.</li>
+    <li><strong>Improvement #30</strong><br>The validation now also checks for duplicate event/round combinations.</li>
+    <li><strong>Improvement #32</strong><br>Validation errors now refer to the cell address instead of just the row number.</li>
+    <li><strong>Improvement #33</strong><br>Validation errors are now displayed in a table instead of a flat list.</li>
+    <li><strong>Improvement #36</strong><br>Validation errors panel now has an option to show all errors in all sheets.</li>
+    <li><strong>Improvement #34 and #35</strong><br>Better window icons.</li>
+</ul>
+<h3>v0.3 (2nd December 2012)</h3>
+<ul>
+    <li><strong>Bug fix #13</strong><br>The validation kept validating results when the result format was invalid, leading to misleading validation errors. This is now fixed.</li>
+    <li><strong>Bug fix #17</strong><br>The Sheets contents pane sometimes didn't show the best and average results. This is now fixed.</li>
+    <li><strong>Bug fix #22</strong><br>The recognition of the result format for multiple blindfolded was sometimes incorrect if the round had only DNF results. This is now fixed.</li>
+    <li><strong>Bug fix #25</strong><br>Workbooks that contained cell formats with Locale information didn't always open properly. This is now fixed.</li>
+    <li><strong>Improvement #6</strong><br>The Persons query now only updates persons who competed in the uploaded competition.</li>
+    <li><strong>Improvement #27</strong><br>The Persons query now also returns the persons who still have a missing date of birth or gender.</li>
+</ul>
+<h3>v0.2 (29th October 2012)</h3>
+<ul>
+    <li><strong>Bug fix #2</strong><br>The workbook file used to be locked by the application under Windows, which prevented making changes using Excel and refreshing from the application. This is now fixed.</li>
+    <li><strong>Bug fix #5</strong><br>The validation didn't check that non-empty results are formatted correctly for combined rounds. This is now fixed.</li>
+    <li><strong>Improvement #3</strong><br>The validation now also checks for wrongly calculated best and average results.</li>
+    <li><strong>Improvement #4</strong><br>The validation now also checks for rounding of times >10 minutes.</li>
+</ul>
+<h3>v0.1 (21st August 2012)</h3>
+<ul>
+    <li>Initial release</li>
+</ul>
