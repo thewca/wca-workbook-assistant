@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -17,7 +18,7 @@ public class WCADatabaseExportDecoder {
     public static Database decodeMostRecentExport(Database aCurrentDatabase) throws IOException {
         String[] exportFiles = new File(".").list(new WCADatabaseFilenameFilter());
         if (exportFiles.length > 0) {
-            Arrays.sort(exportFiles);
+            Arrays.sort(exportFiles, new SortByExportDate());
             String mostRecentExportFile = exportFiles[exportFiles.length - 1];
             if (aCurrentDatabase != null && mostRecentExportFile.equals(aCurrentDatabase.getFileName())) {
                 return aCurrentDatabase;
@@ -62,11 +63,24 @@ public class WCADatabaseExportDecoder {
         return persons;
     }
 
+    public static String getExportDate(String aExportFileName) {
+        return aExportFileName.substring(14, 22);
+    }
+
     public static class WCADatabaseFilenameFilter implements FilenameFilter {
 
         @Override
         public boolean accept(File dir, String name) {
             return name.startsWith("WCA_export") && name.endsWith(".tsv.zip");
+        }
+
+    }
+
+    public static class SortByExportDate implements Comparator<String> {
+
+        @Override
+        public int compare(String string1, String string2) {
+            return getExportDate(string1).compareTo(getExportDate(string2));
         }
 
     }

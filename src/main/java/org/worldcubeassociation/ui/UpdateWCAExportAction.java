@@ -88,8 +88,8 @@ public class UpdateWCAExportAction extends AbstractAction {
                 }
                 reader.close();
 
-                String localExportDate = getExportDate(fEnv.getDatabase().getFileName());
-                String onlineExportDate = getExportDate(exportRelativeUrl);
+                String localExportDate = WCADatabaseExportDecoder.getExportDate(fEnv.getDatabase().getFileName());
+                String onlineExportDate = WCADatabaseExportDecoder.getExportDate(exportRelativeUrl);
                 boolean updateAvailable = fEnv.getDatabase() == null ||
                         localExportDate.compareTo(onlineExportDate) < 0;
 
@@ -154,10 +154,6 @@ public class UpdateWCAExportAction extends AbstractAction {
 
     private static String asKiloBytes(int aBytes) {
         return FILE_SIZE_FORMAT.format(aBytes / 1024) + 'K';
-    }
-
-    private static String getExportDate(String aExportFileName) {
-        return aExportFileName.substring(14, 22);
     }
 
     private void showDialog() {
