@@ -7,12 +7,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="1.6" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="1.7" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="junit-4.10" level="project" />
-    <orderEntry type="library" name="poi-3.8-20120326" level="project" />
     <orderEntry type="library" name="dom4j-1.6.1" level="project" />
     <orderEntry type="library" name="org.apache.sling.commons.json-2.0.6" level="project" />
+    <orderEntry type="library" name="poi-3.8-20120326" level="project" />
   </component>
 </module>
 

@@ -78,8 +78,8 @@ public class WorkbookValidator {
         // Clear persons
         aMatchedWorkbook.getPersons().clear();
 
-        List<RegisteredPerson> persons = new ArrayList<>();
-        Set<RegisteredPerson> duplicatePersons = new HashSet<>();
+        List<RegisteredPerson> persons = new ArrayList<RegisteredPerson>();
+        Set<RegisteredPerson> duplicatePersons = new HashSet<RegisteredPerson>();
 
         // Validate name, country.
         Sheet sheet = aMatchedSheet.getSheet();
@@ -230,8 +230,8 @@ public class WorkbookValidator {
         // Validate position, name, country and WCA ID.
         Sheet sheet = aMatchedSheet.getSheet();
         FormulaEvaluator formulaEvaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
-        List<RegisteredPerson> persons = new ArrayList<>();
-        Set<RegisteredPerson> duplicatePersons = new HashSet<>();
+        List<RegisteredPerson> persons = new ArrayList<RegisteredPerson>();
+        Set<RegisteredPerson> duplicatePersons = new HashSet<RegisteredPerson>();
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = sheet.getRow(rowIdx);
 
