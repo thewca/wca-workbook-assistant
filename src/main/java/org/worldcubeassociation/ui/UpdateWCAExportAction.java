@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.db.WCADatabaseExportDecoder;
 import org.worldcubeassociation.workbook.WorkbookValidator;
@@ -25,11 +25,11 @@ public class UpdateWCAExportAction extends AbstractAction {
     private static final DecimalFormat FILE_SIZE_FORMAT = new DecimalFormat("0");
 
     private Executor fExecutor = Executors.newSingleThreadExecutor();
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
     private JLabel fLabel;
     private ProgressDialog fProgressDialog;
 
-    public UpdateWCAExportAction(WorkbookUploaderEnv aEnv, JLabel aLabel) {
+    public UpdateWCAExportAction(WorkbookAssistantEnv aEnv, JLabel aLabel) {
         super("Check for updates...");
         fEnv = aEnv;
         fLabel = aLabel;

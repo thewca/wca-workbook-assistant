@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.ui.table.*;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
@@ -21,9 +21,9 @@ import java.beans.PropertyChangeListener;
  */
 public class SheetsListPanel extends JTable implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
-    public SheetsListPanel(WorkbookUploaderEnv aEnv) {
+    public SheetsListPanel(WorkbookAssistantEnv aEnv) {
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
 
@@ -106,22 +106,22 @@ public class SheetsListPanel extends JTable implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
-        else if (WorkbookUploaderEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
+        else if (WorkbookAssistantEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
             int selectedRow = getSelectedRow();
             ((AbstractTableModel) getModel()).fireTableDataChanged();
             getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
         }
-        else if (WorkbookUploaderEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
+        else if (WorkbookAssistantEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
             MatchedSheet changedSheet = (MatchedSheet) aPropertyChangeEvent.getNewValue();
             int sheetIndex = fEnv.getMatchedWorkbook().getWorkbook().getSheetIndex(changedSheet.getSheet());
             int selectedRow = getSelectedRow();
             ((AbstractTableModel) getModel()).fireTableRowsUpdated(sheetIndex, sheetIndex);
             getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
         }
-        else if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) &&
+        else if (WorkbookAssistantEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) &&
                 aPropertyChangeEvent.getNewValue() != null) {
             MatchedSheet selectedSheet = (MatchedSheet) aPropertyChangeEvent.getNewValue();
             int sheetIndex = fEnv.getMatchedWorkbook().getWorkbook().getSheetIndex(selectedSheet.getSheet());
@@ -129,7 +129,7 @@ public class SheetsListPanel extends JTable implements PropertyChangeListener {
                 getSelectionModel().setSelectionInterval(sheetIndex, sheetIndex);
             }
         }
-        else if (WorkbookUploaderEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
+        else if (WorkbookAssistantEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
             updateFont();
         }
     }

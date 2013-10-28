@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.ui.table.PackTableUtil;
 import org.worldcubeassociation.ui.table.SheetContentsCellRenderer;
 import org.worldcubeassociation.ui.table.SheetContentsTableModel;
@@ -17,9 +17,9 @@ import java.beans.PropertyChangeListener;
  */
 public class SheetContentsPanel extends JTable implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
-    public SheetContentsPanel(WorkbookUploaderEnv aEnv) {
+    public SheetContentsPanel(WorkbookAssistantEnv aEnv) {
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
 
@@ -60,15 +60,15 @@ public class SheetContentsPanel extends JTable implements PropertyChangeListener
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
-        else if (WorkbookUploaderEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
+        else if (WorkbookAssistantEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
             if (aPropertyChangeEvent.getNewValue() == fEnv.getSelectedSheet()) {
                 updateTable();
             }
         }
-        else if (WorkbookUploaderEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
+        else if (WorkbookAssistantEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
             updateFont();
         }
     }

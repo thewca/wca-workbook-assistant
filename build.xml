@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="wca-workbook-uploader" default="package">
+<project name="wca-workbook-assistant" default="package">
     <property file="build.properties"/>
     <taskdef resource="proguard/ant/task.properties"
              classpath="build/lib/proguard.jar"/>
@@ -16,9 +16,9 @@
         </javac>
     </target>
     <target name="jar" depends="compile">
-        <jar basedir="target/classes" jarfile="target/wca-workbook-uploader-lib-${version}.jar">
+        <jar basedir="target/classes" jarfile="target/wca-workbook-assistant-lib-${version}.jar">
             <manifest>
-                <attribute name="Main-Class" value="org.worldcubeassociation.WorkbookUploader"/>
+                <attribute name="Main-Class" value="org.worldcubeassociation.WorkbookAssistant"/>
             </manifest>
         </jar>
     </target>
@@ -31,9 +31,9 @@
             <injar filter="!META-INF/**">
                 <fileset dir="lib" includes="*.jar"/>
             </injar>
-            <injar file="target/wca-workbook-uploader-lib-${version}.jar"/>
+            <injar file="target/wca-workbook-assistant-lib-${version}.jar"/>
             <injar file="src/main/resources"/>
-            <outjar file="target/wca-workbook-uploader-${version}.jar"/>
+            <outjar file="target/wca-workbook-assistant-${version}.jar"/>
         </proguard>
     </target>
     <target name="package" depends="obfuscatejar"/>

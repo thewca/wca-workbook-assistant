@@ -11,7 +11,7 @@ import java.beans.PropertyChangeSupport;
 /**
  * @author Lars Vandenbergh
  */
-public class WorkbookUploaderEnv {
+public class WorkbookAssistantEnv {
 
     public static final String MATCHED_WORKBOOK_PROPERTY = "matchedWorkbook";
     public static final String MATCHED_SELECTED_SHEET = "matchedSelectedSheet";

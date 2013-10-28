@@ -82,6 +82,7 @@ public class ScriptsGenerator {
                 }
                 else if (dobCell.getCellType() == Cell.CELL_TYPE_STRING) {
                     try {
+                        System.out.println("Date string: "+dobCell.getStringCellValue());
                         date = new SimpleDateFormat("yyyy-MM-dd").parse(dobCell.getStringCellValue());
                     }
                     catch (ParseException e) {

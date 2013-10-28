@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.JSONGenerator;
 import org.worldcubeassociation.workbook.SheetType;
 
@@ -19,7 +19,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
     private JDialog fDialog;
     private JTextArea fTextArea;
 
-    public GenerateJSONAction(WorkbookUploaderEnv aEnv) {
+    public GenerateJSONAction(WorkbookAssistantEnv aEnv) {
         super("Generate JSON...", aEnv);
 
         initUI();

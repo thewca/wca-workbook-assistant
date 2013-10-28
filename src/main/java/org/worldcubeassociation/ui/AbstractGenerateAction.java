@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.ui.table.PackTableUtil;
 import org.worldcubeassociation.ui.table.ValidationErrorsWorkbookTableColumnModel;
 import org.worldcubeassociation.ui.table.ValidationErrorsWorkbookTableModel;
@@ -23,17 +23,17 @@ import java.util.List;
  */
 public abstract class AbstractGenerateAction extends AbstractAction implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
     private boolean fApproved;
 
-    protected AbstractGenerateAction(String aName, WorkbookUploaderEnv aEnv) {
+    protected AbstractGenerateAction(String aName, WorkbookAssistantEnv aEnv) {
         super(aName);
 
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
     }
 
-    protected WorkbookUploaderEnv getEnv() {
+    protected WorkbookAssistantEnv getEnv() {
         return fEnv;
     }
 
@@ -151,7 +151,7 @@ public abstract class AbstractGenerateAction extends AbstractAction implements P
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateEnabledState();
         }
     }

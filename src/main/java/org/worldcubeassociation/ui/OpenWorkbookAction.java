@@ -2,7 +2,7 @@ package org.worldcubeassociation.ui;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
 import org.worldcubeassociation.workbook.WorkbookMatcher;
 import org.worldcubeassociation.workbook.WorkbookValidator;
@@ -21,11 +21,11 @@ import java.util.concurrent.Executors;
 public class OpenWorkbookAction extends AbstractAction {
 
     private Executor fExecutor = Executors.newSingleThreadExecutor();
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
     private JFileChooser fFileChooser;
     private ProgressDialog fProgressDialog;
 
-    public OpenWorkbookAction(WorkbookUploaderEnv aEnv) {
+    public OpenWorkbookAction(WorkbookAssistantEnv aEnv) {
         super("Open...");
         fEnv = aEnv;
 

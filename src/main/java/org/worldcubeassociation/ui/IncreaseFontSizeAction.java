@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -12,9 +12,9 @@ import java.beans.PropertyChangeListener;
  */
 public class IncreaseFontSizeAction extends AbstractAction implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
-    public IncreaseFontSizeAction(WorkbookUploaderEnv aEnv) {
+    public IncreaseFontSizeAction(WorkbookAssistantEnv aEnv) {
         super(null, new FontSizeIcon(14f));
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
@@ -32,7 +32,7 @@ public class IncreaseFontSizeAction extends AbstractAction implements PropertyCh
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
             updateEnabledState();
         }
     }

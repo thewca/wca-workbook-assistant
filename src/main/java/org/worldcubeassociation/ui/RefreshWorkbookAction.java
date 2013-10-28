@@ -3,7 +3,7 @@ package org.worldcubeassociation.ui;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 
@@ -20,9 +20,9 @@ import java.io.IOException;
  */
 public class RefreshWorkbookAction extends AbstractAction implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
-    public RefreshWorkbookAction(WorkbookUploaderEnv aEnv) {
+    public RefreshWorkbookAction(WorkbookAssistantEnv aEnv) {
         super("Refresh");
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
@@ -70,7 +70,7 @@ public class RefreshWorkbookAction extends AbstractAction implements PropertyCha
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateEnabledState();
         }
     }

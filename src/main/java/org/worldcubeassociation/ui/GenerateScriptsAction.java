@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.ScriptsGenerator;
 import org.worldcubeassociation.workbook.SheetType;
 
@@ -21,7 +21,7 @@ public class GenerateScriptsAction extends AbstractGenerateAction implements Pro
     private JDialog fDialog;
     private JTextArea fTextArea;
 
-    public GenerateScriptsAction(WorkbookUploaderEnv aEnv, String aName, SheetType aType) {
+    public GenerateScriptsAction(WorkbookAssistantEnv aEnv, String aName, SheetType aType) {
         super(aName, aEnv);
         fType = aType;
 

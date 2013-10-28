@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
 import org.worldcubeassociation.workbook.SheetType;
 
@@ -26,11 +26,11 @@ import java.net.URL;
 /**
  * @author Lars Vandenbergh
  */
-public class WorkbookUploaderFrame extends JFrame {
+public class WorkbookAssistantFrame extends JFrame {
 
     private static final Icon REFRESH_ICON;
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
     private OpenWorkbookAction fOpenWorkbookAction;
     private ValidationErrorsPanel fValidationErrorsPanel;
@@ -38,13 +38,13 @@ public class WorkbookUploaderFrame extends JFrame {
     private UpdateWCAExportAction fUpdateWCAExportAction;
 
     static {
-        URL refreshURL = WorkbookUploaderFrame.class.getClassLoader().
+        URL refreshURL = WorkbookAssistantFrame.class.getClassLoader().
                 getResource("org/worldcubeassociation/ui/refresh_icon.png");
         REFRESH_ICON = new ImageIcon(refreshURL);
     }
 
-    public WorkbookUploaderFrame(WorkbookUploaderEnv aEnv) {
-        super("WCA Workbook Uploader");
+    public WorkbookAssistantFrame(WorkbookAssistantEnv aEnv) {
+        super();
         fEnv = aEnv;
         fEnv.setTopLevelComponent(this);
         fEnv.addPropertyChangeListener(new EnvPropertyListener());
@@ -256,21 +256,17 @@ public class WorkbookUploaderFrame extends JFrame {
                     if (new WorkbookFileFilter().accept(firstFile)) {
                         fOpenWorkbookAction.open(firstFile);
                         aDropTargetDropEvent.getDropTargetContext().dropComplete(true);
-                    }
-                    else {
+                    } else {
                         aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
                     }
-                }
-                catch (UnsupportedFlavorException e) {
+                } catch (UnsupportedFlavorException e) {
+                    e.printStackTrace();
+                    aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
+                } catch (IOException e) {
                     e.printStackTrace();
                     aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
                 }
-                catch (IOException e) {
-                    e.printStackTrace();
-                    aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
-                }
-            }
-            else {
+            } else {
                 aDropTargetDropEvent.rejectDrop();
             }
         }

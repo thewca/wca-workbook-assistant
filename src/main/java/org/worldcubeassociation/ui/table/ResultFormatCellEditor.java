@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui.table;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.ResultFormat;
 import org.worldcubeassociation.workbook.WorkbookValidator;
@@ -17,9 +17,9 @@ import java.util.List;
 public class ResultFormatCellEditor extends DefaultCellEditor {
 
     private MatchedSheet fMatchedSheet;
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
-    public ResultFormatCellEditor(WorkbookUploaderEnv aEnv) {
+    public ResultFormatCellEditor(WorkbookAssistantEnv aEnv) {
         super(createComboBox());
         fEnv = aEnv;
         setClickCountToStart(2);

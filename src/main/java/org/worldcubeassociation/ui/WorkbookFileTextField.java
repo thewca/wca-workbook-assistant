@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
 
 import javax.swing.*;
@@ -12,9 +12,9 @@ import java.beans.PropertyChangeListener;
  */
 public class WorkbookFileTextField extends JTextField implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
-    public WorkbookFileTextField(WorkbookUploaderEnv aEnv) {
+    public WorkbookFileTextField(WorkbookAssistantEnv aEnv) {
         super();
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
@@ -32,7 +32,7 @@ public class WorkbookFileTextField extends JTextField implements PropertyChangeL
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateContent();
         }
     }

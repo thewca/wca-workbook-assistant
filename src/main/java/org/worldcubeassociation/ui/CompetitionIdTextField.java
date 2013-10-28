@@ -1,9 +1,8 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -16,9 +15,9 @@ import java.beans.PropertyChangeListener;
  */
 public class CompetitionIdTextField extends JTextField implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
-    public CompetitionIdTextField(WorkbookUploaderEnv aEnv) {
+    public CompetitionIdTextField(WorkbookAssistantEnv aEnv) {
         super();
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
@@ -42,7 +41,7 @@ public class CompetitionIdTextField extends JTextField implements PropertyChange
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateContent();
         }
     }

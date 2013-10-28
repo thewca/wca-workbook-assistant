@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.ui.table.*;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.ValidationError;
@@ -36,11 +36,11 @@ public class ValidationErrorsPanel extends JTable implements PropertyChangeListe
 
     }
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
     private JTable fSlave;
     private View fView;
 
-    public ValidationErrorsPanel(WorkbookUploaderEnv aEnv, JTable aSlave) {
+    public ValidationErrorsPanel(WorkbookAssistantEnv aEnv, JTable aSlave) {
         fEnv = aEnv;
         fSlave = aSlave;
         fEnv.addPropertyChangeListener(this);
@@ -90,21 +90,21 @@ public class ValidationErrorsPanel extends JTable implements PropertyChangeListe
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
-        else if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) &&
+        else if (WorkbookAssistantEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) &&
                 fView == View.SHEET) {
             updateTable();
         }
-        else if (WorkbookUploaderEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
+        else if (WorkbookAssistantEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
-        else if (WorkbookUploaderEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName()) &&
+        else if (WorkbookAssistantEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName()) &&
                 (fView == View.WORKBOOK || fEnv.getSelectedSheet() == aPropertyChangeEvent.getNewValue())) {
             updateTable();
         }
-        else if (WorkbookUploaderEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
+        else if (WorkbookAssistantEnv.FONT_SIZE.equals(aPropertyChangeEvent.getPropertyName())) {
             updateFont();
         }
     }

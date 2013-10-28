@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.SheetType;
 import org.worldcubeassociation.workbook.WorkbookValidator;
@@ -20,12 +20,12 @@ import java.beans.PropertyChangeListener;
  */
 public class SetDataRangeAction extends AbstractAction implements PropertyChangeListener {
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
     private JDialog fDialog;
     private JSpinner fFirstRowSpinner;
     private JSpinner fLastRowSpinner;
 
-    public SetDataRangeAction(WorkbookUploaderEnv aEnv) {
+    public SetDataRangeAction(WorkbookAssistantEnv aEnv) {
         super("Set data range...");
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
@@ -102,10 +102,10 @@ public class SetDataRangeAction extends AbstractAction implements PropertyChange
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookUploaderEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName())) {
             updateEnabledState();
         }
-        else if (WorkbookUploaderEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName()) &&
+        else if (WorkbookAssistantEnv.SHEET_CHANGED.equals(aPropertyChangeEvent.getPropertyName()) &&
                 aPropertyChangeEvent.getNewValue() == fEnv.getSelectedSheet()) {
             updateEnabledState();
         }

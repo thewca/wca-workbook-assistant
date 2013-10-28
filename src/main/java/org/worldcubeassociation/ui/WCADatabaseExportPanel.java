@@ -1,6 +1,6 @@
 package org.worldcubeassociation.ui;
 
-import org.worldcubeassociation.WorkbookUploaderEnv;
+import org.worldcubeassociation.WorkbookAssistantEnv;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +16,7 @@ public class WCADatabaseExportPanel extends JLabel implements PropertyChangeList
     private static final Icon OK_ICON;
     private static final Icon ERROR_ICON;
 
-    private WorkbookUploaderEnv fEnv;
+    private WorkbookAssistantEnv fEnv;
 
     static {
         URL okURL = WCADatabaseExportPanel.class.getClassLoader().
@@ -27,7 +27,7 @@ public class WCADatabaseExportPanel extends JLabel implements PropertyChangeList
         ERROR_ICON = new ImageIcon(errorURL);
     }
 
-    public WCADatabaseExportPanel(WorkbookUploaderEnv aEnv) {
+    public WCADatabaseExportPanel(WorkbookAssistantEnv aEnv) {
         fEnv = aEnv;
         fEnv.addPropertyChangeListener(this);
 
@@ -51,7 +51,7 @@ public class WCADatabaseExportPanel extends JLabel implements PropertyChangeList
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (WorkbookUploaderEnv.DATABASE.equals(evt.getPropertyName())) {
+        if (WorkbookAssistantEnv.DATABASE.equals(evt.getPropertyName())) {
             updateLabel();
         }
     }
