@@ -21,6 +21,7 @@ public class WorkbookValidator {
 
     private static final String[] ORDER = {"1st", "2nd", "3rd", "4th", "5th"};
     private static final Long TEN_MINUTES_IN_CENTISECONDS = 10L * 60L * 100L;
+    public static final int TEN_MINUTES = 600;
 
     public static void validate(MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
         // Find registration sheet.
@@ -431,7 +432,7 @@ public class WorkbookValidator {
                         secondsValid = false;
                     }
 
-                    // If # tried cubes, solve cubes and seconds are valid, calculate and check score.
+                    // If # tried cubes, solve cubes and seconds are valid, calculate and check score and also check time limit.
                     if (cubesTriedValid && cubesSolvedValid && secondsValid && result != null) {
                         if (cubesTried == null || cubesTried == 0) {
                             if (result != 0) {
@@ -461,6 +462,12 @@ public class WorkbookValidator {
                                 long expectedScore = cubeScore * 10000000 + 100 * seconds + cubesUnsolved;
                                 if (result != expectedScore) {
                                     validationErrors.add(new ValidationError(Severity.HIGH, "Score does not match calculated score: " + expectedScore, aMatchedSheet, sheetRow, resultCellCol));
+                                    allResultsInRowValid = false;
+                                    allRowsValid = false;
+                                }
+
+                                if (seconds > cubesTried * TEN_MINUTES) {
+                                    validationErrors.add(new ValidationError(Severity.HIGH, "Time should not exceed 10 minutes times # tried cubes", aMatchedSheet, sheetRow, secondsCol));
                                     allResultsInRowValid = false;
                                     allRowsValid = false;
                                 }
