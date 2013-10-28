@@ -1,12 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="WorkbookUploader" type="Application" factoryName="Application">
+  <configuration default="false" name="WorkbookAssistant" type="Application" factoryName="Application">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
       <pattern>
         <option name="PATTERN" value="org.worldcubeassociation.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="MAIN_CLASS_NAME" value="org.worldcubeassociation.WorkbookUploader" />
+    <option name="MAIN_CLASS_NAME" value="org.worldcubeassociation.WorkbookAssistant" />
     <option name="VM_PARAMETERS" value="" />
     <option name="PROGRAM_PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
@@ -17,12 +17,18 @@
     <option name="PASS_PARENT_ENVS" value="true" />
     <module name="wcaresults" />
     <envs />
+    <RunnerSettings RunnerId="Debug">
+      <option name="DEBUG_PORT" value="" />
+      <option name="TRANSPORT" value="0" />
+      <option name="LOCAL" value="true" />
+    </RunnerSettings>
     <RunnerSettings RunnerId="JProfiler">
       <option name="WINDOW" value="false" />
       <option name="JVMPI" value="false" />
       <option name="INTERPRETED" value="false" />
     </RunnerSettings>
     <RunnerSettings RunnerId="Run" />
+    <ConfigurationWrapper RunnerId="Debug" />
     <ConfigurationWrapper RunnerId="Run" />
     <method />
   </configuration>
