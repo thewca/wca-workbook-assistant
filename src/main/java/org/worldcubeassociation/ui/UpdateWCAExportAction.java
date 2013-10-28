@@ -88,10 +88,16 @@ public class UpdateWCAExportAction extends AbstractAction {
                 }
                 reader.close();
 
-                String localExportDate = WCADatabaseExportDecoder.getExportDate(fEnv.getDatabase().getFileName());
-                String onlineExportDate = WCADatabaseExportDecoder.getExportDate(exportRelativeUrl);
-                boolean updateAvailable = fEnv.getDatabase() == null ||
-                        localExportDate.compareTo(onlineExportDate) < 0;
+                boolean updateAvailable;
+                if ( fEnv.getDatabase() == null ) {
+                    updateAvailable = true;
+                }
+                else {
+                    String localExportDate = WCADatabaseExportDecoder.getExportDate(fEnv.getDatabase().getFileName());
+                    String onlineExportDate = WCADatabaseExportDecoder.getExportDate(exportRelativeUrl);
+
+                    updateAvailable = localExportDate.compareTo(onlineExportDate) < 0;
+                }
 
                 if ( updateAvailable ) {
                     int option = JOptionPane.showConfirmDialog(fEnv.getTopLevelComponent(),
