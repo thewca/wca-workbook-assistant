@@ -1,7 +1,6 @@
 package org.worldcubeassociation.workbook;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.worldcubeassociation.workbook.parse.CellParser;
@@ -10,7 +9,6 @@ import org.worldcubeassociation.workbook.parse.ParsedRecord;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -75,24 +73,9 @@ public class ScriptsGenerator {
             Cell dobCell = row.getCell(aMatchedSheet.getDobHeaderColumn());
             Cell genderCell = row.getCell(aMatchedSheet.getGenderHeaderColumn());
 
-            Date date = null;
-            if (dobCell != null) {
-                if (dobCell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(dobCell)) {
-                    date = DateUtil.getJavaDate(dobCell.getNumericCellValue());
-                }
-                else if (dobCell.getCellType() == Cell.CELL_TYPE_STRING) {
-                    try {
-                        System.out.println("Date string: "+dobCell.getStringCellValue());
-                        date = new SimpleDateFormat("yyyy-MM-dd").parse(dobCell.getStringCellValue());
-                    }
-                    catch (ParseException e) {
-                        // It was worth a try.
-                    }
-                }
-            }
-
             String name = CellParser.parseMandatoryText(nameCell);
             String country = CellParser.parseMandatoryText(countryCell);
+            Date date = CellParser.parseDateCell(dobCell);
             if (date != null) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);

@@ -4,6 +4,7 @@ import org.apache.poi.ss.format.CellFormat;
 import org.apache.poi.ss.format.CellFormatResult;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.worldcubeassociation.ui.WorkbookTableDataExtractor;
 import org.worldcubeassociation.workbook.ResultFormat;
@@ -12,6 +13,9 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author Lars Vandenbergh
@@ -20,6 +24,14 @@ public class CellParser {
 
     private static DecimalFormat THIRD_DIGIT_SECONDS_FORMAT = new DecimalFormat("#0.000");
     private static SimpleDateFormat THIRD_DIGIT_MINUTES_FORMAT = new SimpleDateFormat("m:ss.SSS");
+    private static Map<Pattern, SimpleDateFormat> DATE_OF_BIRTH_FORMAT = new HashMap<Pattern, SimpleDateFormat>();
+
+    static {
+        DATE_OF_BIRTH_FORMAT.put(Pattern.compile("[0-9]{1,2}-[0-9]{1,2}-[0-9]{4,4}"), new SimpleDateFormat("dd-MM-yyyy"));
+        DATE_OF_BIRTH_FORMAT.put(Pattern.compile("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4,4}"), new SimpleDateFormat("dd/MM/yyyy"));
+        DATE_OF_BIRTH_FORMAT.put(Pattern.compile("[0-9]{4,4}-[0-9]{1,2}-[0-9]{1,2}"), new SimpleDateFormat("yyyy-MM-dd"));
+        DATE_OF_BIRTH_FORMAT.put(Pattern.compile("[0-9]{4,4}/[0-9]{1,2}/[0-9]{1,2}"), new SimpleDateFormat("yyyy/MM/dd"));
+    }
 
     public static String parseOptionalText(Cell cell) {
         return parseText(cell, false);
@@ -275,6 +287,31 @@ public class CellParser {
         cellFormatString = cellFormatString.replaceAll("\\*.", "");
 
         return cellFormatString;
+    }
+
+    public static Date parseDateCell(Cell aDateCell) {
+        if (aDateCell == null) {
+            return null;
+        }
+        else if (aDateCell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(aDateCell)) {
+            return DateUtil.getJavaDate(aDateCell.getNumericCellValue());
+        }
+        else if (aDateCell.getCellType() == Cell.CELL_TYPE_STRING ||
+                (aDateCell.getCellType() == Cell.CELL_TYPE_FORMULA && aDateCell.getCachedFormulaResultType() == Cell.CELL_TYPE_STRING)) {
+            String aStringCellValue = aDateCell.getStringCellValue().trim();
+            for (Map.Entry<Pattern, SimpleDateFormat> dateFormatEntry : DATE_OF_BIRTH_FORMAT.entrySet()) {
+                Pattern pattern = dateFormatEntry.getKey();
+                if (pattern.matcher(aStringCellValue).matches()) {
+                    try {
+                        return dateFormatEntry.getValue().parse(aStringCellValue);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

@@ -108,6 +108,15 @@ public class WorkbookValidator {
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
+            int dobColIdx = aMatchedSheet.getDobHeaderColumn();
+            Cell dobCell = row.getCell(dobColIdx);
+            Date dob = CellParser.parseDateCell(dobCell);
+            String dobText = CellParser.parseText(dobCell, false);
+            if (dobText != null && !dobText.equals("") && dob == null) {
+                ValidationError validationError = new ValidationError(Severity.HIGH, "Misformatted date of birth", aMatchedSheet, rowIdx, dobColIdx);
+                aMatchedSheet.getValidationErrors().add(validationError);
+            }
+
             int wcaColIdx = aMatchedSheet.getWcaIdHeaderColumn();
             String wcaId = CellParser.parseOptionalText(row.getCell(wcaColIdx));
             boolean wcaIdEmpty = "".equals(wcaId);
