@@ -332,10 +332,10 @@ public class WorkbookValidator {
                 try {
                     Long result;
                     if (round.isCombined() && resultIdx > 1) {
-                        result = CellParser.parseOptionalSingleTime(resultCell, resultFormat, aFormulaEvaluator);
+                        result = CellParser.parseOptionalSingleTime(resultCell, resultFormat, event, aFormulaEvaluator);
                     }
                     else {
-                        result = CellParser.parseMandatorySingleTime(resultCell, resultFormat, aFormulaEvaluator);
+                        result = CellParser.parseMandatorySingleTime(resultCell, resultFormat, event, aFormulaEvaluator);
                     }
                     results[resultIdx - 1] = result;
 
@@ -344,7 +344,7 @@ public class WorkbookValidator {
                     }
                     else {
                         if ((resultFormat == ResultFormat.SECONDS || resultFormat == ResultFormat.MINUTES) &&
-                                !roundToNearestSecond(result).equals(result)) {
+                                !roundAverage(result).equals(result)) {
                             validationErrors.add(new ValidationError(Severity.HIGH, ORDER[resultIdx - 1] + " result is over 10 minutes and should be rounded to the nearest second",
                                     aMatchedSheet, sheetRow, resultCellCol));
                             allResultsInRowValid = false;
@@ -377,7 +377,7 @@ public class WorkbookValidator {
                     boolean cubesTriedValid = true;
                     Long cubesTried = null;
                     try {
-                        cubesTried = CellParser.parseOptionalSingleTime(cubesTriedCell, ResultFormat.NUMBER, aFormulaEvaluator);
+                        cubesTried = CellParser.parseOptionalSingleTime(cubesTriedCell, ResultFormat.NUMBER, event, aFormulaEvaluator);
 
                         if (cubesTried == null || cubesTried == 0) {
                             if (resultIdx == 1 || !round.isCombined()) {
@@ -398,7 +398,7 @@ public class WorkbookValidator {
                     Long cubesSolved = null;
                     boolean cubesSolvedValid = true;
                     try {
-                        cubesSolved = CellParser.parseOptionalSingleTime(cubesSolvedCell, ResultFormat.NUMBER, aFormulaEvaluator);
+                        cubesSolved = CellParser.parseOptionalSingleTime(cubesSolvedCell, ResultFormat.NUMBER, event, aFormulaEvaluator);
 
                         if (cubesSolved == null) {
                             if (cubesTriedValid) {
@@ -419,7 +419,7 @@ public class WorkbookValidator {
                     Long seconds = null;
                     boolean secondsValid = true;
                     try {
-                        seconds = CellParser.parseOptionalSingleTime(secondsCell, ResultFormat.NUMBER, aFormulaEvaluator);
+                        seconds = CellParser.parseOptionalSingleTime(secondsCell, ResultFormat.NUMBER, event, aFormulaEvaluator);
 
                         if (seconds == null) {
                             if (cubesTriedValid && cubesSolvedValid && (cubesTried - cubesSolved <= cubesSolved)) {
@@ -525,7 +525,7 @@ public class WorkbookValidator {
                 Cell bestResultCell = row.getCell(bestCellCol);
 
                 try {
-                    Long bestResult = CellParser.parseMandatorySingleTime(bestResultCell, resultFormat, aFormulaEvaluator);
+                    Long bestResult = CellParser.parseMandatorySingleTime(bestResultCell, resultFormat, event, aFormulaEvaluator);
                     bestResults[rowIdx] = bestResult;
                     if (allResultsInRowValid) {
                         Long expectedBestResult = calculateBestResult(results);
@@ -564,16 +564,16 @@ public class WorkbookValidator {
                 try {
                     Long averageResult;
                     if (round.isCombined()) {
-                        averageResult = CellParser.parseOptionalAverageTime(averageResultCell, resultFormat, aFormulaEvaluator);
+                        averageResult = CellParser.parseOptionalAverageTime(averageResultCell, resultFormat, event, aFormulaEvaluator);
                     }
                     else {
-                        averageResult = CellParser.parseMandatoryAverageTime(averageResultCell, resultFormat, aFormulaEvaluator);
+                        averageResult = CellParser.parseMandatoryAverageTime(averageResultCell, resultFormat, event, aFormulaEvaluator);
                     }
                     averageResults[rowIdx] = averageResult;
 
                     if (allResultsInRowValid) {
                         if (allResultsInRowPresent) {
-                            Long expectedAverageResult = calculateAverageResult(results, format);
+                            Long expectedAverageResult = calculateAverageResult(results, format, event);
                             if (!expectedAverageResult.equals(averageResult)) {
                                 String formattedExpectedAverage = CellFormatter.formatTime(expectedAverageResult, resultFormat);
                                 validationErrors.add(new ValidationError(Severity.HIGH, "Average result does not match calculated average result: " + formattedExpectedAverage,
@@ -691,7 +691,7 @@ public class WorkbookValidator {
         }
     }
 
-    private static Long calculateAverageResult(Long[] aResults, Format aFormat) {
+    private static Long calculateAverageResult(Long[] aResults, Format aFormat, Event aEvent) {
         Long[] resultsCopy = Arrays.copyOf(aResults, aResults.length);
         Arrays.sort(resultsCopy, new ResultComparator());
         if (aFormat == Format.AVERAGE_OF_5) {
@@ -708,16 +708,24 @@ public class WorkbookValidator {
             }
         }
 
-        long average = Math.round(sum / resultsCopy.length);
-        return roundToNearestSecond(average);
+        double average = sum / resultsCopy.length;
+        long roundedAverage;
+        if (aEvent == Event._333fm) {
+            roundedAverage = Math.round(average * 100);
+        }
+        else {
+            roundedAverage = roundAverage(average);
+        }
+
+        return roundedAverage;
     }
 
-    private static Long roundToNearestSecond(Long aResult) {
+    private static Long roundAverage(double aResult) {
         if (aResult > TEN_MINUTES_IN_CENTISECONDS) {
             return Math.round(aResult / 100.0) * 100;
         }
         else {
-            return aResult;
+            return Math.round(aResult);
         }
     }
 

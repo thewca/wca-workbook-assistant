@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.worldcubeassociation.ui.WorkbookTableDataExtractor;
+import org.worldcubeassociation.workbook.Event;
 import org.worldcubeassociation.workbook.ResultFormat;
 
 import java.text.DecimalFormat;
@@ -93,24 +94,25 @@ public class CellParser {
         return null;
     }
 
-    public static Long parseOptionalSingleTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
-        return parseTime(aCell, aResultFormat, false, false, aFormulaEvaluator);
+    public static Long parseOptionalSingleTime(Cell aCell, ResultFormat aResultFormat, Event aEvent, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, aEvent, false, false, aFormulaEvaluator);
     }
 
-    public static Long parseMandatorySingleTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
-        return parseTime(aCell, aResultFormat, true, false, aFormulaEvaluator);
+    public static Long parseMandatorySingleTime(Cell aCell, ResultFormat aResultFormat, Event aEvent, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, aEvent, true, false, aFormulaEvaluator);
     }
 
-    public static Long parseOptionalAverageTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
-        return parseTime(aCell, aResultFormat, false, true, aFormulaEvaluator);
+    public static Long parseOptionalAverageTime(Cell aCell, ResultFormat aResultFormat, Event aEvent, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, aEvent, false, true, aFormulaEvaluator);
     }
 
-    public static Long parseMandatoryAverageTime(Cell aCell, ResultFormat aResultFormat, FormulaEvaluator aFormulaEvaluator) throws ParseException {
-        return parseTime(aCell, aResultFormat, true, true, aFormulaEvaluator);
+    public static Long parseMandatoryAverageTime(Cell aCell, ResultFormat aResultFormat, Event aEvent, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+        return parseTime(aCell, aResultFormat, aEvent, true, true, aFormulaEvaluator);
     }
 
     public static Long parseTime(Cell cell,
                                  ResultFormat aResultFormat,
+                                 Event aEvent,
                                  boolean aMandatory,
                                  boolean aAverage,
                                  FormulaEvaluator aFormulaEvaluator) throws ParseException {
@@ -131,13 +133,13 @@ public class CellParser {
                 return parseStringTime(stringCellValue, aMandatory);
             }
             else if (evaluatedCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                return parseNumericTime(cell, evaluatedCell.getNumberValue(), aResultFormat, aAverage, aFormulaEvaluator);
+                return parseNumericTime(cell, evaluatedCell.getNumberValue(), aResultFormat, aEvent, aAverage, aFormulaEvaluator);
             }
             else {
                 // Desperate attempt
                 try {
                     double cachedNumericValue = cell.getNumericCellValue();
-                    return parseNumericTime(cell, cachedNumericValue, aResultFormat, aAverage, aFormulaEvaluator);
+                    return parseNumericTime(cell, cachedNumericValue, aResultFormat, aEvent, aAverage, aFormulaEvaluator);
                 }
                 catch (IllegalStateException e) {
                     if (aMandatory) {
@@ -154,7 +156,7 @@ public class CellParser {
             return parseStringTime(stringCellValue, aMandatory);
         }
         else if (cellType == Cell.CELL_TYPE_NUMERIC) {
-            return parseNumericTime(cell, cell.getNumericCellValue(), aResultFormat, aAverage, aFormulaEvaluator);
+            return parseNumericTime(cell, cell.getNumericCellValue(), aResultFormat, aEvent, aAverage, aFormulaEvaluator);
         }
         else {
             if (aMandatory) {
@@ -166,7 +168,7 @@ public class CellParser {
         }
     }
 
-    private static Long parseNumericTime(Cell aCell, double aCellValue, ResultFormat aResultFormat, boolean aAverage, FormulaEvaluator aFormulaEvaluator) throws ParseException {
+    private static Long parseNumericTime(Cell aCell, double aCellValue, ResultFormat aResultFormat, Event aEvent, boolean aAverage, FormulaEvaluator aFormulaEvaluator) throws ParseException {
         String cellString;
         try {
             cellString = WorkbookTableDataExtractor.cellToString(aCell, aFormulaEvaluator);
@@ -190,16 +192,22 @@ public class CellParser {
             return roundCentiSeconds(centiSeconds, aAverage, aResultFormat);
         }
         else {
-            long roundedValue = Math.round(aCellValue);
-            if (roundedValue == aCellValue) {
-                return roundedValue;
+            if( aEvent == Event._333fm && aAverage ){
+                long centiMoves = Math.round(aCellValue * 100);
+                return centiMoves;
             }
-            else {
-                if (cellString.contains(".")) {
-                    throw new ParseException("not formatted as a whole number", 0);
+            else{
+                long roundedValue = Math.round(aCellValue);
+                if (roundedValue == aCellValue) {
+                    return roundedValue;
                 }
                 else {
-                    throw new ParseException("invisible digits after decimal point: " + aCellValue, 0);
+                    if (cellString.contains(".")) {
+                        throw new ParseException("not formatted as a whole number", 0);
+                    }
+                    else {
+                        throw new ParseException("invisible digits after decimal point: " + aCellValue, 0);
+                    }
                 }
             }
         }
