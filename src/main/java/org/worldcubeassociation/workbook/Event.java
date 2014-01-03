@@ -17,6 +17,7 @@ public enum Event {
     _pyram("Pyraminx", "pyram"),
     _sq1("Square-1", "sq1"),
     _clock("Rubik's Clock", "clock"),
+    _skewb("Skewb", "skewb"),
     _666("6x6 Cube", "666"),
     _777("7x7 Cube", "777"),
     _magic("Rubik's Magic", "magic"),

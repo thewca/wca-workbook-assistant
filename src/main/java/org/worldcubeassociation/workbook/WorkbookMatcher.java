@@ -578,6 +578,9 @@ public class WorkbookMatcher {
         if (aCellValue.contains("CLOCK") || aCellValue.contains("CLK")) {
             return Event._clock;
         }
+        if (aCellValue.contains("SKEWB") || aCellValue.contains("SKB")) {
+            return Event._skewb;
+        }
         if (aCellValue.contains("MASTER") || aCellValue.contains("MMAGIC") || aCellValue.contains("MMG")) {
             return Event._mmagic;
         }
