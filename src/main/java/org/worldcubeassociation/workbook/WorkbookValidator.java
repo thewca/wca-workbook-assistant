@@ -464,6 +464,13 @@ public class WorkbookValidator {
                                 allRowsValid = false;
                             }
                         }
+                        else if (cubesTried == 2 && cubesSolved == 1) {
+                            if (result != -1) {
+                                validationErrors.add(new ValidationError(Severity.HIGH, "Score should be -1 if # tried cubes is 2 and # solved cubes is 1", aMatchedSheet, sheetRow, resultCellCol));
+                                allResultsInRowValid = false;
+                                allRowsValid = false;
+                            }
+                        }
                         else {
                             long cubesUnsolved = cubesTried - cubesSolved;
                             if (cubesSolved >= cubesUnsolved) {
