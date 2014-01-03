@@ -68,7 +68,7 @@ public class RowTokenizer {
     }
 
     public static int getAverageCell(Format aFormat, Event aEvent) {
-        if (aFormat == Format.MEAN_OF_3) {
+        if (aFormat == Format.MEAN_OF_3 || aFormat == Format.BEST_OF_3) {
             return 9;
         }
         else if (aFormat == Format.AVERAGE_OF_5) {
@@ -80,7 +80,7 @@ public class RowTokenizer {
     }
 
     public static int getAverageRecordCell(Format aFormat, Event aEvent) {
-        if (aFormat == Format.MEAN_OF_3) {
+        if (aFormat == Format.MEAN_OF_3 || aFormat == Format.BEST_OF_3) {
             return 10;
         }
         else if (aFormat == Format.AVERAGE_OF_5) {

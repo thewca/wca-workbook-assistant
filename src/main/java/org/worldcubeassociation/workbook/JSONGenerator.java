@@ -16,6 +16,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -164,7 +165,8 @@ public class JSONGenerator {
 
             Long averageResult;
             ParsedRecord averageRecord;
-            if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5) {
+            if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5 ||
+                    (format == Format.BEST_OF_3 && columnOrder == ColumnOrder.BLD_WITH_MEAN)) {
                 int averageCellCol = RowTokenizer.getAverageCell(format, event);
                 Cell averageResultCell = row.getCell(averageCellCol);
                 averageResult = round.isCombined() ?
@@ -174,6 +176,11 @@ public class JSONGenerator {
                 int averageRecordCellCol = RowTokenizer.getAverageRecordCell(format, event);
                 Cell averageRecordCell = row.getCell(averageRecordCellCol);
                 averageRecord = CellParser.parseRecord(averageRecordCell);
+            }
+            else if (format == Format.BEST_OF_3 && event == Event._333bf) {
+                Long[] threeResults = Arrays.copyOfRange(results, 0, 3);
+                averageResult = ResultsAggregator.calculateAverageResult(threeResults, format, event);
+                averageRecord = new ParsedRecord(null);
             }
             else {
                 averageResult = 0L;

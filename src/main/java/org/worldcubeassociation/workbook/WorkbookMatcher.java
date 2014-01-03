@@ -263,6 +263,13 @@ public class WorkbookMatcher {
                 resultFormat = matchResultFormat(cell, aFormulaEvaluator);
             }
 
+            // For 3x3x3 blindfolded best of 3 rounds, there can be a mean/average column for the WCA rankings but the
+            // event format is still best of 3.
+            if(event == Event._333bf && format == Format.MEAN_OF_3){
+                format = Format.BEST_OF_3;
+                columnOrder = ColumnOrder.BLD_WITH_MEAN;
+            }
+
             return new MatchedSheet(sheet, event, round, format, resultFormat, columnOrder, firstDataRow, lastDataRow);
         }
 

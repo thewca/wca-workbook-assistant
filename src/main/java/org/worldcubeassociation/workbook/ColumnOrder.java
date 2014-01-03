@@ -5,9 +5,10 @@ package org.worldcubeassociation.workbook;
  */
 public enum ColumnOrder {
 
-    WCA,
-    BEST_OF_1_WITH_BEST_COLUMN,
-    MULTI_BLD_WITH_SCORE_FIRST,
-    MULTI_BLD_WITH_SCORE_AND_BEST_FIRST;
+    WCA,                                    // Any event, any format
+    BEST_OF_1_WITH_BEST_COLUMN,             // Any event except multiple blindfolded, best of 1
+    MULTI_BLD_WITH_SCORE_FIRST,             // Multiple blindfolded, best of 1
+    MULTI_BLD_WITH_SCORE_AND_BEST_FIRST,    // Multiple blindfolded, best of 1
+    BLD_WITH_MEAN                           // 3x3x3 blindfolded, best of 3
 
 }

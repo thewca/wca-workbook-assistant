@@ -20,7 +20,6 @@ import java.util.*;
 public class WorkbookValidator {
 
     private static final String[] ORDER = {"1st", "2nd", "3rd", "4th", "5th"};
-    private static final Long TEN_MINUTES_IN_CENTISECONDS = 10L * 60L * 100L;
     public static final int TEN_MINUTES = 600;
 
     public static void validate(MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
@@ -344,7 +343,7 @@ public class WorkbookValidator {
                     }
                     else {
                         if ((resultFormat == ResultFormat.SECONDS || resultFormat == ResultFormat.MINUTES) &&
-                                !roundAverage(result).equals(result)) {
+                                !ResultsAggregator.roundAverage(result).equals(result)) {
                             validationErrors.add(new ValidationError(Severity.HIGH, ORDER[resultIdx - 1] + " result is over 10 minutes and should be rounded to the nearest second",
                                     aMatchedSheet, sheetRow, resultCellCol));
                             allResultsInRowValid = false;
@@ -528,7 +527,7 @@ public class WorkbookValidator {
                     Long bestResult = CellParser.parseMandatorySingleTime(bestResultCell, resultFormat, event, aFormulaEvaluator);
                     bestResults[rowIdx] = bestResult;
                     if (allResultsInRowValid) {
-                        Long expectedBestResult = calculateBestResult(results);
+                        Long expectedBestResult = ResultsAggregator.calculateBestResult(results);
                         if (!expectedBestResult.equals(bestResult)) {
                             String formattedExpectedBest = CellFormatter.formatTime(expectedBestResult, resultFormat);
                             validationErrors.add(new ValidationError(Severity.HIGH, "Best result does not match calculated best result: " + formattedExpectedBest,
@@ -557,7 +556,8 @@ public class WorkbookValidator {
             }
 
             // Validate average result.
-            if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5) {
+            if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5 ||
+                    (format == Format.BEST_OF_3 && columnOrder == ColumnOrder.BLD_WITH_MEAN) ) {
                 int averageCellCol = RowTokenizer.getAverageCell(format, event);
                 Cell averageResultCell = row.getCell(averageCellCol);
 
@@ -573,7 +573,7 @@ public class WorkbookValidator {
 
                     if (allResultsInRowValid) {
                         if (allResultsInRowPresent) {
-                            Long expectedAverageResult = calculateAverageResult(results, format, event);
+                            Long expectedAverageResult = ResultsAggregator.calculateAverageResult(results, format, event);
                             if (!expectedAverageResult.equals(averageResult)) {
                                 String formattedExpectedAverage = CellFormatter.formatTime(expectedAverageResult, resultFormat);
                                 validationErrors.add(new ValidationError(Severity.HIGH, "Average result does not match calculated average result: " + formattedExpectedAverage,
@@ -671,88 +671,6 @@ public class WorkbookValidator {
 
     private static boolean validateWCAId(String aWcaId) {
         return aWcaId.matches("[0-9]{4}[A-Z]{4}[0-9]{2}");
-    }
-
-    private static Long calculateBestResult(Long[] aResults) {
-        Long best = null;
-        for (Long result : aResults) {
-            if (result > 0) {
-                if (best == null || result < best) {
-                    best = result;
-                }
-            }
-        }
-
-        if (best == null) {
-            return -1L;
-        }
-        else {
-            return best;
-        }
-    }
-
-    private static Long calculateAverageResult(Long[] aResults, Format aFormat, Event aEvent) {
-        Long[] resultsCopy = Arrays.copyOf(aResults, aResults.length);
-        Arrays.sort(resultsCopy, new ResultComparator());
-        if (aFormat == Format.AVERAGE_OF_5) {
-            resultsCopy = Arrays.copyOfRange(resultsCopy, 1, 4);
-        }
-
-        double sum = 0;
-        for (Long result : resultsCopy) {
-            if (result > 0) {
-                sum += result;
-            }
-            else {
-                return -1L;
-            }
-        }
-
-        double average = sum / resultsCopy.length;
-        long roundedAverage;
-        if (aEvent == Event._333fm) {
-            roundedAverage = Math.round(average * 100);
-        }
-        else {
-            roundedAverage = roundAverage(average);
-        }
-
-        return roundedAverage;
-    }
-
-    private static Long roundAverage(double aResult) {
-        if (aResult > TEN_MINUTES_IN_CENTISECONDS) {
-            return Math.round(aResult / 100.0) * 100;
-        }
-        else {
-            return Math.round(aResult);
-        }
-    }
-
-    private static class ResultComparator implements Comparator<Long> {
-        @Override
-        public int compare(Long aFirst, Long aSecond) {
-            if (aFirst == -2 || aFirst == -1) {
-                if (aSecond == -2 || aSecond == -1) {
-                    // A DNS/DNF is equal to a DNS/DNF.
-                    return 0;
-                }
-                else {
-                    // A DNS/DNF is larger than a time.
-                    return 1;
-                }
-            }
-            else {
-                if (aSecond == -2 || aSecond == -1) {
-                    // A time is smaller than a DNS/DNF.
-                    return -1;
-                }
-                else {
-                    // A lower time is smaller than a larger time.
-                    return (int) (aFirst - aSecond);
-                }
-            }
-        }
     }
 
     private static class AverageResultRowComparator implements Comparator<ResultRow> {
