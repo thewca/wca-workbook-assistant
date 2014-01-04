@@ -178,7 +178,6 @@ public class WorkbookValidator {
         aMatchedSheet.setValidated(false);
 
         // Validate round, event, format and result format.
-        boolean validResultFormat = true;
         if (aMatchedSheet.getEvent() == null) {
             ValidationError validationError = new ValidationError(Severity.HIGH, "Missing event", aMatchedSheet, -1, ValidationError.EVENT_CELL_IDX);
             aMatchedSheet.getValidationErrors().add(validationError);
@@ -195,7 +194,17 @@ public class WorkbookValidator {
             ValidationError validationError = new ValidationError(Severity.HIGH, "Missing result format", aMatchedSheet, -1, ValidationError.RESULT_FORMAT_CELL_IDX);
             aMatchedSheet.getValidationErrors().add(validationError);
         }
-        else if (aMatchedSheet.getEvent() != null) {
+
+        boolean validRoundFormat = true;
+        if (aMatchedSheet.getEvent() != null && aMatchedSheet.getFormat() != null &&
+                !FormatValidator.isValidRoundFormat(aMatchedSheet.getFormat(), aMatchedSheet.getEvent())) {
+            ValidationError validationError = new ValidationError(Severity.HIGH, "Illegal format for event", aMatchedSheet, -1, ValidationError.FORMAT_CELL_IDX);
+            aMatchedSheet.getValidationErrors().add(validationError);
+            validRoundFormat = false;
+        }
+
+        boolean validResultFormat = true;
+        if (aMatchedSheet.getEvent() != null && aMatchedSheet.getResultFormat() != null) {
             if (aMatchedSheet.getEvent() == Event._333mbf || aMatchedSheet.getEvent() == Event._333fm) {
                 validResultFormat = aMatchedSheet.getResultFormat() == ResultFormat.NUMBER;
             }
@@ -207,7 +216,6 @@ public class WorkbookValidator {
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
         }
-
         // Check for duplicate event/round combination.
         if (aMatchedSheet.getEvent() != null && aMatchedSheet.getRound() != null) {
             List<MatchedSheet> sheets = aMatchedWorkbook.sheets();
@@ -295,6 +303,7 @@ public class WorkbookValidator {
                 aMatchedSheet.getRound() != null &&
                 aMatchedSheet.getFormat() != null &&
                 aMatchedSheet.getResultFormat() != null &&
+                validRoundFormat &&
                 validResultFormat) {
             validateResults(aMatchedSheet, formulaEvaluator);
         }
