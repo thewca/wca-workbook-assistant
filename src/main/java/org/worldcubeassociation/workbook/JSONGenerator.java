@@ -179,8 +179,20 @@ public class JSONGenerator {
             }
             else if (format == Format.BEST_OF_3 && event == Event._333bf) {
                 Long[] threeResults = Arrays.copyOfRange(results, 0, 3);
-                averageResult = ResultsAggregator.calculateAverageResult(threeResults, format, event);
-                averageRecord = new ParsedRecord(null);
+                boolean allResultsPresent = true;
+                for (Long result : threeResults) {
+                    if (result == 0) {
+                        allResultsPresent = false;
+                    }
+                }
+                if (allResultsPresent) {
+                    averageResult = ResultsAggregator.calculateAverageResult(threeResults, format, event);
+                    averageRecord = new ParsedRecord(null);
+                }
+                else {
+                    averageResult = 0L;
+                    averageRecord = new ParsedRecord(null);
+                }
             }
             else {
                 averageResult = 0L;
