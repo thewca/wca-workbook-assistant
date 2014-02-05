@@ -8,6 +8,7 @@ import org.worldcubeassociation.workbook.WorkbookMatcher;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -87,8 +88,8 @@ public class OpenWorkbookAction extends AbstractAction {
             hideDialog(workbook);
 
             if (exception != null) {
+            	exception.printStackTrace();
                 JOptionPane.showMessageDialog(fEnv.getTopLevelComponent(), exception.getMessage());
-                exception.printStackTrace();
             }
         }
 

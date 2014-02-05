@@ -176,6 +176,11 @@ public class WorkbookValidator {
         // Clear validation errors.
         aMatchedSheet.getValidationErrors().clear();
         aMatchedSheet.setValidated(false);
+        
+        //<<<
+        ValidationError missingScramblesError = new ValidationError(Severity.HIGH, "Missing scrambles", aMatchedSheet, -1, -1);
+        aMatchedSheet.getValidationErrors().add(missingScramblesError);
+        //<<<
 
         // Validate round, event, format and result format.
         if (aMatchedSheet.getEvent() == null) {

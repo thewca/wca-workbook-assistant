@@ -1,12 +1,13 @@
 package org.worldcubeassociation;
 
+import java.awt.Window;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
-
-import java.awt.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import org.worldcubeassociation.workbook.scrambles.Scrambles;
 
 /**
  * @author Lars Vandenbergh
@@ -17,8 +18,9 @@ public class WorkbookAssistantEnv {
     public static final String MATCHED_SELECTED_SHEET = "matchedSelectedSheet";
     public static final String SHEET_CHANGED = "sheetChanged";
     public static final String SHEETS_CHANGED = "sheetsChanged";
-    public static final String DATABASE= "database";
+    public static final String DATABASE = "database";
     public static final String FONT_SIZE = "fontSize";
+    public static final String SCRAMBLES = "database";
 
     private float fFontSize;
 
@@ -26,6 +28,8 @@ public class WorkbookAssistantEnv {
 
     private MatchedWorkbook fMatchedWorkbook;
     private MatchedSheet fSelectedSheet;
+    
+    private Scrambles scrambles;
 
     private Database fDatabase;
 
@@ -49,6 +53,16 @@ public class WorkbookAssistantEnv {
         Object oldValue = fSelectedSheet;
         fSelectedSheet = aSelectedSheet;
         fPropertyChangeSupport.firePropertyChange(MATCHED_SELECTED_SHEET, oldValue, fSelectedSheet);
+    }
+    
+    public Scrambles getScrambles() {
+    	return scrambles;//<<<
+    }
+    
+    public void setScrambles(Scrambles newScrambles) {
+    	Object oldValue = scrambles;
+    	scrambles = newScrambles;
+    	fPropertyChangeSupport.firePropertyChange(SCRAMBLES, oldValue, scrambles);
     }
 
     public Database getDatabase() {
