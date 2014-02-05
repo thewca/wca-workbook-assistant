@@ -1,3 +1,12 @@
 out
 target
 reports
+
+# eclipse stuff
+.settings
+
+# vim stuff
+*.swp
+
+# stuff from running the application
+WCA_export*.zip
