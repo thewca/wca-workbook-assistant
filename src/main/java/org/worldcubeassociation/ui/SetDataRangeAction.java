@@ -142,7 +142,7 @@ public class SetDataRangeAction extends AbstractAction implements PropertyChange
             int firstDataRow = ((Number) fFirstRowSpinner.getValue()).intValue() - 1;
             MatchedSheet selectedSheet = fEnv.getSelectedSheet();
             selectedSheet.setFirstDataRow(firstDataRow);
-            WorkbookValidator.validateSheet(selectedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase());
+            WorkbookValidator.validateSheet(selectedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase(), fEnv.getScrambles());
             fEnv.fireSheetChanged(selectedSheet);
         }
     }
@@ -153,7 +153,7 @@ public class SetDataRangeAction extends AbstractAction implements PropertyChange
             int lastDataRow = ((Number) fLastRowSpinner.getValue()).intValue() - 1;
             MatchedSheet selectedSheet = fEnv.getSelectedSheet();
             selectedSheet.setLastDataRow(lastDataRow);
-            WorkbookValidator.validateSheet(selectedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase());
+            WorkbookValidator.validateSheet(selectedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase(), fEnv.getScrambles());
             fEnv.fireSheetChanged(selectedSheet);
         }
     }

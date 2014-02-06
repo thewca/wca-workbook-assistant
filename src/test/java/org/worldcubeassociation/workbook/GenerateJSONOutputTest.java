@@ -42,7 +42,7 @@ public class GenerateJSONOutputTest extends AbstractWorkbookTest {
         try {
             Workbook workbook = createWorkbook(aWorkbookFile);
             MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, aWorkbookFile.getAbsolutePath());
-            WorkbookValidator.validate(matchedWorkbook, null);
+            WorkbookValidator.validate(matchedWorkbook, null, null);
 
             String results = JSONGenerator.generateJSON(matchedWorkbook);
             fWriter.println(results);

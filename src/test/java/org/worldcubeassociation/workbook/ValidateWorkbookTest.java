@@ -34,7 +34,7 @@ public class ValidateWorkbookTest extends AbstractWorkbookTest {
         try {
             Workbook workbook = createWorkbook(aWorkbookFile);
             MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, aWorkbookFile.getAbsolutePath());
-            WorkbookValidator.validate(matchedWorkbook, fDatabase);
+            WorkbookValidator.validate(matchedWorkbook, fDatabase, null);
 
             boolean errors = false;
             for (MatchedSheet matchedSheet : matchedWorkbook.sheets()) {

@@ -27,7 +27,7 @@ public class ScramblesFilesTextField extends JTextField implements PropertyChang
 
     private void updateContent() {
         Scrambles scrambles = fEnv.getScrambles();
-        setText(scrambles == null ? "" : scrambles.getScramblesFilesNames());
+        setText(scrambles == null ? "" : scrambles.getScramblesSources());
     }
 
 

@@ -148,7 +148,7 @@ public class UpdateWCAExportAction extends AbstractAction {
                 @Override
                 public void run() {
                     if (fEnv.getMatchedWorkbook() != null && oldDatabase != fEnv.getDatabase()) {
-                        WorkbookValidator.validate(fEnv.getMatchedWorkbook(), fEnv.getDatabase());
+                        WorkbookValidator.validate(fEnv.getMatchedWorkbook(), fEnv.getDatabase(), fEnv.getScrambles());
                         fEnv.fireSheetsChanged();
                     }
                     fLabel.setEnabled(true);

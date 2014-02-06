@@ -54,6 +54,8 @@ public class SheetsListPanel extends JTable implements PropertyChangeListener {
                 return new FormatRenderer();
             case 6:
                 return new ResultFormatRenderer();
+            case 7:
+                return new RoundScramblesRenderer();
             default:
                 return null;
         }
@@ -87,6 +89,8 @@ public class SheetsListPanel extends JTable implements PropertyChangeListener {
                 return new FormatCellEditor(fEnv);
             case 6:
                 return new ResultFormatCellEditor(fEnv);
+            case 7:
+                return new RoundScramblesCellEditor(fEnv);
             default:
                 return null;
         }
@@ -107,6 +111,9 @@ public class SheetsListPanel extends JTable implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
         if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+            updateTable();
+        }
+        else if (WorkbookAssistantEnv.SCRAMBLES.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
         else if (WorkbookAssistantEnv.SHEETS_CHANGED.equals(aPropertyChangeEvent.getPropertyName())) {

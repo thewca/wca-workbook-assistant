@@ -1,9 +1,10 @@
 package org.worldcubeassociation.workbook;
 
-import org.apache.poi.ss.usermodel.Sheet;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 
 /**
  * @author Lars Vandenbergh
@@ -17,6 +18,7 @@ public class MatchedSheet {
     private Round fRound;
     private Format fFormat;
     private ResultFormat fResultFormat;
+    private RoundScrambles roundScrambles;
 
     private ColumnOrder fColumnOrder;
 
@@ -90,6 +92,10 @@ public class MatchedSheet {
 
     public void setEvent(Event aEvent) {
         fEvent = aEvent;
+    }
+    
+    public String getEventId() {
+    	return fEvent == null ? null : fEvent.getCode();
     }
 
     public Round getRound() {
@@ -187,6 +193,14 @@ public class MatchedSheet {
     public void setTableData(Object[][] aTableData) {
         fTableData = aTableData;
     }
+    
+	public RoundScrambles getRoundScrambles() {
+		return roundScrambles;
+	}
+	
+	public void setRoundScrambles(RoundScrambles roundScrambles) {
+		this.roundScrambles = roundScrambles;
+	}
 
     public boolean isValidated() {
         return fValidated;

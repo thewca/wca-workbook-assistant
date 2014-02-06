@@ -43,6 +43,11 @@ public class SheetsTableColumnModel extends DefaultTableColumnModel {
         resultFormatColumn.setHeaderValue("Result");
         resultFormatColumn.setPreferredWidth(20);
         addColumn(resultFormatColumn);
+        
+        TableColumn roundScramblesColumn = new TableColumn();
+        roundScramblesColumn.setHeaderValue("Scrambles");
+        roundScramblesColumn.setPreferredWidth(20);
+        addColumn(roundScramblesColumn);
     }
 
 }

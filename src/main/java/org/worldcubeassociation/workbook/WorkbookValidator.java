@@ -1,5 +1,15 @@
 package org.worldcubeassociation.workbook;
 
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -10,9 +20,9 @@ import org.worldcubeassociation.workbook.parse.CellFormatter;
 import org.worldcubeassociation.workbook.parse.CellParser;
 import org.worldcubeassociation.workbook.parse.ParsedGender;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
-
-import java.text.ParseException;
-import java.util.*;
+import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
+import org.worldcubeassociation.workbook.scrambles.Scrambles;
+import org.worldcubeassociation.workbook.scrambles.SheetJson;
 
 /**
  * @author Lars Vandenbergh
@@ -22,7 +32,7 @@ public class WorkbookValidator {
     private static final String[] ORDER = {"1st", "2nd", "3rd", "4th", "5th"};
     public static final int TEN_MINUTES = 600;
 
-    public static void validate(MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
+    public static void validate(MatchedWorkbook aMatchedWorkbook, Database aDatabase, Scrambles scrambles) {
         // Find registration sheet.
         MatchedSheet registrationSheet = null;
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
@@ -48,25 +58,34 @@ public class WorkbookValidator {
         // Validate results sheets.
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.RESULTS) {
-                validateResultsSheet(matchedSheet, aMatchedWorkbook, aDatabase);
+                validateResultsSheet(matchedSheet, aMatchedWorkbook, aDatabase, scrambles);
             }
         }
     }
 
-    public static void validateSheetsForEvent(MatchedWorkbook aMatchedWorkbook, Event aEvent, Database aDatabase) {
+    public static void validateSheetsForEvent(MatchedWorkbook aMatchedWorkbook, Event aEvent, Database aDatabase, Scrambles scrambles) {
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.RESULTS && aEvent.equals(matchedSheet.getEvent())) {
-                validateResultsSheet(matchedSheet, aMatchedWorkbook, aDatabase);
+                validateResultsSheet(matchedSheet, aMatchedWorkbook, aDatabase, scrambles);
             }
         }
     }
+    
 
-    public static void validateSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
+	public static void validateSheetsWithRoundScrambles(MatchedWorkbook matchedWorkbook, RoundScrambles newRoundScrambles, Database database, Scrambles scrambles) {
+        for (MatchedSheet matchedSheet : matchedWorkbook.sheets()) {
+            if (matchedSheet.getSheetType() == SheetType.RESULTS && newRoundScrambles == matchedSheet.getRoundScrambles()) {
+                validateResultsSheet(matchedSheet, matchedWorkbook, database, scrambles);
+            }
+        }
+	}
+
+    public static void validateSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase, Scrambles scrambles) {
         if (aMatchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
             validateRegistrationsSheet(aMatchedSheet, aMatchedWorkbook, aDatabase);
         }
         else if (aMatchedSheet.getSheetType() == SheetType.RESULTS) {
-            validateResultsSheet(aMatchedSheet, aMatchedWorkbook, aDatabase);
+            validateResultsSheet(aMatchedSheet, aMatchedWorkbook, aDatabase, scrambles);
         }
     }
 
@@ -172,15 +191,59 @@ public class WorkbookValidator {
 
     public static void validateResultsSheet(MatchedSheet aMatchedSheet,
                                              MatchedWorkbook aMatchedWorkbook,
-                                             Database aDatabase) {
+                                             Database bDatabase,
+                                             Scrambles scrambles) {
         // Clear validation errors.
         aMatchedSheet.getValidationErrors().clear();
         aMatchedSheet.setValidated(false);
         
-        //<<<
-        ValidationError missingScramblesError = new ValidationError(Severity.HIGH, "Missing scrambles", aMatchedSheet, -1, -1);
-        aMatchedSheet.getValidationErrors().add(missingScramblesError);
-        //<<<
+        // Check that every round has scrambles.
+        // Currently, we don't make any effort to notify users about unused scrambles,
+        // or the same scrambles being applied to different rounds.  
+        RoundScrambles roundScrambles = aMatchedSheet.getRoundScrambles();
+        if(roundScrambles == null) {
+	        ValidationError missingScramblesError = new ValidationError(Severity.HIGH, "Missing scrambles", aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+	        aMatchedSheet.getValidationErrors().add(missingScramblesError);
+        } else {
+        	// The round has scrambles, lets make sure we have the correct number of scrambles.
+        	HashMap<String, SheetJson> sheetsByGroupId = roundScrambles.getSheetsByGroupId();
+        	for(String groupId : sheetsByGroupId.keySet()) {
+        		SheetJson sheet = sheetsByGroupId.get(groupId);
+        		int actualCount = sheet.scrambles.length;
+        		int expectedCount = aMatchedSheet.getFormat().getResultCount();
+        		if(actualCount != expectedCount) {
+        			String msg = "Incorrect number of scrambles in group: " + groupId + " (found: " + actualCount + ", expected: " + expectedCount + ")";
+        			ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+        			aMatchedSheet.getValidationErrors().add(missingScramblesError);
+        		}
+        	}
+
+            // Check for duplicate scrambles.
+            List<MatchedSheet> sheets = aMatchedWorkbook.sheets();
+            List<MatchedSheet> duplicateScrambles = new ArrayList<MatchedSheet>();
+            for (MatchedSheet sheet : sheets) {
+                if (sheet.getRoundScrambles() == roundScrambles) {
+                	duplicateScrambles.add(sheet);
+                }
+            }
+
+            if (duplicateScrambles.size() > 1) {
+            	StringBuilder sheetNames = new StringBuilder();
+                for (int i = 0, duplicateScramblesSize = duplicateScrambles.size(); i < duplicateScramblesSize; i++) {
+                    if (i == duplicateScramblesSize - 1) {
+                        sheetNames.append(" and ");
+                    }
+                    else if (i > 0) {
+                        sheetNames.append(", ");
+                    }
+                    MatchedSheet duplicateSheet = duplicateScrambles.get(i);
+                    sheetNames.append(duplicateSheet.getSheet().getSheetName());
+                }
+                ValidationError validationError = new ValidationError(Severity.HIGH, "Duplicate scrambles for sheets " + sheetNames, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+                aMatchedSheet.getValidationErrors().add(validationError);
+            }
+        
+        }
 
         // Validate round, event, format and result format.
         if (aMatchedSheet.getEvent() == null) {

@@ -56,7 +56,7 @@ public class WorkbookAssistantEnv {
     }
     
     public Scrambles getScrambles() {
-    	return scrambles;//<<<
+    	return scrambles;
     }
     
     public void setScrambles(Scrambles newScrambles) {

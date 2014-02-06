@@ -1,11 +1,13 @@
 package org.worldcubeassociation.workbook.scrambles;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,6 +19,10 @@ import javax.swing.JPasswordField;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.worldcubeassociation.WorkbookAssistantEnv;
+import org.worldcubeassociation.workbook.MatchedSheet;
+import org.worldcubeassociation.workbook.MatchedWorkbook;
+
 import com.google.gson.Gson;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -27,16 +33,23 @@ import net.lingala.zip4j.model.FileHeader;
 
 public class Scrambles {
 	
-	private HashMap<String, GeneratedScrambles> scrambles;
+	private WorkbookAssistantEnv env;
+	
+	public Scrambles(WorkbookAssistantEnv env) {
+		this.env = env;
+	}
+	
+	public HashMap<String, Events> eventsBySource;
+	
 	public Scrambles() {}
 
-	public String getScramblesFilesNames() {
-		if(scrambles == null) {
+	public String getScramblesSources() {
+		if(eventsBySource == null) {
 			return "";
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		for(String src : scrambles.keySet()) {
+		for(String src : eventsBySource.keySet()) {
 			sb.append(" ").append(src);
 		}
 		int offset = sb.length() > 0 ? 1 : 0;
@@ -58,7 +71,7 @@ public class Scrambles {
 		}
 	}
 	
-	private static String promptPassword(String title, String prompt) {
+	private static String promptPassword(Component component, String title, String prompt) {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		
@@ -84,8 +97,7 @@ public class Scrambles {
 		});
 
 
-		// TODO fEnv.getTopLevelComponent() <<<???
-		int okCxl = JOptionPane.showConfirmDialog(null, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		int okCxl = JOptionPane.showConfirmDialog(component, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (okCxl == JOptionPane.OK_OPTION) {
 			String password = new String(pf.getPassword());
@@ -94,7 +106,7 @@ public class Scrambles {
 		return null;
 	}
 
-	private static void promptAndSetPasswordIfNecessary(ZipFile zipFile) throws ZipException, InvalidScramblesFileException {
+	private static void promptAndSetPasswordIfNecessary(Component component, ZipFile zipFile) throws ZipException, InvalidScramblesFileException {
 		if(!zipFile.isEncrypted()) {
 			return;
 		}
@@ -130,7 +142,7 @@ public class Scrambles {
             } else {
             	title = "Password required";
             }
-            String password = promptPassword(title, prompt);
+            String password = promptPassword(component, title, prompt);
             if(password == null) {
             	throw new InvalidScramblesFileException("Could not find password for " + zipFile.getFile().getAbsolutePath());
             }
@@ -139,15 +151,14 @@ public class Scrambles {
 	}
 	
 	private static final Gson GSON = new Gson();
-	private static GeneratedScrambles parseJsonScrambles(InputStream is) {
+	private static ScramblesJson parseJsonScrambles(InputStream is) {
 		InputStreamReader isr = new InputStreamReader(is);
-		GeneratedScrambles scrambles = GSON.fromJson(isr, GeneratedScrambles.class);
-		System.out.println(scrambles);//<<<
+		ScramblesJson scrambles = GSON.fromJson(isr, ScramblesJson.class);
 		return scrambles;
 	}
 	
 	public void addScrambles(File[] files) throws InvalidScramblesFileException {
-		HashMap<String, GeneratedScrambles> scrambles = new HashMap<String, GeneratedScrambles>();
+		HashMap<String, ScramblesJson> scrambles = new HashMap<String, ScramblesJson>();
 		for(File f : files) {
 			String[] filename_ext = Scrambles.splitext(f.getName());
 			String competitionName = filename_ext[0];
@@ -165,12 +176,12 @@ public class Scrambles {
 					// Note that we actually check for the existence of the file before we attempt to extract it.
 					// This makes things easier on people when dealing with password encrypted zip files that do
 					// not contain the file we're looking for.
-					promptAndSetPasswordIfNecessary(zipFile);
+					promptAndSetPasswordIfNecessary(env.getTopLevelComponent(), zipFile);
 
 					ZipInputStream is = zipFile.getInputStream(fileHeader);
 
 					try {
-						GeneratedScrambles gs = parseJsonScrambles(is);
+						ScramblesJson gs = parseJsonScrambles(is);
 						is.close();
 						scrambles.put(f.getAbsolutePath(), gs);
 					} catch (IOException e) {
@@ -182,7 +193,7 @@ public class Scrambles {
 			} else if(ext.endsWith(".json")) {
 				try {
 					FileInputStream fis = new FileInputStream(f);
-					GeneratedScrambles gs = parseJsonScrambles(fis);
+					ScramblesJson gs = parseJsonScrambles(fis);
 					fis.close();
 					scrambles.put(f.getAbsolutePath(), gs);
 				} catch(FileNotFoundException e) {
@@ -193,10 +204,51 @@ public class Scrambles {
 			} else {
 				throw new InvalidScramblesFileException("Unrecognized filetype: " + f.getName());
 			}
-			// <<< MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, fSelectedFile.getAbsolutePath());
 		}
 		
-		this.scrambles = scrambles;
+		eventsBySource = new HashMap<String, Events>();
+		for(String source : scrambles.keySet()) {
+			Events events = new Events(source);
+			eventsBySource.put(source, events);
+			ScramblesJson scrambleSource = scrambles.get(source);
+			for(SheetJson sheet : scrambleSource.sheets) {
+				Rounds rounds = events.getRoundsForEvent(sheet.event);
+				RoundScrambles round = rounds.getRound(sheet.round);
+				try {
+					round.addSheet(sheet);
+				} catch (InvalidSheetException e) {
+					throw new InvalidScramblesFileException(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	public void matchScrambles(MatchedWorkbook matchedWorkbook) {
+		if(eventsBySource == null) {
+			return;
+		}
+		for(MatchedSheet sheet : matchedWorkbook.sheets()) {
+			if(sheet.getEvent() == null) {
+				// This can happen with the registration sheet, or a malformed results sheet
+				continue;
+			}
+			// First clear the sheet of scrambles. If the user selected a different 
+			// source of scrambles, we don't want to keep any from before.
+			sheet.setRoundScrambles(null);
+			
+			// TODO - actually pick scrambles!
+			// This is an annoyingly tricky thing to do, as our scrambles rounds are indexed by
+			// ints, which can't easily be mapped to and from org.worldcubeassociation.workbook.Round's.
+		}
+	}
+
+	public List<RoundScrambles> getRoundsForEvent(String eventId) {
+		ArrayList<RoundScrambles> rounds = new ArrayList<RoundScrambles>();
+		for(Events events : eventsBySource.values()) {
+			Rounds moreRounds = events.getRoundsForEvent(eventId);
+			rounds.addAll(moreRounds.asList());
+		}
+		return rounds;
 	}
 
 }
