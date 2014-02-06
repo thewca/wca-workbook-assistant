@@ -22,7 +22,7 @@ import org.worldcubeassociation.workbook.parse.ParsedGender;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
-import org.worldcubeassociation.workbook.scrambles.SheetJson;
+import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
 
 /**
  * @author Lars Vandenbergh
@@ -206,9 +206,9 @@ public class WorkbookValidator {
 	        aMatchedSheet.getValidationErrors().add(missingScramblesError);
         } else {
         	// The round has scrambles, lets make sure we have the correct number of scrambles.
-        	HashMap<String, SheetJson> sheetsByGroupId = roundScrambles.getSheetsByGroupId();
+        	HashMap<String, TNoodleSheetJson> sheetsByGroupId = roundScrambles.getSheetsByGroupId();
         	for(String groupId : sheetsByGroupId.keySet()) {
-        		SheetJson sheet = sheetsByGroupId.get(groupId);
+        		TNoodleSheetJson sheet = sheetsByGroupId.get(groupId);
         		int actualCount = sheet.scrambles.length;
         		int expectedCount = aMatchedSheet.getFormat().getResultCount();
         		if(actualCount != expectedCount) {

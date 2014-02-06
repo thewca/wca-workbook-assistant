@@ -1,13 +1,9 @@
 package org.worldcubeassociation.workbook.scrambles;
 
-public class SheetJson {
+public class WcaSheetJson {
 	public String[] scrambles;
 	public String[] extraScrambles;
-	public String scrambler;
-	public int copies;
-	public String title;
-	public String fmc;
+	public Object round;
 	public String group;
 	public String event;
-	public int round;
 }

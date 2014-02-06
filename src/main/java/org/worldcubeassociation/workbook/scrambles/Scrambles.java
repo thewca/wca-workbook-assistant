@@ -39,7 +39,8 @@ public class Scrambles {
 		this.env = env;
 	}
 	
-	public HashMap<String, Events> eventsBySource;
+	private HashMap<String, Events> eventsBySource;
+	private String scrambleProgram;
 	
 	public Scrambles() {}
 
@@ -54,6 +55,10 @@ public class Scrambles {
 		}
 		int offset = sb.length() > 0 ? 1 : 0;
 		return sb.substring(offset);
+	}
+	
+	public String getScrambleProgram() {
+		return scrambleProgram;
 	}
 	
 	/*
@@ -207,11 +212,17 @@ public class Scrambles {
 		}
 		
 		eventsBySource = new HashMap<String, Events>();
+		scrambleProgram = null;
 		for(String source : scrambles.keySet()) {
+			ScramblesJson scrambleSource = scrambles.get(source);
+			if(scrambleProgram == null) {
+				scrambleProgram = scrambleSource.version;
+			} else if(!scrambleProgram.equals(scrambleSource.version)) {
+				throw new InvalidScramblesFileException(source + " was generated with " + scrambleSource.version + ", was expecting " + scrambleProgram);
+			}
 			Events events = new Events(source);
 			eventsBySource.put(source, events);
-			ScramblesJson scrambleSource = scrambles.get(source);
-			for(SheetJson sheet : scrambleSource.sheets) {
+			for(TNoodleSheetJson sheet : scrambleSource.sheets) {
 				Rounds rounds = events.getRoundsForEvent(sheet.event);
 				RoundScrambles round = rounds.getRound(sheet.round);
 				try {

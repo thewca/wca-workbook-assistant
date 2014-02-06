@@ -4,18 +4,18 @@ import java.util.HashMap;
 
 public class RoundScrambles {
 	
-	private HashMap<String, SheetJson> sheetsByGroupId;
+	private HashMap<String, TNoodleSheetJson> sheetsByGroupId;
 	private final String source, eventId;
 	private final int roundId;
 	
 	public RoundScrambles(String source, String eventId, int roundId) {
-		sheetsByGroupId = new HashMap<String, SheetJson>();
+		sheetsByGroupId = new HashMap<String, TNoodleSheetJson>();
 		this.source = source;
 		this.eventId = eventId;
 		this.roundId = roundId;
 	}
 	
-	public void addSheet(SheetJson sheet) throws InvalidSheetException {
+	public void addSheet(TNoodleSheetJson sheet) throws InvalidSheetException {
 		assert sheet.event == eventId;
 		assert sheet.round == roundId;
 		if(sheetsByGroupId.containsKey(sheet.group)) {
@@ -26,8 +26,8 @@ public class RoundScrambles {
 		sheetsByGroupId.put(sheet.group, sheet);
 	}
 	
-	public HashMap<String, SheetJson> getSheetsByGroupId() {
-		return new HashMap<String, SheetJson>(sheetsByGroupId);
+	public HashMap<String, TNoodleSheetJson> getSheetsByGroupId() {
+		return new HashMap<String, TNoodleSheetJson>(sheetsByGroupId);
 	}
 	
 	public String toString() {

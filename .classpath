@@ -16,6 +16,5 @@
 	<classpathentry kind="lib" path="lib/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/zip4j_1.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.2.4.jar"/>
-	<classpathentry kind="lib" path="lib/org.apache.sling.commons.json-2.0.6.jar"/>
 	<classpathentry kind="output" path="out"/>
 </classpath>

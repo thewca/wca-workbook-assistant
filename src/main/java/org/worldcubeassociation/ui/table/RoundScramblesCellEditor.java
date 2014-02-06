@@ -17,7 +17,7 @@ import org.worldcubeassociation.workbook.ResultFormat;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 import org.worldcubeassociation.workbook.scrambles.Rounds;
-import org.worldcubeassociation.workbook.scrambles.SheetJson;
+import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
 
 /**
