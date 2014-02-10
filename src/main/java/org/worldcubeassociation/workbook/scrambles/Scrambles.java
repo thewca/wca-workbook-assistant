@@ -42,8 +42,6 @@ public class Scrambles {
 	private HashMap<String, Events> eventsBySource;
 	private String scrambleProgram;
 	
-	public Scrambles() {}
-
 	public String getScramblesSources() {
 		if(eventsBySource == null) {
 			return "";
@@ -156,9 +154,12 @@ public class Scrambles {
 	}
 	
 	private static final Gson GSON = new Gson();
-	private static TNoodleScramblesJson parseJsonScrambles(InputStream is) {
+	private static TNoodleScramblesJson parseJsonScrambles(InputStream is, String filename) throws InvalidScramblesFileException {
 		InputStreamReader isr = new InputStreamReader(is);
 		TNoodleScramblesJson scrambles = GSON.fromJson(isr, TNoodleScramblesJson.class);
+		if(scrambles.sheets == null) {
+			throw new InvalidScramblesFileException("sheets attribute not found in " + filename);
+		}
 		return scrambles;
 	}
 	
@@ -186,7 +187,7 @@ public class Scrambles {
 					ZipInputStream is = zipFile.getInputStream(fileHeader);
 
 					try {
-						TNoodleScramblesJson gs = parseJsonScrambles(is);
+						TNoodleScramblesJson gs = parseJsonScrambles(is, f.getAbsolutePath());
 						is.close();
 						scrambles.put(f.getAbsolutePath(), gs);
 					} catch (IOException e) {
@@ -198,7 +199,7 @@ public class Scrambles {
 			} else if(ext.endsWith(".json")) {
 				try {
 					FileInputStream fis = new FileInputStream(f);
-					TNoodleScramblesJson gs = parseJsonScrambles(fis);
+					TNoodleScramblesJson gs = parseJsonScrambles(fis, f.getAbsolutePath());
 					fis.close();
 					scrambles.put(f.getAbsolutePath(), gs);
 				} catch(FileNotFoundException e) {
