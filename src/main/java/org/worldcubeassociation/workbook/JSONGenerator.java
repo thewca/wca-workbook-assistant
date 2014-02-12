@@ -128,7 +128,7 @@ public class JSONGenerator {
             }
             ParsedGender gender = CellParser.parseGender(genderCell);
 
-            Object[] person = new Object[] { name, id, country, gender, year, month, day };
+            Object[] person = new Object[] { name, id, country, gender.toString(), year, month, day };
             persons.add(person);
         }
         return persons;
