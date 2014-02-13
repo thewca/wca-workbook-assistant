@@ -1,6 +1,5 @@
 package org.worldcubeassociation.workbook.scrambles;
 
-import java.awt.Component;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,32 +10,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.ZipInputStream;
+import net.lingala.zip4j.model.FileHeader;
 
-import org.worldcubeassociation.WorkbookAssistantEnv;
+import org.worldcubeassociation.ui.JOptionPaneZipFileOpener;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
 
 import com.google.gson.Gson;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.exception.ZipExceptionConstants;
-import net.lingala.zip4j.io.ZipInputStream;
-import net.lingala.zip4j.model.FileHeader;
-
 public class Scrambles {
 	
-	private WorkbookAssistantEnv env;
+	private JOptionPaneZipFileOpener zipOpener;
 	
-	public Scrambles(WorkbookAssistantEnv env) {
-		this.env = env;
+	public Scrambles(JOptionPaneZipFileOpener zipOpener) {
+		this.zipOpener = zipOpener;
 	}
 	
 	private HashMap<String, Events> eventsBySource;
@@ -74,85 +64,6 @@ public class Scrambles {
 		}
 	}
 	
-	private static String promptPassword(Component component, String title, String prompt) {
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-		
-		JLabel promptLabel = new JLabel(prompt);
-		panel.add(promptLabel);
-		final JPasswordField pf = new JPasswordField();
-		panel.add(pf);
-		pf.addAncestorListener(new AncestorListener() {
-			@Override
-			public void ancestorRemoved(AncestorEvent arg0) {
-				pf.requestFocus();
-			}
-			
-			@Override
-			public void ancestorMoved(AncestorEvent arg0) {
-				pf.requestFocus();
-			}
-			
-			@Override
-			public void ancestorAdded(AncestorEvent arg0) {
-				pf.requestFocus();
-			}
-		});
-
-
-		int okCxl = JOptionPane.showConfirmDialog(component, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-		if (okCxl == JOptionPane.OK_OPTION) {
-			String password = new String(pf.getPassword());
-			return password;
-		}
-		return null;
-	}
-
-	private static void promptAndSetPasswordIfNecessary(Component component, ZipFile zipFile) throws ZipException, InvalidScramblesFileException {
-		if(!zipFile.isEncrypted()) {
-			return;
-		}
-		
-		// Copied (and modified) from http://stackoverflow.com/a/19246327
-        List<FileHeader> fileHeaders = zipFile.getFileHeaders();
-        
-        int attempt = 0;
-        for(FileHeader fileHeader : fileHeaders) {
-            try {
-                InputStream is = zipFile.getInputStream(fileHeader);
-                byte[] b = new byte[4 * 4096];
-                while (is.read(b) != -1) {
-                    // Do nothing as we just want to verify password
-                }
-                is.close();
-                
-                // Success! We can return from this function
-                return;
-            } catch (ZipException e) {
-                if (e.getCode() == ZipExceptionConstants.WRONG_PASSWORD) {
-                	// Fall through and prompt the user for a password
-                } else {
-                	throw e;
-                }
-            } catch (IOException e) {
-            	// Fall through and prompt the user for a password
-            }
-            String prompt = "Enter password for: " + zipFile.getFile().getAbsolutePath();
-            String title;
-            if(attempt++ > 0) {
-            	title = "Wrong password!";
-            } else {
-            	title = "Password required";
-            }
-            String password = promptPassword(component, title, prompt);
-            if(password == null) {
-            	throw new InvalidScramblesFileException("Could not find password for " + zipFile.getFile().getAbsolutePath());
-            }
-            zipFile.setPassword(password);
-        }
-	}
-	
 	private static final Gson GSON = new Gson();
 	private static TNoodleScramblesJson parseJsonScrambles(InputStream is, String filename) throws InvalidScramblesFileException {
 		InputStreamReader isr = new InputStreamReader(is);
@@ -171,19 +82,13 @@ public class Scrambles {
 			String ext = filename_ext[1].toLowerCase();
 			if(ext.endsWith(".zip")) {
 				try {
-					ZipFile zipFile = new ZipFile(f);
+					ZipFile zipFile = zipOpener.open(f);
 
 					String jsonFilename = competitionName + ".json";
 					FileHeader fileHeader = zipFile.getFileHeader(jsonFilename);
 					if(fileHeader == null) {
 						throw new InvalidScramblesFileException("Could not find " + jsonFilename + " in " + f.getAbsolutePath());
 					}
-
-					// Note that we actually check for the existence of the file before we attempt to extract it.
-					// This makes things easier on people when dealing with password encrypted zip files that do
-					// not contain the file we're looking for.
-					promptAndSetPasswordIfNecessary(env.getTopLevelComponent(), zipFile);
-
 					ZipInputStream is = zipFile.getInputStream(fileHeader);
 
 					try {

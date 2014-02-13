@@ -55,7 +55,7 @@ public class OpenWorkbookRunnable implements Runnable {
             updateStatus(40, "Loading scrambles");
             Scrambles newScrambles;
             if(newScramblesFiles != null) {
-            	newScrambles = new Scrambles(fEnv);
+            	newScrambles = new Scrambles(new JOptionPaneZipFileOpener(fEnv.getTopLevelComponent()));
             	newScrambles.addScrambles(newScramblesFiles);
             } else {
             	newScrambles = fEnv.getScrambles();
