@@ -202,7 +202,7 @@ public class WorkbookValidator {
         // or the same scrambles being applied to different rounds.  
         RoundScrambles roundScrambles = aMatchedSheet.getRoundScrambles();
         if(roundScrambles == null) {
-	        ValidationError missingScramblesError = new ValidationError(Severity.HIGH, "Missing scrambles", aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+	        ValidationError missingScramblesError = new ValidationError(Severity.LOW, "Missing scrambles", aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
 	        aMatchedSheet.getValidationErrors().add(missingScramblesError);
         } else {
         	// The round has scrambles, lets make sure we have the correct number of scrambles.
