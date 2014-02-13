@@ -92,6 +92,11 @@ public class MatchedSheet {
 
     public void setEvent(Event aEvent) {
         fEvent = aEvent;
+        if(fEvent == null || (roundScrambles != null && !roundScrambles.getEventId().equals(fEvent.getCode()))) {
+        	// We no longer have an event, or the current event is different than event of the scrambles we have.
+        	// Discard our scrambles.
+        	roundScrambles = null;
+        }
     }
     
     public String getEventId() {

@@ -30,6 +30,10 @@ public class RoundScrambles {
 		return new HashMap<String, TNoodleSheetJson>(sheetsByGroupId);
 	}
 	
+	public String getEventId() {
+		return eventId;
+	}
+	
 	public String toString() {
 		return String.format("%s Round %s from %s", eventId, roundId, source);
 	}
