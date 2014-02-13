@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Rounds {
 	
-	public HashMap<Integer, RoundScrambles> roundsByRoundId;
+	private HashMap<Integer, RoundScrambles> roundsByRoundId;
 	private final String source, eventId;
 	
 	public Rounds(String source, String eventId) {
@@ -20,6 +20,16 @@ public class Rounds {
 			roundsByRoundId.put(roundId, new RoundScrambles(source, eventId, roundId));
 		}
 		return roundsByRoundId.get(roundId);
+	}
+	
+	public RoundScrambles getRoundIfExists(int roundId) {
+		return roundsByRoundId.get(roundId);
+	}
+	
+	public void putRound(RoundScrambles rs) {
+		assert rs.getEventId().equals(eventId);
+		// Note that there may already be an entry for this roundId
+		roundsByRoundId.put(rs.getRoundId(), rs);
 	}
 	
 	public List<RoundScrambles> asList() {

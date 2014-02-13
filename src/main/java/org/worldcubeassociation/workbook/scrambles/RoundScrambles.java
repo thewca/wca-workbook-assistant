@@ -37,5 +37,9 @@ public class RoundScrambles {
 	public String toString() {
 		return String.format("%s Round %s from %s", eventId, roundId, source);
 	}
+	
+	public int getRoundId() {
+		return roundId;
+	}
 
 }

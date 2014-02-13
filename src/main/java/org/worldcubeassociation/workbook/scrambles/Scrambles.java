@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.SortedMap;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -16,8 +17,10 @@ import net.lingala.zip4j.io.ZipInputStream;
 import net.lingala.zip4j.model.FileHeader;
 
 import org.worldcubeassociation.ui.JOptionPaneZipFileOpener;
+import org.worldcubeassociation.workbook.Event;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
+import org.worldcubeassociation.workbook.Round;
 
 import com.google.gson.Gson;
 
@@ -30,6 +33,7 @@ public class Scrambles {
 	}
 	
 	private HashMap<String, Events> eventsBySource;
+	private Events mergedSources;
 	private String scrambleProgram;
 	
 	public String getScramblesSources() {
@@ -74,7 +78,7 @@ public class Scrambles {
 		return scrambles;
 	}
 	
-	public void addScrambles(File[] files) throws InvalidScramblesFileException {
+	public void setScrambles(File[] files) throws InvalidScramblesFileException {
 		HashMap<String, TNoodleScramblesJson> scrambles = new HashMap<String, TNoodleScramblesJson>();
 		for(File f : files) {
 			String[] filename_ext = Scrambles.splitext(f.getName());
@@ -138,6 +142,8 @@ public class Scrambles {
 				}
 			}
 		}
+		
+		mergedSources = new Events(eventsBySource.values());
 	}
 
 	public void matchScrambles(MatchedWorkbook matchedWorkbook) {
@@ -145,22 +151,33 @@ public class Scrambles {
 			return;
 		}
 		for(MatchedSheet sheet : matchedWorkbook.sheets()) {
-			if(sheet.getEvent() == null) {
-				// This can happen with the registration sheet, or a malformed results sheet
-				continue;
-			}
-			// First clear the sheet of scrambles. If the user selected a different 
+			// First clear all sheets of scrambles. If the user selected a different 
 			// source of scrambles, we don't want to keep any from before.
 			sheet.setRoundScrambles(null);
-			
-			// TODO - actually pick scrambles!
-			// This is an annoyingly tricky thing to do, as our scrambles rounds are indexed by
-			// ints, which can't easily be mapped to and from org.worldcubeassociation.workbook.Round's.
+		}
+		
+		HashMap<Event, SortedMap<Round, MatchedSheet>> sheetsByRoundByEvent = matchedWorkbook.sheetsByRoundByEvent();
+		for(Event event : sheetsByRoundByEvent.keySet()) {
+			SortedMap<Round, MatchedSheet> sheetsByRound = sheetsByRoundByEvent.get(event);
+			// We must convert from a Round enum to a round number (as that's what our JSON scramble format uses).
+			// To do this, we simply sort the MatchedSheets by Round enum, and assign them indices starting at 1.
+			int roundIndex = 0;
+			for(Round round : sheetsByRound.keySet()) {
+				roundIndex++;
+				MatchedSheet sheet = sheetsByRound.get(round);
+				Rounds rounds = mergedSources.getRoundsForEventIfExists(event.getCode());
+				if(rounds != null) {
+					RoundScrambles rs = rounds.getRoundIfExists(roundIndex);
+					if(rs != null) {
+						sheet.setRoundScrambles(rs);
+					}
+				}
+			}
 		}
 	}
 
 	public List<RoundScrambles> getRoundsForEvent(String eventId) {
-		ArrayList<RoundScrambles> rounds = new ArrayList<RoundScrambles>();
+		List<RoundScrambles> rounds = new ArrayList<RoundScrambles>();
 		for(Events events : eventsBySource.values()) {
 			Rounds moreRounds = events.getRoundsForEvent(eventId);
 			rounds.addAll(moreRounds.asList());
