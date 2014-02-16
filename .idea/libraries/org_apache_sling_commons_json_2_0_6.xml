@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="org.apache.sling.commons.json-2.0.6">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/org.apache.sling.commons.json-2.0.6.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
