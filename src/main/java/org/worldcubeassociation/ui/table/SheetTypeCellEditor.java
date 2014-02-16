@@ -46,7 +46,7 @@ public class SheetTypeCellEditor extends DefaultCellEditor {
             fMatchedSheet.setSheetType(newSheetType);
             fMatchedSheet.setFirstDataRow(4);
             fMatchedSheet.setLastDataRow(fMatchedSheet.getTableData().length - 1);
-            WorkbookValidator.validate(fEnv.getMatchedWorkbook(), fEnv.getDatabase());
+            WorkbookValidator.validate(fEnv.getMatchedWorkbook(), fEnv.getDatabase(), fEnv.getScrambles());
             fEnv.fireSheetChanged(fMatchedSheet);
         }
         return super.stopCellEditing();

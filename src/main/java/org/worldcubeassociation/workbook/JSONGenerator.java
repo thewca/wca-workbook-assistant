@@ -1,24 +1,29 @@
 package org.worldcubeassociation.workbook;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.worldcubeassociation.workbook.parse.CellParser;
 import org.worldcubeassociation.workbook.parse.ParsedGender;
 import org.worldcubeassociation.workbook.parse.ParsedRecord;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
+import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
+import org.worldcubeassociation.workbook.scrambles.Scrambles;
+import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
+import org.worldcubeassociation.workbook.scrambles.WcaSheetJson;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author Lars Vandenbergh
@@ -27,61 +32,64 @@ public class JSONGenerator {
 
     public static final JSONVersion DEFAULT_VERSION = JSONVersion.WCA_COMPETITION_0_1;
 
-    public static String generateJSON(MatchedWorkbook aMatchedWorkbook) throws ParseException, JSONException, IOException {
-        return generateJSON(aMatchedWorkbook, DEFAULT_VERSION);
+    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, Scrambles scrambles) throws ParseException {
+        return generateJSON(aMatchedWorkbook, scrambles, DEFAULT_VERSION);
     }
 
-    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, JSONVersion aVersion) throws ParseException, JSONException, IOException {
-        StringWriter stringWriter = new StringWriter();
-        JSONWriter jsonWriter = new JSONWriter(stringWriter);
+    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, Scrambles scrambles, JSONVersion aVersion) throws ParseException {
+    	// We disable HTML escaping so scrambles look a little prettier.
+    	Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+    	HashMap<String, Object> jsonObject = new HashMap<String, Object>();
+    	jsonObject.put("formatVersion", aVersion.toString());
+    	jsonObject.put("persons", getPersonsJson(aMatchedWorkbook));
+    	jsonObject.put("results", getResultsJson(aMatchedWorkbook));
+    	jsonObject.put("scrambles", getScramblesJson(aMatchedWorkbook, scrambles));
+    	return GSON.toJson(jsonObject);
+    }
 
-        // Start JSON export.
-        jsonWriter.object();
-
-        // Format version.
-        stringWriter.append("\n  ");
-        jsonWriter.key("formatVersion").value(aVersion.toString());
-
-        // Start persons.
-        stringWriter.append("\n  ");
-        jsonWriter.key("persons").array();
-
+    private static HashMap<String, Object> getScramblesJson(MatchedWorkbook aMatchedWorkbook, Scrambles scrambles) {
+    	HashMap<String, Object> scramblesJson = new HashMap<String, Object>();
+    	scramblesJson.put("scrambleProgram", scrambles.getScrambleProgram());
+    	List<WcaSheetJson> sheets = new ArrayList<WcaSheetJson>();
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
-            if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS &&
+        	if(matchedSheet.getSheetType() == SheetType.RESULTS &&
                     matchedSheet.getValidationErrors(Severity.HIGH).isEmpty()) {
-                generateRegistrations(stringWriter, jsonWriter, matchedSheet);
-            }
+        		RoundScrambles roundScrambles = matchedSheet.getRoundScrambles();
+        		assert roundScrambles != null; // No validation errors means scrambles are set
+        		for(TNoodleSheetJson sheet : roundScrambles.getSheetsByGroupId().values()) {
+        			sheets.add(sheet.toWcaSheetJson(matchedSheet));
+        		}
+        	}
         }
+    	scramblesJson.put("sheets", sheets);
+		return scramblesJson;
+	}
 
-        // End persons.
-        stringWriter.append("\n  ");
-        jsonWriter.endArray();
-
-        // Start results.
-        stringWriter.append("\n  ");
-        jsonWriter.key("results").array();
-
+	private static List<Object[]> getResultsJson(MatchedWorkbook aMatchedWorkbook) throws ParseException {
+		ArrayList<Object[]> allResults = new ArrayList<Object[]>();
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.RESULTS &&
                     matchedSheet.getValidationErrors(Severity.HIGH).isEmpty()) {
-                generateResults(stringWriter, jsonWriter, aMatchedWorkbook.getCompetitionId(), matchedSheet);
+                List<Object[]> newResults = generateResults(matchedSheet, aMatchedWorkbook.getCompetitionId());
+                allResults.addAll(newResults);
             }
         }
+        return allResults;
+	}
 
-        // End results.
-        stringWriter.append("\n  ");
-        jsonWriter.endArray();
+	private static List<Object[]> getPersonsJson(MatchedWorkbook aMatchedWorkbook) {
+        for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
+            if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS &&
+                    matchedSheet.getValidationErrors(Severity.HIGH).isEmpty()) {
+            	// There is only one valid registrations sheet
+                return generateRegistrations(matchedSheet);
+            }
+        }
+        return null;
+	}
 
-        // End JSON export.
-        stringWriter.append("\n");
-        jsonWriter.endObject();
-
-        return stringWriter.toString();
-    }
-
-    public static void generateRegistrations(Writer aStringWriter,
-                                             JSONWriter aJSONWriter,
-                                             MatchedSheet aMatchedSheet) throws JSONException, IOException {
+	public static List<Object[]> generateRegistrations(MatchedSheet aMatchedSheet) {
+		List<Object[]> persons = new ArrayList<Object[]>();
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = aMatchedSheet.getSheet().getRow(rowIdx);
             Cell nameCell = row.getCell(aMatchedSheet.getNameHeaderColumn());
@@ -120,16 +128,15 @@ public class JSONGenerator {
             }
             ParsedGender gender = CellParser.parseGender(genderCell);
 
-            // Write person.
-            aStringWriter.append("\n    ");
-            aJSONWriter.array().value(name).value(id).value(country).value(gender).value(year).value(month).value(day).endArray();
+            Object[] person = new Object[] { name, id, country, gender.toString(), year, month, day };
+            persons.add(person);
         }
+        return persons;
     }
 
-    private static void generateResults(Writer aStringWriter,
-                                        JSONWriter aJSONWriter,
-                                        String aCompetitionId,
-                                        MatchedSheet aMatchedSheet) throws ParseException, JSONException, IOException {
+    private static List<Object[]> generateResults(MatchedSheet aMatchedSheet, String aCompetitionId) throws ParseException {
+    	ArrayList<Object[]> resultsJson = new ArrayList<Object[]>();
+    	
         Event event = aMatchedSheet.getEvent();
         Round round = aMatchedSheet.getRound();
         Format format = aMatchedSheet.getFormat();
@@ -199,28 +206,28 @@ public class JSONGenerator {
                 averageRecord = new ParsedRecord(null);
             }
 
-            // Write result.
-            aStringWriter.append("\n    ");
-            aJSONWriter.array().
-                    value(CellParser.parsePosition(row.getCell(0))).
-                    value(CellParser.parseMandatoryText(row.getCell(1))).
-                    value(CellParser.parseOptionalText(row.getCell(3))).
-                    value(CellParser.parseMandatoryText(row.getCell(2))).
-                    value(aCompetitionId).
-                    value(aMatchedSheet.getEvent().getCode()).
-                    value(aMatchedSheet.getRound().getCode()).
-                    value(aMatchedSheet.getFormat().getCode()).
-                    value(results[0]).
-                    value(results[1]).
-                    value(results[2]).
-                    value(results[3]).
-                    value(results[4]).
-                    value(bestResult).
-                    value(averageResult).
-                    value(singleRecord).
-                    value(averageRecord).
-                    endArray();
+            Object[] result = new Object[] {
+            		CellParser.parsePosition(row.getCell(0)),
+            		CellParser.parseMandatoryText(row.getCell(1)),
+            		CellParser.parseOptionalText(row.getCell(3)),
+            		CellParser.parseMandatoryText(row.getCell(2)),
+            		aCompetitionId,
+            		aMatchedSheet.getEvent().getCode(),
+            		aMatchedSheet.getRound().getCode(),
+            		aMatchedSheet.getFormat().getCode(),
+            		results[0],
+            		results[1],
+            		results[2],
+            		results[3],
+            		results[4],
+            		bestResult,
+            		averageResult.toString(),
+            		singleRecord.toString(),
+            		averageRecord.toString()
+            };
+            resultsJson.add(result);
         }
+        return resultsJson;
     }
 
 }

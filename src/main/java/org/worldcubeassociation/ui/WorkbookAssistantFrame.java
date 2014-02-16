@@ -33,6 +33,7 @@ public class WorkbookAssistantFrame extends JFrame {
     private WorkbookAssistantEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
     private OpenWorkbookAction fOpenWorkbookAction;
+    private OpenScramblesAction fOpenScramblesAction;
     private ValidationErrorsPanel fValidationErrorsPanel;
     private JComboBox fViewComboBox;
     private UpdateWCAExportAction fUpdateWCAExportAction;
@@ -104,6 +105,15 @@ public class WorkbookAssistantFrame extends JFrame {
         c.weightx = 0;
         fOpenWorkbookAction = new OpenWorkbookAction(fEnv);
         panel.add(new JButton(fOpenWorkbookAction), c);
+        
+        panel.add(new JLabel("Scrambles:"), c);
+
+        c.weightx = 1;
+        panel.add(new ScramblesFilesTextField(fEnv), c);
+
+        c.weightx = 0;
+        fOpenScramblesAction = new OpenScramblesAction(fEnv);
+        panel.add(new JButton(fOpenScramblesAction), c);
 
         panel.add(new JButton(new RefreshWorkbookAction(fEnv)), c);
 

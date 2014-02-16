@@ -66,7 +66,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
         }
 
         try {
-            String scripts = JSONGenerator.generateJSON(getEnv().getMatchedWorkbook());
+            String scripts = JSONGenerator.generateJSON(getEnv().getMatchedWorkbook(), getEnv().getScrambles());
             fTextArea.setText(scripts);
 
             fDialog.setLocationRelativeTo(getEnv().getTopLevelComponent());

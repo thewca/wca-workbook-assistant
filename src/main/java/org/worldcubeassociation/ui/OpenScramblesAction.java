@@ -13,19 +13,19 @@ import org.worldcubeassociation.WorkbookAssistantEnv;
 /**
  * @author Lars Vandenbergh
  */
-public class OpenWorkbookAction extends AbstractAction {
+public class OpenScramblesAction extends AbstractAction {
 
     private Executor fExecutor = Executors.newSingleThreadExecutor();
     private WorkbookAssistantEnv fEnv;
     private JFileChooser fFileChooser;
 
-    public OpenWorkbookAction(WorkbookAssistantEnv aEnv) {
+    public OpenScramblesAction(WorkbookAssistantEnv aEnv) {
         super("Open...");
         fEnv = aEnv;
 
         fFileChooser = new JFileChooser();
-        fFileChooser.setMultiSelectionEnabled(false);
-        fFileChooser.setFileFilter(new WorkbookFileFilter());
+        fFileChooser.setMultiSelectionEnabled(true);
+        fFileChooser.setFileFilter(new ExtensionFileFilter("TNoodle Scrambles", ".zip", ".json"));
     }
 
 
@@ -34,14 +34,13 @@ public class OpenWorkbookAction extends AbstractAction {
         int choice = fFileChooser.showOpenDialog(fEnv.getTopLevelComponent());
 
         if (choice == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fFileChooser.getSelectedFile();
-            open(selectedFile);
+            File[] selectedFiles = fFileChooser.getSelectedFiles();
+            open(selectedFiles);
         }
     }
 
-    public void open(File aSelectedFile) {
-        fExecutor.execute(new OpenWorkbookRunnable(aSelectedFile, null, fEnv));
+    public void open(File[] aSelectedFiles) {
+        fExecutor.execute(new OpenWorkbookRunnable(null, aSelectedFiles, fEnv));
     }
-
 
 }

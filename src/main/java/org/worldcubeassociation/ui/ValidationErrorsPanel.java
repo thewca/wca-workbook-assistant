@@ -93,6 +93,9 @@ public class ValidationErrorsPanel extends JTable implements PropertyChangeListe
         if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
+        else if (WorkbookAssistantEnv.SCRAMBLES.equals(aPropertyChangeEvent.getPropertyName())) {
+        	updateTable();
+        }
         else if (WorkbookAssistantEnv.MATCHED_SELECTED_SHEET.equals(aPropertyChangeEvent.getPropertyName()) &&
                 fView == View.SHEET) {
             updateTable();

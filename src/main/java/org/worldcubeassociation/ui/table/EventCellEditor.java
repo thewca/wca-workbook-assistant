@@ -47,14 +47,14 @@ public class EventCellEditor extends DefaultCellEditor {
         if (newEvent != oldEvent) {
             fMatchedSheet.setEvent(newEvent);
             if (oldEvent != null) {
-                WorkbookValidator.validateSheetsForEvent(fEnv.getMatchedWorkbook(), oldEvent, fEnv.getDatabase());
+                WorkbookValidator.validateSheetsForEvent(fEnv.getMatchedWorkbook(), oldEvent, fEnv.getDatabase(), fEnv.getScrambles());
             }
             if (newEvent != null) {
-                WorkbookValidator.validateSheetsForEvent(fEnv.getMatchedWorkbook(), newEvent, fEnv.getDatabase());
+                WorkbookValidator.validateSheetsForEvent(fEnv.getMatchedWorkbook(), newEvent, fEnv.getDatabase(), fEnv.getScrambles());
             }
             else{
                 // Make sure the sheet gets validated anyhow.
-                WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase());
+                WorkbookValidator.validateSheet(fMatchedSheet, fEnv.getMatchedWorkbook(), fEnv.getDatabase(), fEnv.getScrambles());
             }
             fEnv.fireSheetChanged(fMatchedSheet);
         }
