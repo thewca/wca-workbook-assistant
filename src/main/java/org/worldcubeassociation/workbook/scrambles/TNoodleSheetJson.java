@@ -17,9 +17,7 @@ public class TNoodleSheetJson {
 		WcaSheetJson wcaSheet = new WcaSheetJson();
 		wcaSheet.scrambles = scrambles;
 		wcaSheet.extraScrambles = extraScrambles;
-		wcaSheet.round = matchedSheet.getRound().getCode();
 		wcaSheet.group = group;
-		wcaSheet.event = event;
 		return wcaSheet;
 	}
 }

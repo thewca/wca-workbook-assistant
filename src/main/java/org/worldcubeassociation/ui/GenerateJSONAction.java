@@ -77,6 +77,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
                     "An unexpected validation error occurred in one of the sheets!",
                     "Generate JSON",
                     JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
