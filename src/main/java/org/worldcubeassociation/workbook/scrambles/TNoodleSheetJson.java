@@ -1,6 +1,7 @@
 package org.worldcubeassociation.workbook.scrambles;
 
 import org.worldcubeassociation.workbook.MatchedSheet;
+import org.worldcubeassociation.workbook.wcajson.WcaGroupJson;
 
 public class TNoodleSheetJson {
 	public String[] scrambles;
@@ -13,8 +14,8 @@ public class TNoodleSheetJson {
 	public String event;
 	public int round;
 	
-	public WcaSheetJson toWcaSheetJson(MatchedSheet matchedSheet) {
-		WcaSheetJson wcaSheet = new WcaSheetJson();
+	public WcaGroupJson toWcaSheetJson(MatchedSheet matchedSheet) {
+		WcaGroupJson wcaSheet = new WcaGroupJson();
 		wcaSheet.scrambles = scrambles;
 		wcaSheet.extraScrambles = extraScrambles;
 		wcaSheet.group = group;

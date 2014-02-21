@@ -18,11 +18,11 @@ public enum Round {
     FINAL("Final", "f", 6, false);
 
     private String fDisplayName;
-    private Object fCode;
+    private String fCode;
     private int fRoundType;
     private boolean fCombined;
 
-    private Round(String aDisplayName, Object aCode, int aRoundType, boolean aCombined) {
+    private Round(String aDisplayName, String aCode, int aRoundType, boolean aCombined) {
         fDisplayName = aDisplayName;
         fCode = aCode;
         fRoundType = aRoundType;
@@ -34,7 +34,7 @@ public enum Round {
         return fDisplayName;
     }
 
-    public Object getCode() {
+    public String getCode() {
         return fCode;
     }
 
