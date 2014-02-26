@@ -3,7 +3,12 @@ package org.worldcubeassociation.workbook;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -14,7 +19,12 @@ import org.worldcubeassociation.workbook.parse.RowTokenizer;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
 import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
-import org.worldcubeassociation.workbook.scrambles.WcaSheetJson;
+import org.worldcubeassociation.workbook.wcajson.WcaCompetitionJson;
+import org.worldcubeassociation.workbook.wcajson.WcaEventJson;
+import org.worldcubeassociation.workbook.wcajson.WcaGroupJson;
+import org.worldcubeassociation.workbook.wcajson.WcaPersonJson;
+import org.worldcubeassociation.workbook.wcajson.WcaResultJson;
+import org.worldcubeassociation.workbook.wcajson.WcaRoundJson;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,9 +50,12 @@ public class JSONGenerator {
         while (scanner.hasNext()) {
             String countryId = scanner.next();
             String iso3166Code = scanner.next();
-            scanner.next();
+            if(scanner.hasNext()) {
+            	scanner.next();
+            }
             sCountryCodes.put(countryId, iso3166Code);
         }
+        scanner.close();
     }
 
     public static String generateJSON(MatchedWorkbook aMatchedWorkbook, Scrambles scrambles) throws ParseException {
@@ -57,16 +70,16 @@ public class JSONGenerator {
         // We disable HTML escaping so scrambles look a little prettier.
         Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
-        HashMap<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("formatVersion", aVersion.toString());
-        jsonObject.put("persons", generatePersons(aMatchedWorkbook));
-        jsonObject.put("results", generateResults(aMatchedWorkbook));
-        jsonObject.put("scrambleProgram", scrambles.getScrambleProgram());
-        return GSON.toJson(jsonObject);
+        WcaCompetitionJson competitionJson = new WcaCompetitionJson();
+        competitionJson.formatVersion = aVersion.toString();
+        competitionJson.persons = generatePersons(aMatchedWorkbook);
+        competitionJson.events = generateEvents(aMatchedWorkbook);
+        competitionJson.scrambleProgram = scrambles == null ? null : scrambles.getScrambleProgram();
+        return GSON.toJson(competitionJson);
     }
 
-    private static List<Object> generateResults(MatchedWorkbook aMatchedWorkbook) throws ParseException {
-        ArrayList<Object> events = new ArrayList<Object>();
+    private static WcaEventJson[] generateEvents(MatchedWorkbook aMatchedWorkbook) throws ParseException {
+        ArrayList<WcaEventJson> events = new ArrayList<WcaEventJson>();
 
         // Group results sheets by event.
         HashMap<Event, List<MatchedSheet>> sheetsByEvent = new HashMap<Event, List<MatchedSheet>>();
@@ -85,63 +98,66 @@ public class JSONGenerator {
         // Output events.
         List<RegisteredPerson> persons = aMatchedWorkbook.getPersons();
         for (Map.Entry<Event, List<MatchedSheet>> eventListEntry : sheetsByEvent.entrySet()) {
-            Object event = generateEventJson(eventListEntry.getKey(), eventListEntry.getValue(), persons);
+        	WcaEventJson event = generateEventJson(eventListEntry.getKey(), eventListEntry.getValue(), persons);
             events.add(event);
         }
 
-        return events;
+        return events.toArray(new WcaEventJson[0]);
     }
 
-    private static Object generateEventJson(Event aEvent,
+    private static WcaEventJson generateEventJson(Event aEvent,
                                             List<MatchedSheet> aRoundSheets,
                                             List<RegisteredPerson> aPersons) throws ParseException {
-        HashMap<String, Object> event = new HashMap<String, Object>();
+    	WcaEventJson event = new WcaEventJson();
 
-        event.put("eventId", aEvent.getCode());
-        event.put("rounds", generateRoundsJson(aRoundSheets, aPersons));
+    	event.eventId = aEvent.getCode();
+    	event.rounds = generateRoundsJson(aRoundSheets, aPersons);
 
         return event;
     }
 
-    private static List<Object> generateRoundsJson(List<MatchedSheet> aRoundSheets,
+    private static WcaRoundJson[] generateRoundsJson(List<MatchedSheet> aRoundSheets,
                                                    List<RegisteredPerson> aPersons) throws ParseException {
-        ArrayList<Object> rounds = new ArrayList<Object>();
+        ArrayList<WcaRoundJson> rounds = new ArrayList<WcaRoundJson>();
 
         for (MatchedSheet roundSheet : aRoundSheets) {
-            Object round = generateRound(roundSheet, aPersons);
+            WcaRoundJson round = generateRound(roundSheet, aPersons);
             rounds.add(round);
         }
 
-        return rounds;
+        return rounds.toArray(new WcaRoundJson[0]);
     }
 
-    private static Object generateRound(MatchedSheet aRoundSheet,
+    private static WcaRoundJson generateRound(MatchedSheet aRoundSheet,
                                         List<RegisteredPerson> aPersons) throws ParseException {
-        HashMap<String, Object> round = new HashMap<String, Object>();
+    	WcaRoundJson round = new WcaRoundJson();
 
-        round.put("roundId", aRoundSheet.getRound().getCode());
-        round.put("formatId", aRoundSheet.getFormat().getCode());
-        round.put("results", generateResults(aRoundSheet, aPersons));
-        round.put("groups", generateGroups(aRoundSheet));
+        round.roundId = aRoundSheet.getRound().getCode();
+        round.formatId = aRoundSheet.getFormat().getCode();
+        round.results = generateResults(aRoundSheet, aPersons);
+        round.groups = generateGroups(aRoundSheet);
 
         return round;
     }
 
-    private static List<Object> generateGroups(MatchedSheet aRoundSheet) {
-        ArrayList<Object> groups = new ArrayList<Object>();
+    private static WcaGroupJson[] generateGroups(MatchedSheet aRoundSheet) {
+        ArrayList<WcaGroupJson> groups = new ArrayList<WcaGroupJson>();
 
         RoundScrambles roundScrambles = aRoundSheet.getRoundScrambles();
-        assert roundScrambles != null; // No validation errors means scrambles are set
+        if(roundScrambles == null) {
+        	// Not specifying scrambles is a low priority error, so it's possible for them to be null
+        	return null;
+        }
         for (TNoodleSheetJson sheet : roundScrambles.getSheetsByGroupId().values()) {
             groups.add(sheet.toWcaSheetJson(aRoundSheet));
         }
 
-        return groups;
+        return groups.toArray(new WcaGroupJson[0]);
     }
 
-    private static List<Object> generateResults(MatchedSheet aMatchedSheet,
+    private static WcaResultJson[] generateResults(MatchedSheet aMatchedSheet,
                                                 List<RegisteredPerson> aPersons) throws ParseException {
-        ArrayList<Object> results = new ArrayList<Object>();
+        ArrayList<WcaResultJson> results = new ArrayList<WcaResultJson>();
 
         Event event = aMatchedSheet.getEvent();
         Round round = aMatchedSheet.getRound();
@@ -160,9 +176,9 @@ public class JSONGenerator {
             RegisteredPerson person = new RegisteredPerson(-1, name, country, wcaId);
             int personId = aPersons.indexOf(person) + 1;
 
-            String position = CellParser.parseMandatoryText(row.getCell(0));
+            int position = Integer.parseInt(CellParser.parseMandatoryText(row.getCell(0)));
 
-            Long[] resultValues = new Long[format.getResultCount()];
+            long[] resultValues = new long[format.getResultCount()];
             for (int resultIdx = 1; resultIdx <= format.getResultCount(); resultIdx++) {
                 int resultCellCol = RowTokenizer.getResultCell(resultIdx, format, event, columnOrder);
                 Cell resultCell = row.getCell(resultCellCol);
@@ -171,7 +187,7 @@ public class JSONGenerator {
                         CellParser.parseMandatorySingleTime(resultCell, resultFormat, event, formulaEvaluator);
             }
 
-            Long bestResult;
+            long bestResult;
             if (format.getResultCount() > 1) {
                 int bestCellCol = RowTokenizer.getBestCell(format, event, columnOrder);
                 Cell bestResultCell = row.getCell(bestCellCol);
@@ -180,7 +196,7 @@ public class JSONGenerator {
                 bestResult = resultValues[0];
             }
 
-            Long averageResult;
+            long averageResult;
             if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5) {
                 int averageCellCol = RowTokenizer.getAverageCell(format, event);
                 Cell averageResultCell = row.getCell(averageCellCol);
@@ -192,41 +208,41 @@ public class JSONGenerator {
             }
 
             // Add result.
-            HashMap<String, Object> result = new HashMap<String, Object>();
-            result.put("personId", personId);
-            result.put("position", position);
-            result.put("results", resultValues);
-            result.put("best", bestResult);
-            result.put("average", averageResult);
+            WcaResultJson result = new WcaResultJson();
+            result.personId = personId;
+            result.position = position;
+            result.results = resultValues;
+            result.best = bestResult;
+            result.average = averageResult;
             results.add(result);
         }
 
-        return results;
+        return results.toArray(new WcaResultJson[0]);
     }
 
-    private static List<Object> generatePersons(MatchedWorkbook aMatchedWorkbook) {
+    private static WcaPersonJson[] generatePersons(MatchedWorkbook aMatchedWorkbook) {
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS &&
                     matchedSheet.getValidationErrors(Severity.HIGH).isEmpty()) {
                 // There is only one valid registrations sheet
-                return generateRegistrations(matchedSheet);
+                return generatePersons(matchedSheet);
             }
         }
         return null;
     }
 
-    public static List<Object> generateRegistrations(MatchedSheet aMatchedSheet) {
-        List<Object> persons = new ArrayList<Object>();
+    public static WcaPersonJson[] generatePersons(MatchedSheet aMatchedSheet) {
+        List<WcaPersonJson> persons = new ArrayList<WcaPersonJson>();
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = aMatchedSheet.getSheet().getRow(rowIdx);
             int personId = rowIdx - aMatchedSheet.getFirstDataRow() + 1;
-            HashMap<String, Object> person = generatePerson(aMatchedSheet, personId, row);
+            WcaPersonJson person = generatePerson(aMatchedSheet, personId, row);
             persons.add(person);
         }
-        return persons;
+        return persons.toArray(new WcaPersonJson[0]);
     }
 
-    private static HashMap<String, Object> generatePerson(MatchedSheet aMatchedSheet, int aPersonId, Row aRow) {
+    private static WcaPersonJson generatePerson(MatchedSheet aMatchedSheet, int aPersonId, Row aRow) {
         Cell nameCell = aRow.getCell(aMatchedSheet.getNameHeaderColumn());
         Cell wcaIdCell = aRow.getCell(aMatchedSheet.getWcaIdHeaderColumn());
         Cell countryCell = aRow.getCell(aMatchedSheet.getCountryHeaderColumn());
@@ -258,13 +274,13 @@ public class JSONGenerator {
         }
         String gender = CellParser.parseGender(genderCell).toString();
 
-        HashMap<String, Object> person = new HashMap<String, Object>();
-        person.put("id", aPersonId);
-        person.put("name", name);
-        person.put("wcaId", wcaId);
-        person.put("countryId", countryCode);
-        person.put("gender", gender);
-        person.put("dob", dob);
+        WcaPersonJson person = new WcaPersonJson();
+        person.id = aPersonId;
+        person.name = name;
+        person.wcaId = wcaId;
+        person.countryId = countryCode;
+        person.gender = gender;
+        person.dob = dob;
         return person;
     }
 

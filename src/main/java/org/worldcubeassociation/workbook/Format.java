@@ -13,9 +13,9 @@ public enum Format {
 
     private int fResultCount;
     private String fDisplayName;
-    private Object fCode;
+    private String fCode;
 
-    private Format(String aDisplayName, int aResultCount, Object aCode) {
+    private Format(String aDisplayName, int aResultCount, String aCode) {
         fDisplayName = aDisplayName;
         fResultCount = aResultCount;
         fCode = aCode;
@@ -30,7 +30,7 @@ public enum Format {
         return fDisplayName;
     }
 
-    public Object getCode() {
+    public String getCode() {
         return fCode;
     }
 }
