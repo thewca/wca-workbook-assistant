@@ -1,15 +1,7 @@
 package org.worldcubeassociation.workbook;
 
-import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -19,15 +11,12 @@ import org.worldcubeassociation.workbook.parse.RowTokenizer;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
 import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
-import org.worldcubeassociation.workbook.wcajson.WcaCompetitionJson;
-import org.worldcubeassociation.workbook.wcajson.WcaEventJson;
-import org.worldcubeassociation.workbook.wcajson.WcaGroupJson;
-import org.worldcubeassociation.workbook.wcajson.WcaPersonJson;
-import org.worldcubeassociation.workbook.wcajson.WcaResultJson;
-import org.worldcubeassociation.workbook.wcajson.WcaRoundJson;
+import org.worldcubeassociation.workbook.wcajson.*;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @author Lars Vandenbergh
@@ -71,8 +60,9 @@ public class JSONGenerator {
         Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
         WcaCompetitionJson competitionJson = new WcaCompetitionJson();
-        competitionJson.formatVersion = aVersion.toString();
+        competitionJson.competitionId = aMatchedWorkbook.getCompetitionId();
         competitionJson.persons = generatePersons(aMatchedWorkbook);
+        competitionJson.formatVersion = aVersion.toString();
         competitionJson.events = generateEvents(aMatchedWorkbook);
         competitionJson.scrambleProgram = scrambles == null ? null : scrambles.getScrambleProgram();
         return GSON.toJson(competitionJson);
