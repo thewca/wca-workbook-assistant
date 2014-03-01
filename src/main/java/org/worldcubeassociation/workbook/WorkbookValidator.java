@@ -707,7 +707,9 @@ public class WorkbookValidator {
         if(allCellsPresent) {
         	// If all time cells were filled in, the format of the round should *not* be combined.
         	if(aMatchedSheet.getRound().isCombined()) {
-        		validationErrors.add(new ValidationError(Severity.HIGH, "Sheet with all cells filled in should not be a combined format", aMatchedSheet, -1, -1));
+        		validationErrors.add(new ValidationError(Severity.HIGH,
+                        "Sheet with all cells filled in should not be a combined round",
+                        aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX));
         	}
         }
 
