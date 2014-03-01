@@ -41,6 +41,8 @@ public abstract class AbstractValidationErrorsTableModel extends AbstractTableMo
                     return "Round";
                 case ValidationError.SHEET_TYPE_CELL_IDX:
                     return "Sheet type";
+                case ValidationError.ROUND_SCRAMBLES_CELL_IDX:
+                	return "Scrambles";
             }
         }
         else if (cellIdx == -1) {

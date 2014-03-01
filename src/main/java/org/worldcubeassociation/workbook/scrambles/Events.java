@@ -1,28 +1,21 @@
 package org.worldcubeassociation.workbook.scrambles;
 
+import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Events {
 
 	private final HashMap<String, Rounds> roundsByEvent;
-	private final String source;
+	private final File source;
 	
-	public Events(String source) {
+	public Events(File source) {
 		roundsByEvent = new HashMap<String, Rounds>();
 		this.source = source;
 	}
 	
 	public Events(Collection<Events> eventsToCombine) {
-		StringBuilder sb = new StringBuilder();
-		for(Events events : eventsToCombine) {
-			sb.append(",");
-			sb.append(events.source);
-		}
-		int offset = (sb.length() > 0 ? 1 : 0);
-		this.source = sb.substring(offset);
+		this.source = null;
 		
 		this.roundsByEvent = new HashMap<String, Rounds>();
 		for(Events events : eventsToCombine) {

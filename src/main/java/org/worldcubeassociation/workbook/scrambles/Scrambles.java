@@ -32,7 +32,7 @@ public class Scrambles {
 		this.zipOpener = zipOpener;
 	}
 	
-	private HashMap<String, Events> eventsBySource;
+	private HashMap<File, Events> eventsBySource;
 	private Events mergedSources;
 	private String scrambleProgram;
 	
@@ -42,7 +42,7 @@ public class Scrambles {
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		for(String src : eventsBySource.keySet()) {
+		for(File src : eventsBySource.keySet()) {
 			sb.append(" ").append(src);
 		}
 		int offset = sb.length() > 0 ? 1 : 0;
@@ -79,28 +79,35 @@ public class Scrambles {
 	}
 	
 	public void setScrambles(File[] files) throws InvalidScramblesFileException {
-		HashMap<String, TNoodleScramblesJson> scrambles = new HashMap<String, TNoodleScramblesJson>();
+		HashMap<File, TNoodleScramblesJson> scrambles = new HashMap<File, TNoodleScramblesJson>();
 		for(File f : files) {
 			String[] filename_ext = Scrambles.splitext(f.getName());
-			String competitionName = filename_ext[0];
 			String ext = filename_ext[1].toLowerCase();
 			if(ext.endsWith(".zip")) {
 				try {
 					ZipFile zipFile = zipOpener.open(f);
-
-					String jsonFilename = competitionName + ".json";
-					FileHeader fileHeader = zipFile.getFileHeader(jsonFilename);
-					if(fileHeader == null) {
-						throw new InvalidScramblesFileException("Could not find " + jsonFilename + " in " + f.getAbsolutePath());
+					List<FileHeader> fileHeaders = zipFile.getFileHeaders();
+					FileHeader jsonFileHeader = null;
+					for(FileHeader fileHeader : fileHeaders) {
+						boolean isJson = fileHeader.getFileName().toLowerCase().endsWith(".json");
+						if(isJson) {
+							if(jsonFileHeader != null) {
+								throw new InvalidScramblesFileException("Found more than one json file in " + f.getAbsolutePath());
+							}
+							jsonFileHeader = fileHeader;
+						}
 					}
-					ZipInputStream is = zipFile.getInputStream(fileHeader);
+					if(jsonFileHeader == null) {
+						throw new InvalidScramblesFileException("Couldn't find any json files in " + f.getAbsolutePath());
+					}
+					ZipInputStream is = zipFile.getInputStream(jsonFileHeader);
 
 					try {
 						TNoodleScramblesJson gs = parseJsonScrambles(is, f.getAbsolutePath());
 						is.close();
-						scrambles.put(f.getAbsolutePath(), gs);
+						scrambles.put(f, gs);
 					} catch (IOException e) {
-						throw new InvalidScramblesFileException("Exception reading " + fileHeader + " in " + f.getAbsolutePath(), e);
+						throw new InvalidScramblesFileException("Exception reading " + jsonFileHeader + " in " + f.getAbsolutePath(), e);
 					}
 				} catch (ZipException e) {
 					throw new InvalidScramblesFileException("Exception reading " + f.getAbsolutePath(), e);
@@ -110,7 +117,7 @@ public class Scrambles {
 					FileInputStream fis = new FileInputStream(f);
 					TNoodleScramblesJson gs = parseJsonScrambles(fis, f.getAbsolutePath());
 					fis.close();
-					scrambles.put(f.getAbsolutePath(), gs);
+					scrambles.put(f, gs);
 				} catch(FileNotFoundException e) {
 					throw new InvalidScramblesFileException("File not found: " + f.getAbsolutePath(), e);
 				} catch(IOException e) {
@@ -121,9 +128,9 @@ public class Scrambles {
 			}
 		}
 		
-		eventsBySource = new HashMap<String, Events>();
+		eventsBySource = new HashMap<File, Events>();
 		scrambleProgram = null;
-		for(String source : scrambles.keySet()) {
+		for(File source : scrambles.keySet()) {
 			TNoodleScramblesJson scrambleSource = scrambles.get(source);
 			if(scrambleProgram == null) {
 				scrambleProgram = scrambleSource.version;
