@@ -286,10 +286,10 @@ public class WorkbookAssistantFrame extends JFrame {
         c.weightx = 0;
         c.anchor = GridBagConstraints.EAST;
         panel.add(new JButton(new GenerateScriptsAction(fEnv,
-                "Generate Results...",
+                "Generate results SQL...",
                 SheetType.RESULTS)), c);
         panel.add(new JButton(new GenerateScriptsAction(fEnv,
-                "Generate Persons...",
+                "Generate persons SQL...",
                 SheetType.REGISTRATIONS)), c);
         c.insets.right = 4;
         panel.add(new JButton(new GenerateJSONAction(fEnv)), c);

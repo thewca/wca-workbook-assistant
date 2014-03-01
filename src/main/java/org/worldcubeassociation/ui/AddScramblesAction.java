@@ -25,7 +25,7 @@ public class AddScramblesAction extends AbstractAction {
 
         fFileChooser = new JFileChooser();
         fFileChooser.setMultiSelectionEnabled(true);
-        fFileChooser.setFileFilter(new ExtensionFileFilter("TNoodle Scrambles", ".zip", ".json"));
+        fFileChooser.setFileFilter(new ExtensionFileFilter("TNoodle scrambles", ".zip", ".json"));
         fFileChooser.setDialogTitle("Open scrambles");
     }
 

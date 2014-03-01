@@ -40,7 +40,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
     private JTextArea fTextArea;
 
     public GenerateJSONAction(WorkbookAssistantEnv aEnv) {
-        super("Generate JSON...", aEnv);
+        super("Generate competition JSON...", aEnv);
 
         initUI();
         updateEnabledState();
@@ -49,7 +49,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
     private void initUI() {
     	// Without this magic, on Windows, JDialog's will be resized so large that they
     	// get hidden underneath the task bar. See http://stackoverflow.com/a/6422995
-        fDialog = new JDialog(getEnv().getTopLevelComponent(), "Generate JSON", Dialog.ModalityType.APPLICATION_MODAL) {
+        fDialog = new JDialog(getEnv().getTopLevelComponent(), "Generate competition JSON", Dialog.ModalityType.APPLICATION_MODAL) {
             @Override
             public void setBounds(int x, int y, int width, int height) {
                 Rectangle bounds = getSafeScreenBounds(new Point(x, y));
@@ -185,7 +185,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
             e.printStackTrace();
             JOptionPane.showMessageDialog(getEnv().getTopLevelComponent(),
                     "An unexpected validation error occurred in one of the sheets!",
-                    "Generate JSON",
+                    "Generate competition JSON",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -193,14 +193,18 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
     private class SaveAction extends AbstractAction {
 
         private SaveAction() {
-            super("Save");
+            super("Save as...");
         }
 
         @Override
         public void actionPerformed(ActionEvent aActionEvent) {
         	final JFileChooser fc = new JFileChooser();
-        	ExtensionFileFilter jsonFileFilter = new ExtensionFileFilter("json", ".json");
+            fc.setDialogTitle("Save competition JSON");
+        	ExtensionFileFilter jsonFileFilter = new ExtensionFileFilter("Competition JSON", ".json");
         	fc.setFileFilter(jsonFileFilter);
+            String jsonFileName = getEnv().getMatchedWorkbook().getCompetitionId() + ".json";
+            fc.setSelectedFile(new File(jsonFileName));
+
         	int returnVal = fc.showSaveDialog(getEnv().getTopLevelComponent());
         	if(returnVal == JFileChooser.APPROVE_OPTION) {
         		File f = fc.getSelectedFile();
@@ -218,9 +222,9 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
 				} catch (IOException e) {
 		            e.printStackTrace();
 		            JOptionPane.showMessageDialog(getEnv().getTopLevelComponent(),
-		                    "An error occurred while trying to write to " +  f.getAbsolutePath() + "!",
-		                    "Save JSON",
-		                    JOptionPane.ERROR_MESSAGE);
+                            "An error occurred while trying to write to " + f.getAbsolutePath() + "!",
+                            "Save competition JSON",
+                            JOptionPane.ERROR_MESSAGE);
                 } finally {
 					if(pw != null) {
 						pw.close();
