@@ -207,16 +207,31 @@ public class WorkbookValidator {
         } else {
         	// The round has scrambles, lets make sure we have the correct number of scrambles.
         	HashMap<String, TNoodleSheetJson> sheetsByGroupId = roundScrambles.getSheetsByGroupId();
-        	for(String groupId : sheetsByGroupId.keySet()) {
-        		TNoodleSheetJson sheet = sheetsByGroupId.get(groupId);
-        		int actualCount = sheet.scrambles.length;
-        		int expectedCount = aMatchedSheet.getFormat().getResultCount();
-        		if(actualCount != expectedCount) {
-        			String msg = "Incorrect number of scrambles in group: " + groupId + " (found: " + actualCount + ", expected: " + expectedCount + ")";
-        			ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
-        			aMatchedSheet.getValidationErrors().add(missingScramblesError);
-        		}
-        	}
+
+        	// ***** HACK ALERT *****
+        	// Here we assume that the groups generated for multiblind were used for each of the attempts.
+        	// See https://github.com/cubing/wca-workbook-assistant/issues/74#issuecomment-36166131 for
+        	// the full discussion.
+    		if(aMatchedSheet.getEvent() == Event._333mbf) {
+    			int actualCount = new ArrayList<String>(sheetsByGroupId.keySet()).size();
+				int expectedCount = aMatchedSheet.getFormat().getResultCount();
+				if(actualCount != expectedCount) {
+					String msg = "Incorrect number of attempts (groups are treated as attempts) for " + aMatchedSheet.getEventId() + " round: " + aMatchedSheet.getRound() + " (found: " + actualCount + ", expected: " + expectedCount + ")";
+					ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+					aMatchedSheet.getValidationErrors().add(missingScramblesError);
+				}
+    		} else {
+    			for(String groupId : sheetsByGroupId.keySet()) {
+    				TNoodleSheetJson sheet = sheetsByGroupId.get(groupId);
+    				int actualCount = sheet.scrambles.length;
+    				int expectedCount = aMatchedSheet.getFormat().getResultCount();
+    				if(actualCount != expectedCount) {
+    					String msg = "Incorrect number of scrambles in group: " + groupId + " (found: " + actualCount + ", expected: " + expectedCount + ")";
+    					ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+    					aMatchedSheet.getValidationErrors().add(missingScramblesError);
+    				}
+    			}
+    		}
 
             // Check for duplicate scrambles.
             List<MatchedSheet> sheets = aMatchedWorkbook.sheets();
