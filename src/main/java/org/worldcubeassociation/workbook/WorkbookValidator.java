@@ -407,7 +407,8 @@ public class WorkbookValidator {
         int nbDataRows = aMatchedSheet.getLastDataRow() - aMatchedSheet.getFirstDataRow() + 1;
         Long[] bestResults = new Long[nbDataRows];
         Long[] averageResults = new Long[nbDataRows];
-
+        boolean allCellsPresent = true;
+        
         for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
             Row row = sheet.getRow(rowIdx + aMatchedSheet.getFirstDataRow());
             int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
@@ -449,6 +450,10 @@ public class WorkbookValidator {
                     allResultsInRowValid = false;
                     allRowsValid = false;
                 }
+            }
+            
+            if(!allResultsInRowPresent) {
+            	allCellsPresent = false;
             }
 
             // For multiple blindfolded, check that the score is calculated correctly.
@@ -697,6 +702,13 @@ public class WorkbookValidator {
                     validationErrors.add(new ValidationError(Severity.HIGH, "Misformatted average record", aMatchedSheet, sheetRow, averageRecordCellCol));
                 }
             }
+        }
+        
+        if(allCellsPresent) {
+        	// If all time cells were filled in, the format of the round should *not* be combined.
+        	if(aMatchedSheet.getRound().isCombined()) {
+        		validationErrors.add(new ValidationError(Severity.HIGH, "Sheet with all cells filled in should not be a combined format", aMatchedSheet, -1, -1));
+        	}
         }
 
         // Check sorting.
