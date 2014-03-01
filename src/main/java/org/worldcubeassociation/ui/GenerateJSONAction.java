@@ -14,9 +14,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -215,15 +213,15 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
         		}
         		PrintWriter pw = null;
 				try {
-					pw = new PrintWriter(f);
+					pw = new PrintWriter(f, "UTF-8");
 	        		pw.write(fTextArea.getText());
-				} catch (FileNotFoundException e) {
+				} catch (IOException e) {
 		            e.printStackTrace();
 		            JOptionPane.showMessageDialog(getEnv().getTopLevelComponent(),
 		                    "An error occurred while trying to write to " +  f.getAbsolutePath() + "!",
 		                    "Save JSON",
 		                    JOptionPane.ERROR_MESSAGE);
-				} finally {
+                } finally {
 					if(pw != null) {
 						pw.close();
 					}
