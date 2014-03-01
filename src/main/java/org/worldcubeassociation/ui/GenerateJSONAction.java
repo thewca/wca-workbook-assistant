@@ -14,13 +14,19 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -77,6 +83,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
         c.weightx = 1;
         c.weighty = 1;
         c.gridx = GridBagConstraints.REMAINDER;
+        c.anchor = GridBagConstraints.CENTER;
         fTextArea = new JTextArea(50, 150);
         fTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         fTextArea.setLineWrap(true);
@@ -89,8 +96,11 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
 
         c.weighty = 0;
         c.fill = GridBagConstraints.NONE;
-        c.anchor = GridBagConstraints.EAST;
-        fDialog.getContentPane().add(new JButton(new CopyAction()), c);
+        c.anchor = GridBagConstraints.LAST_LINE_END;
+        JPanel buttons = new JPanel();
+        fDialog.getContentPane().add(buttons, c);
+        buttons.add(new JButton(new CopyAction()));
+        buttons.add(new JButton(new SaveAction()));
 
         fDialog.pack();
     }
@@ -175,12 +185,53 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
             fDialog.setVisible(true);
         }
         catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(getEnv().getTopLevelComponent(),
                     "An unexpected validation error occurred in one of the sheets!",
                     "Generate JSON",
                     JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         }
+    }
+    
+    private class SaveAction extends AbstractAction {
+
+        private SaveAction() {
+            super("Save");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent aActionEvent) {
+        	final JFileChooser fc = new JFileChooser();
+        	ExtensionFileFilter jsonFileFilter = new ExtensionFileFilter("json", ".json");
+        	fc.setFileFilter(jsonFileFilter);
+        	int returnVal = fc.showSaveDialog(getEnv().getTopLevelComponent());
+        	if(returnVal == JFileChooser.APPROVE_OPTION) {
+        		File f = fc.getSelectedFile();
+        		if(fc.getFileFilter() == jsonFileFilter) {
+        			// Only append the .json extension when the user chose to save
+        			// the file as .json.
+        			if(!f.getPath().toLowerCase().endsWith(".json")) {
+        				f = new File(f.getPath() + ".json");
+        			}
+        		}
+        		PrintWriter pw = null;
+				try {
+					pw = new PrintWriter(f);
+	        		pw.write(fTextArea.getText());
+				} catch (FileNotFoundException e) {
+		            e.printStackTrace();
+		            JOptionPane.showMessageDialog(getEnv().getTopLevelComponent(),
+		                    "An error occurred while trying to write to " +  f.getAbsolutePath() + "!",
+		                    "Save JSON",
+		                    JOptionPane.ERROR_MESSAGE);
+				} finally {
+					if(pw != null) {
+						pw.close();
+					}
+				}
+        	}
+        }
+
     }
 
     private class CopyAction extends AbstractAction {
