@@ -1,14 +1,16 @@
 package org.worldcubeassociation.workbook.scrambles;
 
+import java.io.File;
 import java.util.HashMap;
 
 public class RoundScrambles {
 	
 	private HashMap<String, TNoodleSheetJson> sheetsByGroupId;
-	private final String source, eventId;
+	private final File source;
+	private final String eventId;
 	private final int roundId;
 	
-	public RoundScrambles(String source, String eventId, int roundId) {
+	public RoundScrambles(File source, String eventId, int roundId) {
 		sheetsByGroupId = new HashMap<String, TNoodleSheetJson>();
 		this.source = source;
 		this.eventId = eventId;
@@ -35,7 +37,7 @@ public class RoundScrambles {
 	}
 	
 	public String toString() {
-		return String.format("%s Round %s from %s", eventId, roundId, source);
+		return String.format("%s Round %s from %s", eventId, roundId, source.getName());
 	}
 	
 	public int getRoundId() {

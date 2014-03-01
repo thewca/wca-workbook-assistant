@@ -1,5 +1,6 @@
 package org.worldcubeassociation.workbook.scrambles;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,9 +8,10 @@ import java.util.List;
 public class Rounds {
 	
 	private HashMap<Integer, RoundScrambles> roundsByRoundId;
-	private final String source, eventId;
+	private final File source;
+	private final String eventId;
 	
-	public Rounds(String source, String eventId) {
+	public Rounds(File source, String eventId) {
 		roundsByRoundId = new HashMap<Integer, RoundScrambles>();
 		this.source = source;
 		this.eventId = eventId;
