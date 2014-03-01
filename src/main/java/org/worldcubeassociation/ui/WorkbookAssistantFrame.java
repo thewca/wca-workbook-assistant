@@ -5,6 +5,7 @@ import org.worldcubeassociation.workbook.MatchedWorkbook;
 import org.worldcubeassociation.workbook.SheetType;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -29,6 +30,17 @@ import java.net.URL;
 public class WorkbookAssistantFrame extends JFrame {
 
     private static final Icon REFRESH_ICON;
+    
+    /**
+     * If set, the workbook assistant will automatically attempt to open this file on startup.
+     * This is useful for development.
+    */
+    private static final File TEST_FILE = null;
+    /**
+     * If true, the workbook assistant will automatically open the JSON export dialog after
+     * parsing TEST_FILE. Does nothing if TEST_FILE is null. Weirdness may ensue if TEST_FILE cannot be parsed.
+     */
+    private static final boolean TEST_JSON_EXPORT = false;
 
     private WorkbookAssistantEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
@@ -56,6 +68,18 @@ public class WorkbookAssistantFrame extends JFrame {
         updateEnabledState();
 
         new DropTarget(getRootPane(), DnDConstants.ACTION_COPY, new DropTargetListener());
+        
+        if(TEST_FILE != null) {
+        	new OpenWorkbookRunnable(TEST_FILE, null, fEnv).run();
+        	if(TEST_JSON_EXPORT) {
+        		SwingUtilities.invokeLater(new Runnable() {
+        			@Override
+        			public void run() {
+        				new GenerateJSONAction(fEnv).actionPerformed(null);
+        			}
+        		});
+        	}
+        }
     }
 
     private void buildUI() {
