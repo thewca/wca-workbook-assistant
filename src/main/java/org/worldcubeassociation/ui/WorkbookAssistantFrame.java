@@ -33,7 +33,8 @@ public class WorkbookAssistantFrame extends JFrame {
     private WorkbookAssistantEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
     private OpenWorkbookAction fOpenWorkbookAction;
-    private OpenScramblesAction fOpenScramblesAction;
+    private AddScramblesAction fAddScramblesAction;
+    private RemoveScramblesAction fRemoveScramblesAction;
     private ValidationErrorsPanel fValidationErrorsPanel;
     private JComboBox fViewComboBox;
     private UpdateWCAExportAction fUpdateWCAExportAction;
@@ -43,6 +44,7 @@ public class WorkbookAssistantFrame extends JFrame {
                 getResource("org/worldcubeassociation/ui/refresh_icon.png");
         REFRESH_ICON = new ImageIcon(refreshURL);
     }
+
 
     public WorkbookAssistantFrame(WorkbookAssistantEnv aEnv) {
         super();
@@ -92,39 +94,61 @@ public class WorkbookAssistantFrame extends JFrame {
 
         GridBagConstraints c = new GridBagConstraints();
 
+        c.gridx = 0;
+        c.gridy = 0;
         c.weightx = 0;
         c.insets.top = 2;
         c.insets.bottom = 2;
         c.insets.left = 4;
         c.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(new JLabel("Workbook file:"), c);
+        panel.add(new JLabel("Workbook:"), c);
 
+        c.gridx++;
         c.weightx = 1;
         panel.add(new WorkbookFileTextField(fEnv), c);
 
+        c.gridx++;
         c.weightx = 0;
         fOpenWorkbookAction = new OpenWorkbookAction(fEnv);
         panel.add(new JButton(fOpenWorkbookAction), c);
-        
-        panel.add(new JLabel("Scrambles:"), c);
 
-        c.weightx = 1;
-        panel.add(new ScramblesFilesTextField(fEnv), c);
-
-        c.weightx = 0;
-        fOpenScramblesAction = new OpenScramblesAction(fEnv);
-        panel.add(new JButton(fOpenScramblesAction), c);
-
+        c.gridx++;
         panel.add(new JButton(new RefreshWorkbookAction(fEnv)), c);
 
+        c.gridx++;
         panel.add(new JSeparator(JSeparator.VERTICAL), c);
 
+        c.gridx++;
         panel.add(new JLabel("Competition ID:"), c);
 
+        c.gridx++;
         c.weightx = 1;
         c.insets.right = 4;
         panel.add(new CompetitionIdTextField(fEnv), c);
 
+        c.gridy++;
+        c.weightx = 0;
+        c.gridx = 0;
+        c.insets.right = 0;
+        panel.add(new JLabel("Scrambles:"), c);
+
+        c.gridx++;
+        c.weightx = 1;
+        c.gridheight = 2;
+        JScrollPane scrollPane = new JScrollPane();
+        ScramblesFilesField scramblesFilesTextField = new ScramblesFilesField(fEnv, scrollPane);
+        scrollPane.setViewportView(scramblesFilesTextField);
+        panel.add(scrollPane, c);
+
+        c.gridx++;
+        c.weightx = 0;
+        c.gridheight = 1;
+        fAddScramblesAction = new AddScramblesAction(fEnv);
+        panel.add(new JButton(fAddScramblesAction), c);
+
+        c.gridx++;
+        fRemoveScramblesAction = new RemoveScramblesAction(fEnv, scramblesFilesTextField);
+        panel.add(new JButton(fRemoveScramblesAction), c);
 
         return panel;
     }

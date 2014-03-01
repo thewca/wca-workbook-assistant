@@ -26,6 +26,7 @@ public class OpenWorkbookAction extends AbstractAction {
         fFileChooser = new JFileChooser();
         fFileChooser.setMultiSelectionEnabled(false);
         fFileChooser.setFileFilter(new WorkbookFileFilter());
+        fFileChooser.setDialogTitle("Open workbook");
     }
 
 

@@ -13,19 +13,20 @@ import org.worldcubeassociation.WorkbookAssistantEnv;
 /**
  * @author Lars Vandenbergh
  */
-public class OpenScramblesAction extends AbstractAction {
+public class AddScramblesAction extends AbstractAction {
 
     private Executor fExecutor = Executors.newSingleThreadExecutor();
     private WorkbookAssistantEnv fEnv;
     private JFileChooser fFileChooser;
 
-    public OpenScramblesAction(WorkbookAssistantEnv aEnv) {
-        super("Open...");
+    public AddScramblesAction(WorkbookAssistantEnv aEnv) {
+        super("Add...");
         fEnv = aEnv;
 
         fFileChooser = new JFileChooser();
         fFileChooser.setMultiSelectionEnabled(true);
         fFileChooser.setFileFilter(new ExtensionFileFilter("TNoodle Scrambles", ".zip", ".json"));
+        fFileChooser.setDialogTitle("Open scrambles");
     }
 
 
