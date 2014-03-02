@@ -2,10 +2,8 @@ package org.worldcubeassociation.ui;
 
 import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
-import org.worldcubeassociation.workbook.SheetType;
 
 import javax.swing.*;
-
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -45,7 +43,6 @@ public class WorkbookAssistantFrame extends JFrame {
 
     private WorkbookAssistantEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
-    private OpenWorkbookAction fOpenWorkbookAction;
     private ValidationErrorsPanel fValidationErrorsPanel;
     private JComboBox fViewComboBox;
     private UpdateWCAExportAction fUpdateWCAExportAction;
@@ -132,8 +129,8 @@ public class WorkbookAssistantFrame extends JFrame {
 
         c.gridx++;
         c.weightx = 0;
-        fOpenWorkbookAction = new OpenWorkbookAction(fEnv);
-        panel.add(new JButton(fOpenWorkbookAction), c);
+        OpenWorkbookAction openWorkbookAction = new OpenWorkbookAction(fEnv);
+        panel.add(new JButton(openWorkbookAction), c);
 
         c.gridx++;
         panel.add(new JButton(new RefreshWorkbookAction(fEnv)), c);
