@@ -3,6 +3,7 @@ package org.worldcubeassociation;
 import java.awt.Window;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.util.concurrent.Executor;
 
 import org.worldcubeassociation.db.Database;
@@ -35,7 +36,7 @@ public class WorkbookAssistantEnv {
     private Database fDatabase;
 
     private Window fTopLevelComponent;
-
+    private File fWorkingDirectory;
     private Executor fExecutor;
 
     public MatchedWorkbook getMatchedWorkbook() {
@@ -110,6 +111,14 @@ public class WorkbookAssistantEnv {
         Object oldValue = fFontSize;
         fFontSize = aFontSize;
         fPropertyChangeSupport.firePropertyChange(FONT_SIZE, oldValue, fFontSize);
+    }
+
+    public File getWorkingDirectory() {
+        return fWorkingDirectory;
+    }
+
+    public void setWorkingDirectory(File aWorkingDirectory) {
+        fWorkingDirectory = aWorkingDirectory;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener aListener) {

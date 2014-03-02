@@ -192,13 +192,15 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
     
     private class SaveAction extends AbstractAction {
 
+        private JFileChooser fc = new JFileChooser();
+
         private SaveAction() {
             super("Save as...");
         }
 
         @Override
         public void actionPerformed(ActionEvent aActionEvent) {
-        	final JFileChooser fc = new JFileChooser();
+            fc.setCurrentDirectory(getEnv().getWorkingDirectory());
             fc.setDialogTitle("Save competition JSON");
         	ExtensionFileFilter jsonFileFilter = new ExtensionFileFilter("Competition JSON", ".json");
         	fc.setFileFilter(jsonFileFilter);
@@ -206,6 +208,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
             fc.setSelectedFile(new File(jsonFileName));
 
         	int returnVal = fc.showSaveDialog(getEnv().getTopLevelComponent());
+            getEnv().setWorkingDirectory(fc.getCurrentDirectory());
         	if(returnVal == JFileChooser.APPROVE_OPTION) {
         		File f = fc.getSelectedFile();
         		if(fc.getFileFilter() == jsonFileFilter) {

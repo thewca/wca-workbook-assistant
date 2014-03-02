@@ -35,7 +35,9 @@ public class AddScramblesAction extends AbstractAction implements PropertyChange
 
     @Override
     public void actionPerformed(ActionEvent aActionEvent) {
+        fFileChooser.setCurrentDirectory(fEnv.getWorkingDirectory());
         int choice = fFileChooser.showOpenDialog(fEnv.getTopLevelComponent());
+        fEnv.setWorkingDirectory(fFileChooser.getCurrentDirectory());
 
         if (choice == JFileChooser.APPROVE_OPTION) {
             File[] selectedFiles = fFileChooser.getSelectedFiles();
