@@ -26,6 +26,7 @@ public class ScramblesFilesField extends JList<File> implements PropertyChangeLi
         fEnv.addPropertyChangeListener(this);
 
         updateContent();
+        updateEnabledState();
     }
 
     private void updateContent() {
@@ -48,10 +49,19 @@ public class ScramblesFilesField extends JList<File> implements PropertyChangeLi
         }
     }
 
+    private void updateEnabledState() {
+        boolean enabled = fEnv.getMatchedWorkbook() != null;
+        setEnabled(enabled);
+        setOpaque(enabled);
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
         if (WorkbookAssistantEnv.SCRAMBLES.equals(aPropertyChangeEvent.getPropertyName())) {
             updateContent();
+        }
+        else if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
+            updateEnabledState();
         }
     }
 

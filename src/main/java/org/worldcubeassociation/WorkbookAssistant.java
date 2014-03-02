@@ -9,6 +9,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
 
 /**
  * @author Lars Vandenbergh
@@ -20,6 +21,7 @@ public class WorkbookAssistant {
     public static void main(String[] args) {
         // Init environment.
         final WorkbookAssistantEnv workbookAssistantEnv = new WorkbookAssistantEnv();
+        workbookAssistantEnv.setExecutor(Executors.newSingleThreadExecutor());
         workbookAssistantEnv.setFontSize(11);
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_TITLE);
 

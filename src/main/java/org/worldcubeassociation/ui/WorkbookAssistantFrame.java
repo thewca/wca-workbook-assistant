@@ -23,6 +23,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * @author Lars Vandenbergh
@@ -30,11 +31,11 @@ import java.net.URL;
 public class WorkbookAssistantFrame extends JFrame {
 
     private static final Icon REFRESH_ICON;
-    
+
     /**
      * If set, the workbook assistant will automatically attempt to open this file on startup.
      * This is useful for development.
-    */
+     */
     private static final File TEST_FILE = null;
     /**
      * If true, the workbook assistant will automatically open the JSON export dialog after
@@ -45,8 +46,6 @@ public class WorkbookAssistantFrame extends JFrame {
     private WorkbookAssistantEnv fEnv;
     private SheetContentsPanel fSheetContentsPanel;
     private OpenWorkbookAction fOpenWorkbookAction;
-    private AddScramblesAction fAddScramblesAction;
-    private RemoveScramblesAction fRemoveScramblesAction;
     private ValidationErrorsPanel fValidationErrorsPanel;
     private JComboBox fViewComboBox;
     private UpdateWCAExportAction fUpdateWCAExportAction;
@@ -68,17 +67,17 @@ public class WorkbookAssistantFrame extends JFrame {
         updateEnabledState();
 
         new DropTarget(getRootPane(), DnDConstants.ACTION_COPY, new DropTargetListener());
-        
-        if(TEST_FILE != null) {
-        	new OpenWorkbookRunnable(TEST_FILE, null, fEnv).run();
-        	if(TEST_JSON_EXPORT) {
-        		SwingUtilities.invokeLater(new Runnable() {
-        			@Override
-        			public void run() {
-        				new GenerateJSONAction(fEnv).actionPerformed(null);
-        			}
-        		});
-        	}
+
+        if (TEST_FILE != null) {
+            new OpenWorkbookRunnable(TEST_FILE, null, fEnv).run();
+            if (TEST_JSON_EXPORT) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        new GenerateJSONAction(fEnv).actionPerformed(null);
+                    }
+                });
+            }
         }
     }
 
@@ -167,12 +166,12 @@ public class WorkbookAssistantFrame extends JFrame {
         c.gridx++;
         c.weightx = 0;
         c.gridheight = 1;
-        fAddScramblesAction = new AddScramblesAction(fEnv);
-        panel.add(new JButton(fAddScramblesAction), c);
+        AddScramblesAction addScramblesAction = new AddScramblesAction(fEnv);
+        panel.add(new JButton(addScramblesAction), c);
 
         c.gridx++;
-        fRemoveScramblesAction = new RemoveScramblesAction(fEnv, scramblesFilesTextField);
-        panel.add(new JButton(fRemoveScramblesAction), c);
+        RemoveScramblesAction removeScramblesAction = new RemoveScramblesAction(fEnv, scramblesFilesTextField);
+        panel.add(new JButton(removeScramblesAction), c);
 
         return panel;
     }
@@ -303,24 +302,65 @@ public class WorkbookAssistantFrame extends JFrame {
     }
 
     private class DropTargetListener extends DropTargetAdapter {
+
+        private WorkbookFileFilter workbookFileFilter = new WorkbookFileFilter();
+        private ScrambleFileFilter scrambleFileFilter = new ScrambleFileFilter();
+
         @Override
-        public void drop(DropTargetDropEvent aDropTargetDropEvent) {
+        public void drop(final DropTargetDropEvent aDropTargetDropEvent) {
             Transferable transferable = aDropTargetDropEvent.getTransferable();
             if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                 aDropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
                 try {
                     java.util.List transferData = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    File firstFile = (File) transferData.get(0);
-                    if (new WorkbookFileFilter().accept(firstFile)) {
-                        fOpenWorkbookAction.open(firstFile);
-                        aDropTargetDropEvent.getDropTargetContext().dropComplete(true);
-                    } else {
+
+                    File workbookFile = null;
+                    java.util.List<File> scrambleFiles = new ArrayList<File>();
+
+                    for (Object transferDataItem : transferData) {
+                        File file = (File) transferDataItem;
+                        if(workbookFileFilter.accept(file)){
+                            if(workbookFile == null){
+                                workbookFile = file;
+                            }
+                            else{
+                                // Can't have multiple workbooks at once.
+                                aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
+                                return;
+                            }
+                        }
+                        else if(scrambleFileFilter.accept(file)){
+                            scrambleFiles.add(file);
+                        }
+                        else{
+                            // Can't have files that are workbooks nor scramble files.
+                            aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
+                            return;
+                        }
+                    }
+
+                    File[] newScrambleFilesArray = scrambleFiles.size() == 0 ?
+                            null :
+                            scrambleFiles.toArray(new File[scrambleFiles.size()]);
+
+                    if (workbookFile == null && newScrambleFilesArray == null) {
+                        // We didn't find anything useful.
                         aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
                     }
-                } catch (UnsupportedFlavorException e) {
+                    else {
+                        // Open workbook and/or scramble files.
+                        fEnv.getExecutor().execute(new OpenWorkbookRunnable(workbookFile,
+                                newScrambleFilesArray, fEnv));
+
+                        // The drop worked, we need to make sure the drop is only completed after the files are opened.
+                        aDropTargetDropEvent.getDropTargetContext().dropComplete(true);
+                    }
+                }
+                catch (UnsupportedFlavorException e) {
                     e.printStackTrace();
                     aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                     aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
                 }

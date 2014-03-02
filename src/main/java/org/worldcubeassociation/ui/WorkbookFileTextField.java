@@ -32,7 +32,7 @@ public class WorkbookFileTextField extends JTextField implements PropertyChangeL
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
             updateContent();
         }
     }

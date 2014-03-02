@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * @author Lars Vandenbergh
@@ -24,7 +22,6 @@ public class UpdateWCAExportAction extends AbstractAction {
 
     private static final DecimalFormat FILE_SIZE_FORMAT = new DecimalFormat("0");
 
-    private Executor fExecutor = Executors.newSingleThreadExecutor();
     private WorkbookAssistantEnv fEnv;
     private JLabel fLabel;
     private ProgressDialog fProgressDialog;
@@ -40,7 +37,7 @@ public class UpdateWCAExportAction extends AbstractAction {
     public void actionPerformed(ActionEvent aActionEvent) {
         if (fLabel.isEnabled()) {
             fLabel.setEnabled(false);
-            fExecutor.execute(new UpdateWCAExportRunnable(aActionEvent.getActionCommand()));
+            fEnv.getExecutor().execute(new UpdateWCAExportRunnable(aActionEvent.getActionCommand()));
         }
     }
 

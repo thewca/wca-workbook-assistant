@@ -41,7 +41,7 @@ public class CompetitionIdTextField extends JTextField implements PropertyChange
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
             updateContent();
         }
     }

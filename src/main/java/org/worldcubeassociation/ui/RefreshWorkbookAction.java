@@ -70,7 +70,7 @@ public class RefreshWorkbookAction extends AbstractAction implements PropertyCha
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
             updateEnabledState();
         }
     }

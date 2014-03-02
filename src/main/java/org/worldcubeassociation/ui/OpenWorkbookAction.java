@@ -1,21 +1,16 @@
 package org.worldcubeassociation.ui;
 
+import org.worldcubeassociation.WorkbookAssistantEnv;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
-import javax.swing.AbstractAction;
-import javax.swing.JFileChooser;
-
-import org.worldcubeassociation.WorkbookAssistantEnv;
 
 /**
  * @author Lars Vandenbergh
  */
 public class OpenWorkbookAction extends AbstractAction {
 
-    private Executor fExecutor = Executors.newSingleThreadExecutor();
     private WorkbookAssistantEnv fEnv;
     private JFileChooser fFileChooser;
 
@@ -41,7 +36,7 @@ public class OpenWorkbookAction extends AbstractAction {
     }
 
     public void open(File aSelectedFile) {
-        fExecutor.execute(new OpenWorkbookRunnable(aSelectedFile, null, fEnv));
+        fEnv.getExecutor().execute(new OpenWorkbookRunnable(aSelectedFile, null, fEnv));
     }
 
 

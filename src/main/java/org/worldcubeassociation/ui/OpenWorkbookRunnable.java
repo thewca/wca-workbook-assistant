@@ -53,7 +53,7 @@ public class OpenWorkbookRunnable implements Runnable {
             	Workbook workbook = WorkbookFactory.create(fileInputStream);
             	fileInputStream.close();
 
-                updateStatus(25, "Matching sheets");
+                updateStatus(16, "Matching sheets");
                 matchedWorkbook = WorkbookMatcher.match(workbook, newWorkbookFile.getAbsolutePath());
             } else {
             	matchedWorkbook = fEnv.getMatchedWorkbook();
@@ -61,11 +61,12 @@ public class OpenWorkbookRunnable implements Runnable {
 
             Scrambles newScrambles;
             if (newScrambleFiles != null) {
-                updateStatus(0, "Loading scrambles");
+                updateStatus(33, "Loading scrambles");
 
-                // Start from current scramble files.
                 List<DecodedScrambleFile> decodedScrambleFiles = new ArrayList<DecodedScrambleFile>();
-                if(fEnv.getScrambles()!=null){
+
+                // Start from current scramble files when only opening scrambles.
+                if(fEnv.getScrambles()!=null && newWorkbookFile == null){
                     decodedScrambleFiles.addAll(fEnv.getScrambles().getDecodedScrambleFiles());
                 }
 
@@ -88,13 +89,19 @@ public class OpenWorkbookRunnable implements Runnable {
                 newScrambles = new Scrambles(decodedScrambleFiles);
 
             }
-            else{
-                newScrambles = fEnv.getScrambles();
+            else {
+                if (newWorkbookFile == null) {
+                    newScrambles = fEnv.getScrambles();
+                }
+                else {
+                    // Clear scrambles when opening a new workbook.
+                    newScrambles = new Scrambles(new ArrayList<DecodedScrambleFile>());
+                }
             }
 
-            if(matchedWorkbook != null) {
-                if(newScrambles != null) {
-                    updateStatus(33, "Matching scrambles");
+            if (matchedWorkbook != null) {
+                if (newScrambles != null) {
+                    updateStatus(40, "Matching scrambles");
                 	newScrambles.matchScrambles(matchedWorkbook);
                 }
 

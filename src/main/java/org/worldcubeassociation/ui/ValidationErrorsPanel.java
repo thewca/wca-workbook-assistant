@@ -90,7 +90,7 @@ public class ValidationErrorsPanel extends JTable implements PropertyChangeListe
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookAssistantEnv.MATCHED_WORKBOOK_PROPERTY.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
             updateTable();
         }
         else if (WorkbookAssistantEnv.SCRAMBLES.equals(aPropertyChangeEvent.getPropertyName())) {

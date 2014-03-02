@@ -3,6 +3,7 @@ package org.worldcubeassociation;
 import java.awt.Window;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.concurrent.Executor;
 
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.workbook.MatchedSheet;
@@ -14,7 +15,7 @@ import org.worldcubeassociation.workbook.scrambles.Scrambles;
  */
 public class WorkbookAssistantEnv {
 
-    public static final String MATCHED_WORKBOOK_PROPERTY = "matchedWorkbook";
+    public static final String MATCHED_WORKBOOK = "matchedWorkbook";
     public static final String MATCHED_SELECTED_SHEET = "matchedSelectedSheet";
     public static final String SHEET_CHANGED = "sheetChanged";
     public static final String SHEETS_CHANGED = "sheetsChanged";
@@ -35,6 +36,8 @@ public class WorkbookAssistantEnv {
 
     private Window fTopLevelComponent;
 
+    private Executor fExecutor;
+
     public MatchedWorkbook getMatchedWorkbook() {
         return fMatchedWorkbook;
     }
@@ -42,7 +45,7 @@ public class WorkbookAssistantEnv {
     public void setMatchedWorkbook(MatchedWorkbook aMatchedWorkbook) {
         Object oldValue = fMatchedWorkbook;
         fMatchedWorkbook = aMatchedWorkbook;
-        fPropertyChangeSupport.firePropertyChange(MATCHED_WORKBOOK_PROPERTY, oldValue, fMatchedWorkbook);
+        fPropertyChangeSupport.firePropertyChange(MATCHED_WORKBOOK, oldValue, fMatchedWorkbook);
     }
 
     public MatchedSheet getSelectedSheet() {
@@ -89,6 +92,14 @@ public class WorkbookAssistantEnv {
 
     public void setTopLevelComponent(Window aTopLevelComponent) {
         fTopLevelComponent = aTopLevelComponent;
+    }
+
+    public Executor getExecutor() {
+        return fExecutor;
+    }
+
+    public void setExecutor(Executor aExecutor) {
+        fExecutor = aExecutor;
     }
 
     public float getFontSize() {
