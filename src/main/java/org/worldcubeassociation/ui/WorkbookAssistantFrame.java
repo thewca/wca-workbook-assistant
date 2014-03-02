@@ -254,6 +254,12 @@ public class WorkbookAssistantFrame extends JFrame {
         JButton increaseFontSizeButton = new JButton(new IncreaseFontSizeAction(fEnv));
         panel.add(increaseFontSizeButton, c);
 
+        c.insets.left = 16;
+        JButton advancedButton = new JButton(new AdvancedAction(fEnv));
+        panel.add(advancedButton, c);
+
+        c.insets.left = 4;
+
         c.weightx = 1;
         c.anchor = GridBagConstraints.EAST;
         c.fill = GridBagConstraints.NONE;
@@ -284,12 +290,6 @@ public class WorkbookAssistantFrame extends JFrame {
 
         c.weightx = 0;
         c.anchor = GridBagConstraints.EAST;
-        panel.add(new JButton(new GenerateScriptsAction(fEnv,
-                "Generate results SQL...",
-                SheetType.RESULTS)), c);
-        panel.add(new JButton(new GenerateScriptsAction(fEnv,
-                "Generate persons SQL...",
-                SheetType.REGISTRATIONS)), c);
         c.insets.right = 4;
         panel.add(new JButton(new GenerateJSONAction(fEnv)), c);
 
