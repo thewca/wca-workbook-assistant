@@ -17,7 +17,7 @@ import java.util.SortedMap;
 public class Scrambles {
 
     private List<DecodedScrambleFile> decodedScrambleFiles;
-	private HashMap<File, Events> eventsBySource;
+	public HashMap<File, Events> eventsBySource;
 	private Events mergedSources;
 	private String scrambleProgram;
 
@@ -30,23 +30,10 @@ public class Scrambles {
         return decodedScrambleFiles;
     }
 
-    public String getScramblesSources() {
-		if(eventsBySource == null) {
-			return "";
-		}
-
-		StringBuilder sb = new StringBuilder();
-		for(File src : eventsBySource.keySet()) {
-			sb.append(" ").append(src);
-		}
-		int offset = sb.length() > 0 ? 1 : 0;
-		return sb.substring(offset);
-	}
-
 	public String getScrambleProgram() {
 		return scrambleProgram;
 	}
-
+	
     private void updateEvents() throws InvalidScramblesFileException {
         eventsBySource = new HashMap<File, Events>();
         scrambleProgram = null;

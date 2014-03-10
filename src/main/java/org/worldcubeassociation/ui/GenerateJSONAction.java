@@ -2,20 +2,15 @@ package org.worldcubeassociation.ui;
 
 import java.awt.Dialog;
 import java.awt.Font;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
-import java.io.*;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 import javax.swing.AbstractAction;
@@ -47,27 +42,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
     }
 
     private void initUI() {
-    	// Without this magic, on Windows, JDialog's will be resized so large that they
-    	// get hidden underneath the task bar. See http://stackoverflow.com/a/6422995
-        fDialog = new JDialog(getEnv().getTopLevelComponent(), "Generate competition JSON", Dialog.ModalityType.APPLICATION_MODAL) {
-            @Override
-            public void setBounds(int x, int y, int width, int height) {
-                Rectangle bounds = getSafeScreenBounds(new Point(x, y));
-                if (x < bounds.x) {
-                    x = bounds.x;
-                }
-                if (y < bounds.y) {
-                    y = bounds.y;
-                }
-                if (width > bounds.width) {
-                    width = (bounds.x + bounds.width) - x;
-                }
-                if (height > bounds.height) {
-                    height = (bounds.y + bounds.height) - y;
-                }
-                super.setBounds(x, y, width, height);
-            }
-        };
+        fDialog = new NicelySizedJDialog(getEnv().getTopLevelComponent(), "Generate competition JSON", Dialog.ModalityType.APPLICATION_MODAL);
         fDialog.getContentPane().setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -102,71 +77,6 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
         fDialog.pack();
     }
     
-
-    public static Rectangle getSafeScreenBounds(Point pos) {
-
-        Rectangle bounds = getScreenBoundsAt(pos);
-        Insets insets = getScreenInsetsAt(pos);
-
-        bounds.x += insets.left;
-        bounds.y += insets.top;
-        bounds.width -= (insets.left + insets.right);
-        bounds.height -= (insets.top + insets.bottom);
-
-        return bounds;
-
-    }
-
-    public static Insets getScreenInsetsAt(Point pos) {
-        GraphicsDevice gd = getGraphicsDeviceAt(pos);
-        Insets insets = null;
-        if (gd != null) {
-            insets = Toolkit.getDefaultToolkit().getScreenInsets(gd.getDefaultConfiguration());
-        }
-        return insets;
-    }
-
-    public static Rectangle getScreenBoundsAt(Point pos) {
-        GraphicsDevice gd = getGraphicsDeviceAt(pos);
-        Rectangle bounds = null;
-        if (gd != null) {
-            bounds = gd.getDefaultConfiguration().getBounds();
-        }
-        return bounds;
-    }
-
-    public static GraphicsDevice getGraphicsDeviceAt(Point pos) {
-
-        GraphicsDevice device = null;
-
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice lstGDs[] = ge.getScreenDevices();
-
-        ArrayList<GraphicsDevice> lstDevices = new ArrayList<GraphicsDevice>(lstGDs.length);
-
-        for (GraphicsDevice gd : lstGDs) {
-
-            GraphicsConfiguration gc = gd.getDefaultConfiguration();
-            Rectangle screenBounds = gc.getBounds();
-
-            if (screenBounds.contains(pos)) {
-
-                lstDevices.add(gd);
-
-            }
-
-        }
-
-        if (lstDevices.size() > 0) {
-            device = lstDevices.get(0);
-        } else {
-            device = ge.getDefaultScreenDevice();
-        }
-
-        return device;
-
-    }
-
     @Override
     public void actionPerformed(ActionEvent aActionEvent) {
         boolean approved = warnForErrors(Arrays.asList(SheetType.values()));

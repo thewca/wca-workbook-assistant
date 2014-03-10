@@ -44,4 +44,12 @@ public class RoundScrambles {
 		return roundId;
 	}
 
+    public void removeSheet(TNoodleSheetJson sheet) throws InvalidSheetException {
+        TNoodleSheetJson candidateSheet = sheetsByGroupId.get(sheet.group);
+        if(candidateSheet != sheet) {
+            throw new InvalidSheetException("Sheet " + sheet.toString() + " not found in " + toString());
+        }
+        sheetsByGroupId.remove(sheet.group);
+    }
+
 }

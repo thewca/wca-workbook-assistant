@@ -178,6 +178,10 @@ public class WorkbookAssistantFrame extends JFrame {
         c.gridx++;
         RemoveScramblesAction removeScramblesAction = new RemoveScramblesAction(fEnv, scramblesFilesTextField);
         panel.add(new JButton(removeScramblesAction), c);
+        
+        c.gridx++;
+        EditScramblesAction editScramblesAction = new EditScramblesAction(fEnv);
+        panel.add(new JButton(editScramblesAction), c);
 
         return panel;
     }
