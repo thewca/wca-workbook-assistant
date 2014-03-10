@@ -22,7 +22,7 @@ public class WorkbookAssistantEnv {
     public static final String SHEETS_CHANGED = "sheetsChanged";
     public static final String DATABASE = "database";
     public static final String FONT_SIZE = "fontSize";
-    public static final String SCRAMBLES = "database";
+    public static final String SCRAMBLES = "scrambles";
 
     private float fFontSize;
 

@@ -39,6 +39,11 @@ public class WorkbookAssistantFrame extends JFrame {
      * If true, the workbook assistant will automatically open the JSON export dialog after
      * parsing TEST_FILE. Does nothing if TEST_FILE is null. Weirdness may ensue if TEST_FILE cannot be parsed.
      */
+    private static final File[] TEST_SCRAMBLE_FILES = null;
+    /**
+     * If true, the workbook assistant will automatically open the JSON export dialog after
+     * parsing TEST_FILE. Does nothing if TEST_FILE is null. Weirdness may ensue if TEST_FILE cannot be parsed.
+     */
     private static final boolean TEST_JSON_EXPORT = false;
 
     private WorkbookAssistantEnv fEnv;
@@ -46,6 +51,7 @@ public class WorkbookAssistantFrame extends JFrame {
     private ValidationErrorsPanel fValidationErrorsPanel;
     private JComboBox fViewComboBox;
     private UpdateWCAExportAction fUpdateWCAExportAction;
+    private AddScramblesAction addScramblesAction;
 
     static {
         URL refreshURL = WorkbookAssistantFrame.class.getClassLoader().
@@ -67,14 +73,17 @@ public class WorkbookAssistantFrame extends JFrame {
 
         if (TEST_FILE != null) {
             new OpenWorkbookRunnable(TEST_FILE, null, fEnv).run();
-            if (TEST_JSON_EXPORT) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if(TEST_SCRAMBLE_FILES != null) {
+                        addScramblesAction.open(TEST_SCRAMBLE_FILES);
+                    }
+                    if (TEST_JSON_EXPORT) {
                         new GenerateJSONAction(fEnv).actionPerformed(null);
                     }
-                });
-            }
+                }
+            });
         }
     }
 
@@ -163,12 +172,16 @@ public class WorkbookAssistantFrame extends JFrame {
         c.gridx++;
         c.weightx = 0;
         c.gridheight = 1;
-        AddScramblesAction addScramblesAction = new AddScramblesAction(fEnv);
+        addScramblesAction = new AddScramblesAction(fEnv);
         panel.add(new JButton(addScramblesAction), c);
 
         c.gridx++;
         RemoveScramblesAction removeScramblesAction = new RemoveScramblesAction(fEnv, scramblesFilesTextField);
         panel.add(new JButton(removeScramblesAction), c);
+        
+        c.gridx++;
+        EditScramblesAction editScramblesAction = new EditScramblesAction(fEnv);
+        panel.add(new JButton(editScramblesAction), c);
 
         return panel;
     }

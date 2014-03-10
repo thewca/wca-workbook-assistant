@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class Events {
 
-	private final HashMap<String, Rounds> roundsByEvent;
+	public final HashMap<String, Rounds> roundsByEvent;
 	private final File source;
 	
 	public Events(File source) {
@@ -41,4 +41,5 @@ public class Events {
 	public Rounds getRoundsForEventIfExists(String eventId) {
 		return roundsByEvent.get(eventId);
 	}
+
 }
