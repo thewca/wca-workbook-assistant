@@ -33,4 +33,25 @@ public class TNoodleSheetJson {
 		wcaSheet.group = group;
 		return wcaSheet;
 	}
+	
+
+    /**
+     * Converts a integer n to the nth group string. Group strings are ordered as follows:
+     *  A, B, C, ..., Z, AA, AB, ...
+     */
+    public static String nthGroupToString(int n) {
+        int offset = n % 26;
+        n = (n / 26) - 1;
+        String group = "" + (char) ('A' + offset);
+        if(n >= 0) {
+            group = nthGroupToString(n) + group;
+        }
+        return group;
+    }
+    
+    public static void main(String... args) {
+        for(int i = 0; i < 100; i++) {
+            System.out.println(i + " " + nthGroupToString(i));
+        }
+    }
 }

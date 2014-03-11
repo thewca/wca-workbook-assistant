@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.workbook.MatchedSheet;
 import org.worldcubeassociation.workbook.MatchedWorkbook;
+import org.worldcubeassociation.workbook.WorkbookValidator;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
 
 /**
@@ -127,6 +128,11 @@ public class WorkbookAssistantEnv {
 
     public void removePropertyChangeListener(PropertyChangeListener aListener) {
         fPropertyChangeSupport.removePropertyChangeListener(aListener);
+    }
+
+    public void forceWorkbookRevalidation() {
+        WorkbookValidator.validate(getMatchedWorkbook(), getDatabase(), getScrambles());
+        fireSheetsChanged();
     }
 
 }

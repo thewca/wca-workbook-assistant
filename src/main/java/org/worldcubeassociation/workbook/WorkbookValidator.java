@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -205,21 +204,36 @@ public class WorkbookValidator {
         if(roundScrambles == null) {
             missingScrambles = true;
         } else {
-            missingScrambles = roundScrambles.getSheetsByGroupIdExcludingDeleted().size() == 0;
+            missingScrambles = roundScrambles.getSheetsExcludingDeleted().size() == 0;
         }
         if(missingScrambles) {
 	        ValidationError missingScramblesError = new ValidationError(Severity.LOW, "Missing scrambles", aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
 	        aMatchedSheet.getValidationErrors().add(missingScramblesError);
         } else {
         	// The round has scrambles, lets make sure we have the correct number of scrambles.
-        	HashMap<String, TNoodleSheetJson> sheetsByGroupId = roundScrambles.getSheetsByGroupIdExcludingDeleted();
+        	List<TNoodleSheetJson> scrambleSheets = roundScrambles.getSheetsExcludingDeleted();
 
+            // Check that that the groupIds for these scrambles are unique
+        	HashSet<String> seenGroupsIds = new HashSet<String>();
+        	HashSet<String> duplicateGroupIds = new HashSet<String>();
+        	for(TNoodleSheetJson scrambleSheet : scrambleSheets) {
+        	    if(seenGroupsIds.contains(scrambleSheet.group)) {
+        	        duplicateGroupIds.add(scrambleSheet.group);
+        	    }
+        	    seenGroupsIds.add(scrambleSheet.group);
+        	}
+        	for(String duplicateGroupId : duplicateGroupIds) {
+                String msg = "Duplicate scramble group " + duplicateGroupId;
+                ValidationError duplicateGroupError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+                aMatchedSheet.getValidationErrors().add(duplicateGroupError);
+        	}
+        	
         	// ***** HACK ALERT *****
         	// Here we assume that the groups generated for multiblind were used for each of the attempts.
         	// See https://github.com/cubing/wca-workbook-assistant/issues/74#issuecomment-36166131 for
         	// the full discussion.
     		if(aMatchedSheet.getEvent() == Event._333mbf) {
-    			int actualCount = new ArrayList<String>(sheetsByGroupId.keySet()).size();
+    			int actualCount = scrambleSheets.size();
 				int expectedCount = aMatchedSheet.getFormat().getResultCount();
 				if(actualCount != expectedCount) {
 					String msg = "Incorrect number of attempts (groups are treated as attempts) for " + aMatchedSheet.getEventId() + " round: " + aMatchedSheet.getRound() + " (found: " + actualCount + ", expected: " + expectedCount + ")";
@@ -227,12 +241,11 @@ public class WorkbookValidator {
 					aMatchedSheet.getValidationErrors().add(missingScramblesError);
 				}
     		} else {
-    			for(String groupId : sheetsByGroupId.keySet()) {
-    				TNoodleSheetJson sheet = sheetsByGroupId.get(groupId);
+    			for(TNoodleSheetJson sheet : scrambleSheets) {
     				int actualCount = sheet.scrambles.length;
     				int expectedCount = aMatchedSheet.getFormat().getResultCount();
     				if(actualCount != expectedCount) {
-    					String msg = "Incorrect number of scrambles in group: " + groupId + " (found: " + actualCount + ", expected: " + expectedCount + ")";
+    					String msg = "Incorrect number of scrambles in group: " + sheet.group + " (found: " + actualCount + ", expected: " + expectedCount + ")";
     					ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
     					aMatchedSheet.getValidationErrors().add(missingScramblesError);
     				}

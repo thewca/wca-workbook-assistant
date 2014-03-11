@@ -36,30 +36,44 @@ public class ScrambleSheetListCellRenderer extends JPanel implements TreeCellRen
                 && tree.getRowForPath(dropLocation.getPath()) == row) {
             selected |= (dropLocation.getPath().getLastPathComponent() == value);
         }
-        JLabel textLabel = new JLabel(value.toString());
-        if(selected) {
-            textLabel.setOpaque(true);
-            textLabel.setBackground(SELECTED_COLOR);
-            textLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        } else {
-            // Allocate space for when we are selected and we get a border.
-            textLabel.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        }
         
+        JLabel selectableLabel;
         removeAll();
         if(value instanceof SheetScramblesTreeNode) {
             SheetScramblesTreeNode node = (SheetScramblesTreeNode) value;
+            
             checkBox.setSelected(!node.sheet.deleted);
+            add(checkBox, BorderLayout.WEST);
+
+            JLabel effectiveGroupLabel = new JLabel("Group: " + node.sheet.group + " ");
+            Font boldFont = effectiveGroupLabel.getFont();
+            boldFont = new Font(boldFont.getName(), Font.BOLD, boldFont.getSize());
+            effectiveGroupLabel.setFont(boldFont);
+            add(effectiveGroupLabel, BorderLayout.CENTER);
+            
+            JLabel titleLabel = new JLabel(node.sheet.title + " from " + node.sheet.originalSource.getAbsolutePath());
             if(node.sheet.deleted) {
-                Font font = textLabel.getFont();
-                Map attributes = font.getAttributes();
+                Font strikethroughFont = titleLabel.getFont();
+                Map attributes = strikethroughFont.getAttributes();
                 attributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
                 Font newFont = new Font(attributes);
-                textLabel.setFont(newFont);
+                titleLabel.setFont(newFont);
             }
-            add(checkBox, BorderLayout.WEST);
+            add(titleLabel, BorderLayout.EAST);
+            
+            selectableLabel = effectiveGroupLabel;
+        } else {
+            selectableLabel = new JLabel(value.toString());
+            add(selectableLabel, BorderLayout.EAST);
         }
-        add(textLabel, BorderLayout.CENTER);
+        if(selected) {
+            selectableLabel.setOpaque(true);
+            selectableLabel.setBackground(SELECTED_COLOR);
+            selectableLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        } else {
+            // Allocate space for when we are selected and we get a border.
+            selectableLabel.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        }
         return this;
     }
     

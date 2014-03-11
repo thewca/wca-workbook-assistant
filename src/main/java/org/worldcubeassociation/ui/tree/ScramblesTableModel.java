@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -45,12 +46,11 @@ public class ScramblesTableModel extends DefaultTreeModel implements PropertyCha
                 ScrambleEventTreeNode eventNode = new ScrambleEventTreeNode(event);
                 sourceNode.add(eventNode);
                 for(RoundScrambles rs : rounds.asList()) {
-                    HashMap<String, TNoodleSheetJson> sheetsByGroupId = rs.getSheetsByGroupIdIncludingDeleted();
+                    List<TNoodleSheetJson> sheets = rs.getSheetsIncludingDeleted();
                     RoundScramblesTreeNode roundNode = new RoundScramblesTreeNode(rs);
                     eventNode.add(roundNode);
-                    for(String groupId : sheetsByGroupId.keySet()) {
-                        TNoodleSheetJson sheet = sheetsByGroupId.get(groupId);
-                        SheetScramblesTreeNode sheetNode = new SheetScramblesTreeNode(sheet, rs);
+                    for(TNoodleSheetJson sheet : sheets) {
+                        SheetScramblesTreeNode sheetNode = new SheetScramblesTreeNode(env, sheet, rs);
                         roundNode.add(sheetNode);
                     }
                 }
