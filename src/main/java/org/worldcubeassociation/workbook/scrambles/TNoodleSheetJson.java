@@ -22,6 +22,10 @@ public class TNoodleSheetJson {
 	// sources).
 	public File originalSource;
 	
+	// This doesn't come from TNoodle's json. This is written to by the edit scrambles gui, and lets
+	// people remove TNoodleSheetJson's from the JSON we send to the WCA.
+	public boolean deleted = false;
+	
 	public WcaGroupJson toWcaSheetJson(MatchedSheet matchedSheet) {
 		WcaGroupJson wcaSheet = new WcaGroupJson();
 		wcaSheet.scrambles = scrambles;

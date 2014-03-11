@@ -45,7 +45,7 @@ public class ScramblesTableModel extends DefaultTreeModel implements PropertyCha
                 ScrambleEventTreeNode eventNode = new ScrambleEventTreeNode(event);
                 sourceNode.add(eventNode);
                 for(RoundScrambles rs : rounds.asList()) {
-                    HashMap<String, TNoodleSheetJson> sheetsByGroupId = rs.getSheetsByGroupId();
+                    HashMap<String, TNoodleSheetJson> sheetsByGroupId = rs.getSheetsByGroupIdIncludingDeleted();
                     RoundScramblesTreeNode roundNode = new RoundScramblesTreeNode(rs);
                     eventNode.add(roundNode);
                     for(String groupId : sheetsByGroupId.keySet()) {

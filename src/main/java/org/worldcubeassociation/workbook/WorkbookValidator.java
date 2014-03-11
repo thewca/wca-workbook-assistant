@@ -201,12 +201,18 @@ public class WorkbookValidator {
         // Currently, we don't make any effort to notify users about unused scrambles,
         // or the same scrambles being applied to different rounds.  
         RoundScrambles roundScrambles = aMatchedSheet.getRoundScrambles();
+        boolean missingScrambles;
         if(roundScrambles == null) {
+            missingScrambles = true;
+        } else {
+            missingScrambles = roundScrambles.getSheetsByGroupIdExcludingDeleted().size() == 0;
+        }
+        if(missingScrambles) {
 	        ValidationError missingScramblesError = new ValidationError(Severity.LOW, "Missing scrambles", aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
 	        aMatchedSheet.getValidationErrors().add(missingScramblesError);
         } else {
         	// The round has scrambles, lets make sure we have the correct number of scrambles.
-        	HashMap<String, TNoodleSheetJson> sheetsByGroupId = roundScrambles.getSheetsByGroupId();
+        	HashMap<String, TNoodleSheetJson> sheetsByGroupId = roundScrambles.getSheetsByGroupIdExcludingDeleted();
 
         	// ***** HACK ALERT *****
         	// Here we assume that the groups generated for multiblind were used for each of the attempts.

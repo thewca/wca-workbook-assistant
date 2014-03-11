@@ -28,9 +28,19 @@ public class RoundScrambles {
 		sheetsByGroupId.put(sheet.group, sheet);
 	}
 	
-	public HashMap<String, TNoodleSheetJson> getSheetsByGroupId() {
+	public HashMap<String, TNoodleSheetJson> getSheetsByGroupIdIncludingDeleted() {
 		return new HashMap<String, TNoodleSheetJson>(sheetsByGroupId);
 	}
+    
+    public HashMap<String, TNoodleSheetJson> getSheetsByGroupIdExcludingDeleted() {
+        HashMap<String, TNoodleSheetJson> undeletedSheets = new HashMap<String, TNoodleSheetJson>();
+        for(TNoodleSheetJson sheetJson : sheetsByGroupId.values()) {
+            if(!sheetJson.deleted) {
+                undeletedSheets.put(sheetJson.group, sheetJson);
+            }
+        }
+        return undeletedSheets;
+    }
 	
 	public String getEventId() {
 		return eventId;

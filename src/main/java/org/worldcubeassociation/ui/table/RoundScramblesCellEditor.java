@@ -3,9 +3,6 @@ package org.worldcubeassociation.ui.table;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -13,12 +10,8 @@ import javax.swing.JTable;
 
 import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.workbook.MatchedSheet;
-import org.worldcubeassociation.workbook.ResultFormat;
 import org.worldcubeassociation.workbook.WorkbookValidator;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
-import org.worldcubeassociation.workbook.scrambles.Rounds;
-import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
-import org.worldcubeassociation.workbook.scrambles.Scrambles;
 
 /**
  * @author Lars Vandenbergh

@@ -3,13 +3,17 @@ package org.worldcubeassociation.ui.tree;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.sound.sampled.ReverbType;
 import javax.swing.DropMode;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -28,7 +32,7 @@ import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 /**
  * Copied from http://stackoverflow.com/a/4589122/1739415, with some changes.
  */
-public class TreeDragAndDrop {
+public class TreeDragAndDrop implements MouseListener {
 
     private final JScrollPane content;
     private final JTree tree;
@@ -44,13 +48,15 @@ public class TreeDragAndDrop {
                 return getRowCount();
             }
         };
+        tree.addMouseListener(this);
+        tree.setCellRenderer(new ScrambleSheetListCellRenderer());
         tree.setDragEnabled(true);
         tree.setDropMode(DropMode.INSERT);
         tree.setTransferHandler(new TreeTransferHandler(fEnv));
         tree.getSelectionModel().setSelectionMode(
                 TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         content = new JScrollPane(tree);
-        
+
         // If we don't force the vertical scroll bar to always be visible, then packing
         // will size us large enough that we don't need any scrollbars, and then our
         // NicelySizedJDialog will resize us to fit on the screen, which will induce
@@ -59,7 +65,7 @@ public class TreeDragAndDrop {
         // everything fit).
         content.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
-    
+
     public JScrollPane getContent() {
         return content;
     }
@@ -76,7 +82,47 @@ public class TreeDragAndDrop {
             tree.expandRow(row);
         }
     }
-    
+
+
+    private int hotspot = new JCheckBox().getPreferredSize().width; 
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+        if(path == null) {
+            return;
+        }
+        if(!(path.getLastPathComponent() instanceof SheetScramblesTreeNode)) {
+            return;
+        }
+        
+        SheetScramblesTreeNode sheetNode = (SheetScramblesTreeNode) path.getLastPathComponent();
+        
+        // Hack for detecting if the JCheckBox was clicked stolen from http://www.jroller.com/santhosh/date/20050610 
+        if(e.getX() <= tree.getPathBounds(path).x + hotspot) {
+            sheetNode.sheet.deleted = !sheetNode.sheet.deleted;
+            // Deleting a sheet may make the scrambles for a round invalid.
+            WorkbookValidator.validate(fEnv.getMatchedWorkbook(), fEnv.getDatabase(), fEnv.getScrambles());
+            fEnv.fireSheetsChanged();
+            tree.treeDidChange();
+        } else {
+            if(e.getClickCount() >= 2) {
+                // TODO - prompt the user to change the group id of this sheet
+            }
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {}
+
+    @Override
+    public void mouseExited(MouseEvent e) {}
+
+    @Override
+    public void mousePressed(MouseEvent e) {}
+
+    @Override
+    public void mouseReleased(MouseEvent e) {}
+
 }
 
 class TreeTransferHandler extends TransferHandler {
@@ -110,7 +156,7 @@ class TreeTransferHandler extends TransferHandler {
         JTree.DropLocation dl =
                 (JTree.DropLocation) support.getDropLocation();
         JTree tree = (JTree) support.getComponent();
-        
+
         // Only allow selected nodes to move to other locations at the same depth.
         // It is sufficient to look at the first selected node, as we only allow selections
         // where every node is at the same depth.
@@ -118,7 +164,7 @@ class TreeTransferHandler extends TransferHandler {
         if(dl.getPath().getPath().length != selectionPath.getPath().length - 1) {
             return false;
         }
-                
+
         int action = support.getDropAction();
         if(action == MOVE) {
             return canMoveNodes(tree);
