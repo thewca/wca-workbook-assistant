@@ -51,11 +51,7 @@ public class Scrambles {
             for(TNoodleSheetJson sheet : tNoodleScramblesJson.sheets) {
                 Rounds rounds = events.getRoundsForEvent(sheet.event);
                 RoundScrambles round = rounds.getRound(sheet.round);
-                try {
-                    round.addSheet(sheet);
-                } catch (InvalidSheetException e) {
-                    throw new InvalidScramblesFileException(e.getMessage(), e);
-                }
+                round.addSheet(sheet);
             }
         }
 

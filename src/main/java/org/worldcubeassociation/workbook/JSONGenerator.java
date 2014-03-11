@@ -138,7 +138,7 @@ public class JSONGenerator {
         	// Not specifying scrambles is a low priority error, so it's possible for them to be null
         	return null;
         }
-        for (TNoodleSheetJson sheet : roundScrambles.getSheetsByGroupId().values()) {
+        for (TNoodleSheetJson sheet : roundScrambles.getSheetsExcludingDeleted()) {
             groups.add(sheet.toWcaSheetJson(aRoundSheet));
         }
 
