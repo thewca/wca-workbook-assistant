@@ -23,7 +23,7 @@ public class EditScramblesAction extends AbstractAction implements PropertyChang
     private TreeDragAndDrop scrambleTree;
 
     public EditScramblesAction(WorkbookAssistantEnv aEnv) {
-        super("Edit...");
+        super("Edit groups...");
         fEnv = aEnv;
         aEnv.addPropertyChangeListener(this);
         initUI();
