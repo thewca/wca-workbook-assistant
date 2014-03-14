@@ -76,7 +76,7 @@ public class WorkbookAssistantFrame extends JFrame {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    if(TEST_SCRAMBLE_FILES != null) {
+                    if (TEST_SCRAMBLE_FILES != null) {
                         addScramblesAction.open(TEST_SCRAMBLE_FILES);
                     }
                     if (TEST_JSON_EXPORT) {
@@ -155,9 +155,16 @@ public class WorkbookAssistantFrame extends JFrame {
         c.insets.right = 4;
         panel.add(new CompetitionIdTextField(fEnv), c);
 
+        int fullWidth = c.gridx + 1;
+        c.gridwidth = fullWidth;
         c.gridy++;
-        c.weightx = 0;
         c.gridx = 0;
+        panel.add(new JSeparator(), c);
+
+        c.gridwidth = 1;
+        c.gridy++;
+        c.gridx = 0;
+        c.weightx = 0;
         c.insets.right = 0;
         panel.add(new JLabel("Scrambles:"), c);
 
@@ -178,10 +185,16 @@ public class WorkbookAssistantFrame extends JFrame {
         c.gridx++;
         RemoveScramblesAction removeScramblesAction = new RemoveScramblesAction(fEnv, scramblesFilesTextField);
         panel.add(new JButton(removeScramblesAction), c);
-        
+
         c.gridx++;
         EditScramblesAction editScramblesAction = new EditScramblesAction(fEnv);
         panel.add(new JButton(editScramblesAction), c);
+
+        c.gridwidth = fullWidth;
+        c.gridy++;
+        c.gridy++;
+        c.gridx = 0;
+        panel.add(new JSeparator(), c);
 
         return panel;
     }
@@ -329,20 +342,20 @@ public class WorkbookAssistantFrame extends JFrame {
 
                     for (Object transferDataItem : transferData) {
                         File file = (File) transferDataItem;
-                        if(workbookFileFilter.accept(file)){
-                            if(workbookFile == null){
+                        if (workbookFileFilter.accept(file)) {
+                            if (workbookFile == null) {
                                 workbookFile = file;
                             }
-                            else{
+                            else {
                                 // Can't have multiple workbooks at once.
                                 aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
                                 return;
                             }
                         }
-                        else if(scrambleFileFilter.accept(file)){
+                        else if (scrambleFileFilter.accept(file)) {
                             scrambleFiles.add(file);
                         }
-                        else{
+                        else {
                             // Can't have files that are workbooks nor scramble files.
                             aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
                             return;
@@ -374,7 +387,8 @@ public class WorkbookAssistantFrame extends JFrame {
                     e.printStackTrace();
                     aDropTargetDropEvent.getDropTargetContext().dropComplete(false);
                 }
-            } else {
+            }
+            else {
                 aDropTargetDropEvent.rejectDrop();
             }
         }
