@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.worldcubeassociation.workbook.parse.CellParser;
+import org.worldcubeassociation.workbook.parse.ParsedRecord;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
@@ -187,13 +188,33 @@ public class JSONGenerator {
             }
 
             long averageResult;
-            if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5) {
+            if (format == Format.MEAN_OF_3 || format == Format.AVERAGE_OF_5 ||
+                    (format == Format.BEST_OF_3 && columnOrder == ColumnOrder.BLD_WITH_MEAN)) {
                 int averageCellCol = RowTokenizer.getAverageCell(format, event);
                 Cell averageResultCell = row.getCell(averageCellCol);
                 averageResult = round.isCombined() ?
                         CellParser.parseOptionalAverageTime(averageResultCell, resultFormat, event, formulaEvaluator) :
                         CellParser.parseMandatoryAverageTime(averageResultCell, resultFormat, event, formulaEvaluator);
-            } else {
+            }
+            else if (format == Format.BEST_OF_3 && event == Event._333bf) {
+                Long[] threeResults = new Long[3];
+                for (int i = 0; i < threeResults.length; i++) {
+                    threeResults[i] = resultValues[i];
+                }
+                boolean allResultsPresent = true;
+                for (Long result : threeResults) {
+                    if (result == 0) {
+                        allResultsPresent = false;
+                    }
+                }
+                if (allResultsPresent) {
+                    averageResult = ResultsAggregator.calculateAverageResult(threeResults, format, event);
+                }
+                else {
+                    averageResult = 0L;
+                }
+            }
+            else {
                 averageResult = 0L;
             }
 
