@@ -86,6 +86,7 @@ public class WorkbookMatcher {
                     dataRow++;
                 }
                 if (combined) {
+                    // Make rounds combined if there are results missing.
                     if (round == Round.FIRST_ROUND) {
                         round = Round.COMBINED_FIRST_ROUND;
                     }
@@ -102,6 +103,26 @@ public class WorkbookMatcher {
                         round = Round.COMBINED_QUALIFICATION;
                     }
                     matchedSheet.setRound(round);
+                }
+                else{
+                    // Make rounds not combined if all results are there.
+                    if (round == Round.COMBINED_FIRST_ROUND) {
+                        round = Round.FIRST_ROUND;
+                    }
+                    else if (round == Round.COMBINED_SECOND_ROUND) {
+                        round = Round.SECOND_ROUND;
+                    }
+                    else if (round == Round.COMBINED_THIRD_ROUND) {
+                        round = Round.SEMI_FINAL;
+                    }
+                    else if (round == Round.COMBINED_FINAL) {
+                        round = Round.FINAL;
+                    }
+                    else if (round == Round.COMBINED_QUALIFICATION) {
+                        round = Round.QUALIFICATION_ROUND;
+                    }
+                    matchedSheet.setRound(round);
+
                 }
             }
         }
