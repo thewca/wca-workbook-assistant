@@ -11,6 +11,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,12 +37,12 @@ public class RemoveScramblesAction extends AbstractAction {
     }
 
     private void updateEnabledState() {
-        setEnabled(!fScramblesFilesField.getSelectedValuesList().isEmpty());
+        setEnabled(fScramblesFilesField.getSelectedIndices().length > 0);
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        List<File> selectedValuesList = fScramblesFilesField.getSelectedValuesList();
+        List<Object> selectedValuesList = Arrays.asList(fScramblesFilesField.getSelectedValues());
 
         Exception exception = null;
         try {

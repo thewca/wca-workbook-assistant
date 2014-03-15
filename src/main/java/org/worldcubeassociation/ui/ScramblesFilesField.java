@@ -14,7 +14,7 @@ import org.worldcubeassociation.workbook.scrambles.Scrambles;
 /**
  * @author Lars Vandenbergh
  */
-public class ScramblesFilesField extends JList<File> implements PropertyChangeListener {
+public class ScramblesFilesField extends JList implements PropertyChangeListener {
 
     private WorkbookAssistantEnv fEnv;
     private JScrollPane fScrollPane;
@@ -44,7 +44,10 @@ public class ScramblesFilesField extends JList<File> implements PropertyChangeLi
 
         Container parent = fScrollPane.getParent();
         if (parent != null) {
-            parent.revalidate();
+            // You can't call revalidate on a Container in java 6. It was introduced in
+            // java 7:
+            //  http://docs.oracle.com/javase/7/docs/api/java/awt/Component.html#revalidate()
+            //parent.revalidate();
             parent.repaint();
         }
     }
