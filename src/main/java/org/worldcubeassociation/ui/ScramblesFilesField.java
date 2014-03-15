@@ -42,9 +42,10 @@ public class ScramblesFilesField extends JList implements PropertyChangeListener
         setModel(listModel);
         setVisibleRowCount(listModel.size() == 0 ? 1 : listModel.size());
 
-        Container parent = fScrollPane.getParent();
-        if (parent != null) {
-            parent.repaint();
+        if (fScrollPane.getRootPane() != null) {
+            fScrollPane.invalidate();
+            fScrollPane.getRootPane().validate();
+            fScrollPane.repaint();
         }
     }
 
