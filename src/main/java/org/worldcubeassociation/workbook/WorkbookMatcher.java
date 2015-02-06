@@ -132,6 +132,11 @@ public class WorkbookMatcher {
         int lastIndexOfPoint = aFileName.lastIndexOf(".");
         if (lastIndexOfPoint != -1 && lastIndexOfSeparator != -1) {
             String competitionId = aFileName.substring(lastIndexOfSeparator + 1, lastIndexOfPoint);
+
+            int openBracket, closeBracket;
+            while ( (openBracket = competitionId.indexOf("(")) != -1 && (closeBracket = competitionId.indexOf(")")) != -1)
+                competitionId = competitionId.substring(0, openBracket) + competitionId.substring(closeBracket + 1);
+
             competitionId = competitionId.replaceAll("[^A-Za-z0-9]", "");
             competitionId = competitionId.replaceAll("[cC][oO][mM][pP][eE][tT][iI][tT][iI][oO][nN]", "");
             competitionId = competitionId.replaceAll("[cC][oO][rR][eE][cC][tT][iI][oO][nN][sS]", "");
