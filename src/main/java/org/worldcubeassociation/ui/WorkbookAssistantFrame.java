@@ -152,8 +152,17 @@ public class WorkbookAssistantFrame extends JFrame {
 
         c.gridx++;
         c.weightx = 1;
+        JTextField competitionIdField = new JTextField();
+        panel.add(competitionIdField, c);
+
+        c.gridx++;
+        c.weightx = 0;
         c.insets.right = 4;
-        panel.add(new CompetitionIdTextField(fEnv), c);
+        JButton selectCompetitionIdButton = new JButton("Select...");
+        panel.add(selectCompetitionIdButton, c);
+
+        SelectCompetitionIdDialog selectCompetitionIdDialog = new SelectCompetitionIdDialog(this, fEnv);
+        new SelectCompetitionIdController(fEnv, competitionIdField, selectCompetitionIdButton, selectCompetitionIdDialog);
 
         int fullWidth = c.gridx + 1;
         c.gridwidth = fullWidth;

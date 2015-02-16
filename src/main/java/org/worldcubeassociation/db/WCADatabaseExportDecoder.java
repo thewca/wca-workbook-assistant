@@ -32,15 +32,22 @@ public class WCADatabaseExportDecoder {
 
     public static Database decodeDatabaseZippedTSV(String aFileName) throws IOException {
         ZipFile zipFile = new ZipFile(aFileName);
+
+        // Decode persons
         ZipEntry personsEntry = zipFile.getEntry("WCA_export_Persons.tsv");
         InputStream personsInputStream = zipFile.getInputStream(personsEntry);
-
         Persons persons = decodePersonsTSV(personsInputStream);
-
         personsInputStream.close();
+
+        // Decode competitions
+        ZipEntry competitionsEntry = zipFile.getEntry("WCA_export_Competitions.tsv");
+        InputStream competitionsInputStream = zipFile.getInputStream(competitionsEntry);
+        Competitions competitions = decodeCompetitionsTSV(competitionsInputStream);
+        competitionsInputStream.close();
+
         zipFile.close();
 
-        return new Database(aFileName, persons);
+        return new Database(aFileName, persons, competitions);
     }
 
     public static Persons decodePersonsTSV(InputStream aInputStream) {
@@ -61,6 +68,43 @@ public class WCADatabaseExportDecoder {
         }
 
         return persons;
+    }
+
+    private static Competitions decodeCompetitionsTSV(InputStream aInputStream) {
+        Competitions competitions = new Competitions();
+
+        Scanner scanner = new Scanner(aInputStream, "UTF-8");
+        scanner.useDelimiter("[\t\n\r\f]");
+        scanner.nextLine();
+        while (scanner.hasNext()) {
+
+            String id = scanner.next();
+            String name = scanner.next();
+            String cityName = scanner.next();
+            String countryId = scanner.next();
+            String information = scanner.next();
+            int year = scanner.nextInt();
+            int month = scanner.nextInt();
+            int day = scanner.nextInt();
+            int endMonth = scanner.nextInt();
+            int endDay = scanner.nextInt();
+            String eventSpecs = scanner.next();
+            String wcaDelegate = scanner.next();
+            String organiser = scanner.next();
+            String venue = scanner.next();
+            String venueAddress = scanner.next();
+            String venueDetails = scanner.next();
+            String website = scanner.next();
+            String cellName = scanner.next();
+            String latitude = scanner.next();
+            String longitude = scanner.next();
+
+            Competition competition = new Competition(id, name, cityName, countryId, year, month, day,
+                    endMonth, endDay, wcaDelegate, organiser);
+            competitions.add(competition);
+        }
+
+        return competitions;
     }
 
     public static String getExportDate(String aExportFileName) {

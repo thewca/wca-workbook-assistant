@@ -1,9 +1,6 @@
 package org.worldcubeassociation.db;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * All persons that are currently in the WCA database.
@@ -24,6 +21,10 @@ public class Persons {
 
     public Person findById(String aId) {
         return fPersons.get(aId);
+    }
+
+    public Iterator<Person> findAll(){
+        return fPersons.values().iterator();
     }
 
     public List<Person> findByNameAndCountry(String aName, String aCountry) {

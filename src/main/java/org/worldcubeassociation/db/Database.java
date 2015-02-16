@@ -7,10 +7,12 @@ public class Database {
 
     private String fFileName;
     private Persons fPersons;
+    private Competitions fCompetitions;
 
-    public Database(String aFileName, Persons aPersons) {
+    public Database(String aFileName, Persons aPersons, Competitions aCompetitions) {
         fFileName = aFileName;
-        this.fPersons = aPersons;
+        fPersons = aPersons;
+        fCompetitions = aCompetitions;
     }
 
     public String getFileName() {
@@ -19,6 +21,10 @@ public class Database {
 
     public Persons getPersons() {
         return fPersons;
+    }
+
+    public Competitions getCompetitions() {
+        return fCompetitions;
     }
 
 }

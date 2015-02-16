@@ -127,27 +127,6 @@ public class WorkbookMatcher {
             }
         }
 
-        // Suggest a competition ID.
-        int lastIndexOfSeparator = aFileName.lastIndexOf(File.separator);
-        int lastIndexOfPoint = aFileName.lastIndexOf(".");
-        if (lastIndexOfPoint != -1 && lastIndexOfSeparator != -1) {
-            String competitionId = aFileName.substring(lastIndexOfSeparator + 1, lastIndexOfPoint);
-            competitionId = competitionId.replaceAll("[^A-Za-z0-9]", "");
-            competitionId = competitionId.replaceAll("[cC][oO][mM][pP][eE][tT][iI][tT][iI][oO][nN]", "");
-            competitionId = competitionId.replaceAll("[cC][oO][rR][eE][cC][tT][iI][oO][nN][sS]", "");
-            competitionId = competitionId.replaceAll("[cC][oO][rR][eE][cC][tT][iI][oO][nN]", "");
-            competitionId = competitionId.replaceAll("[rR][eE][sS][uU][lL][tT][sS][oO][fF]", "");
-            competitionId = competitionId.replaceAll("[rR][eE][sS][uU][lL][tT][sS]", "");
-            competitionId = competitionId.replaceAll("[rR][eE][sS][uU][lL][tT][oO][fF]", "");
-            competitionId = competitionId.replaceAll("[rR][eE][sS][uU][lL][tT]", "");
-            competitionId = competitionId.replaceAll("[fF][iI][nN][aA][lL]", "");
-            competitionId = competitionId.replaceAll("[cC][hH][eE][cC][kK][eE][dD]", "");
-            competitionId = competitionId.replaceAll("[vV][eE][rR][iI][fF][iI][eE][dD]", "");
-            competitionId = competitionId.replaceAll("[fF][oO][rR][wW][cC][aA]", "");
-            competitionId = competitionId.replaceAll("[wW][cC][aA]", "");
-            matchedWorkbook.setCompetitionId(competitionId.substring(0, Math.min(competitionId.length(), 32)));
-        }
-
         return matchedWorkbook;
     }
 
