@@ -417,7 +417,7 @@ public class WorkbookAssistantFrame extends JFrame {
 
         @Override
         public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-            if ("matchedWorkbook".equals(aPropertyChangeEvent.getPropertyName())) {
+            if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
                 updateEnabledState();
             }
         }

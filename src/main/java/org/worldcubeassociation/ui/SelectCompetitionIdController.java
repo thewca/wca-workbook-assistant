@@ -38,10 +38,18 @@ public class SelectCompetitionIdController implements PropertyChangeListener {
         if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
             updateState();
         }
+        else if (WorkbookAssistantEnv.COMPETITION_ID.equals(aPropertyChangeEvent.getPropertyName()) &&
+                !equals(aPropertyChangeEvent.getOldValue(), aPropertyChangeEvent.getNewValue())) {
+            updateState();
+        }
+    }
+
+    private boolean equals(Object aOldValue, Object aNewValue) {
+        return aOldValue == null ? aNewValue == null : aOldValue.equals(aNewValue);
     }
 
     private void updateState() {
-        fCompetitionIdField.setText(fEnv.getMatchedWorkbook() == null ? "" : fEnv.getMatchedWorkbook().getCompetitionId());
+        fCompetitionIdField.setText(fEnv.getMatchedWorkbook() == null ? "" : fEnv.getCompetitionId());
         fSelectCompetitionIdButton.setEnabled(fEnv.getMatchedWorkbook() != null);
     }
 
@@ -53,7 +61,7 @@ public class SelectCompetitionIdController implements PropertyChangeListener {
             if (fSelectCompetitionIdDialog.getSelectedOption() == JOptionPane.OK_OPTION) {
                 String selectedCompetitionId = fSelectCompetitionIdDialog.getSelectedCompetitionId();
                 fCompetitionIdField.setText(selectedCompetitionId);
-                fEnv.getMatchedWorkbook().setCompetitionId(selectedCompetitionId);
+                fEnv.setCompetitionId(selectedCompetitionId);
             }
         }
     }

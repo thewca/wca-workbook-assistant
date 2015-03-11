@@ -156,6 +156,7 @@ public class OpenWorkbookRunnable implements Runnable {
             public void run() {
                 if (loadedWorkbook != null) {
                     fEnv.setMatchedWorkbook(loadedWorkbook);
+                    fEnv.setCompetitionId(null);
                 }
                 if (loadedScrambles != null) {
                 	fEnv.setScrambles(loadedScrambles);

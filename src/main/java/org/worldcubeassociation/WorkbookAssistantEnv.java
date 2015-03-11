@@ -21,6 +21,7 @@ public class WorkbookAssistantEnv {
     public static final String MATCHED_SELECTED_SHEET = "matchedSelectedSheet";
     public static final String SHEET_CHANGED = "sheetChanged";
     public static final String SHEETS_CHANGED = "sheetsChanged";
+    public static final String COMPETITION_ID = "competitionId";
     public static final String DATABASE = "database";
     public static final String FONT_SIZE = "fontSize";
     public static final String SCRAMBLES = "scrambles";
@@ -31,7 +32,9 @@ public class WorkbookAssistantEnv {
 
     private MatchedWorkbook fMatchedWorkbook;
     private MatchedSheet fSelectedSheet;
-    
+
+    private String fCompetitionId;
+
     private Scrambles scrambles;
 
     private Database fDatabase;
@@ -59,7 +62,17 @@ public class WorkbookAssistantEnv {
         fSelectedSheet = aSelectedSheet;
         fPropertyChangeSupport.firePropertyChange(MATCHED_SELECTED_SHEET, oldValue, fSelectedSheet);
     }
-    
+
+    public String getCompetitionId() {
+        return fCompetitionId;
+    }
+
+    public void setCompetitionId(String aCompetitionId) {
+        String oldValue = fCompetitionId;
+        fCompetitionId = aCompetitionId;
+        fPropertyChangeSupport.firePropertyChange(COMPETITION_ID, oldValue, fCompetitionId);
+    }
+
     public Scrambles getScrambles() {
     	return scrambles;
     }

@@ -38,7 +38,7 @@ public abstract class AbstractGenerateAction extends AbstractAction implements P
     }
 
     protected void updateEnabledState() {
-        setEnabled(fEnv.getMatchedWorkbook() != null);
+        setEnabled(fEnv.getMatchedWorkbook() != null && fEnv.getCompetitionId() != null);
     }
 
     protected boolean warnForErrors(List<SheetType> aSheetTypes) {
@@ -151,7 +151,8 @@ public abstract class AbstractGenerateAction extends AbstractAction implements P
 
     @Override
     public void propertyChange(PropertyChangeEvent aPropertyChangeEvent) {
-        if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName())) {
+        if (WorkbookAssistantEnv.MATCHED_WORKBOOK.equals(aPropertyChangeEvent.getPropertyName()) ||
+                WorkbookAssistantEnv.COMPETITION_ID.equals(aPropertyChangeEvent.getPropertyName())) {
             updateEnabledState();
         }
     }

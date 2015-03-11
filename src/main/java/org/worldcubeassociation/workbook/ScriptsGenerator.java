@@ -19,9 +19,7 @@ import java.util.List;
  */
 public class ScriptsGenerator {
 
-    public static String generateResultsScript(MatchedWorkbook aMatchedWorkbook, SheetType aType) throws ParseException {
-        String competitionId = aMatchedWorkbook.getCompetitionId();
-
+    public static String generateResultsScript(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, SheetType aType) throws ParseException {
         StringBuffer script = new StringBuffer();
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.RESULTS && aType == SheetType.RESULTS) {
@@ -31,7 +29,7 @@ public class ScriptsGenerator {
                         append("    (sheet '").append(matchedSheet.getSheet().getSheetName()).append("')\n\n");
 
                 if (checkErrors(script, matchedSheet)) {
-                    generateResults(script, competitionId, matchedSheet);
+                    generateResults(script, aCompetitionId, matchedSheet);
                 }
 
                 script.append("\n");
@@ -41,7 +39,7 @@ public class ScriptsGenerator {
                         append("    (sheet '").append(matchedSheet.getSheet().getSheetName()).append("')\n\n");
 
                 if (checkErrors(script, matchedSheet)) {
-                    generateRegistrations(script, competitionId, matchedSheet);
+                    generateRegistrations(script, aCompetitionId, matchedSheet);
                 }
 
                 script.append("\n");

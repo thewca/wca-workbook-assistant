@@ -45,7 +45,8 @@ public class GenerateResultsScriptOutputTest extends AbstractWorkbookTest {
             MatchedWorkbook matchedWorkbook = WorkbookMatcher.match(workbook, aWorkbookFile.getAbsolutePath());
             WorkbookValidator.validate(matchedWorkbook, null, null);
 
-            String results = ScriptsGenerator.generateResultsScript(matchedWorkbook, SheetType.RESULTS);
+            String competitionId = aWorkbookFile.getName().substring(0, aWorkbookFile.getName().indexOf("."));
+            String results = ScriptsGenerator.generateResultsScript(matchedWorkbook, competitionId, SheetType.RESULTS);
             fWriter.println(results);
             fWriter.println();
         }

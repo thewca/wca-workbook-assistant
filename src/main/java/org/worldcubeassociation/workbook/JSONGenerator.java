@@ -48,11 +48,11 @@ public class JSONGenerator {
         scanner.close();
     }
 
-    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, Scrambles scrambles) throws ParseException {
-        return generateJSON(aMatchedWorkbook, scrambles, DEFAULT_VERSION);
+    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles) throws ParseException {
+        return generateJSON(aMatchedWorkbook, aCompetitionId, scrambles, DEFAULT_VERSION);
     }
 
-    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, Scrambles scrambles, JSONVersion aVersion) throws ParseException {
+    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles, JSONVersion aVersion) throws ParseException {
         if (aVersion != JSONVersion.WCA_COMPETITION_0_2) {
             throw new IllegalArgumentException("Unsupported version: " + aVersion);
         }
@@ -61,7 +61,7 @@ public class JSONGenerator {
         Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
         WcaCompetitionJson competitionJson = new WcaCompetitionJson();
-        competitionJson.competitionId = aMatchedWorkbook.getCompetitionId();
+        competitionJson.competitionId = aCompetitionId;
         competitionJson.persons = generatePersons(aMatchedWorkbook);
         competitionJson.formatVersion = aVersion.toString();
         competitionJson.events = generateEvents(aMatchedWorkbook);

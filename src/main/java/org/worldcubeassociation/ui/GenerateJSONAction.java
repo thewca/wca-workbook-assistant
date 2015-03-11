@@ -85,7 +85,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
         }
 
         try {
-            String scripts = JSONGenerator.generateJSON(getEnv().getMatchedWorkbook(), getEnv().getScrambles());
+            String scripts = JSONGenerator.generateJSON(getEnv().getMatchedWorkbook(), getEnv().getCompetitionId(), getEnv().getScrambles());
             fTextArea.setText(scripts);
 
             fDialog.setLocationRelativeTo(getEnv().getTopLevelComponent());
@@ -114,7 +114,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
             fc.setDialogTitle("Save competition JSON");
         	ExtensionFileFilter jsonFileFilter = new ExtensionFileFilter("Competition JSON", ".json");
         	fc.setFileFilter(jsonFileFilter);
-            String jsonFileName = getEnv().getMatchedWorkbook().getCompetitionId() + ".json";
+            String jsonFileName = getEnv().getCompetitionId() + ".json";
             fc.setSelectedFile(new File(jsonFileName));
 
         	int returnVal = fc.showSaveDialog(getEnv().getTopLevelComponent());

@@ -69,7 +69,7 @@ public class GenerateScriptsAction extends AbstractGenerateAction implements Pro
         }
 
         try {
-            String scripts = ScriptsGenerator.generateResultsScript(getEnv().getMatchedWorkbook(), fType);
+            String scripts = ScriptsGenerator.generateResultsScript(getEnv().getMatchedWorkbook(), getEnv().getCompetitionId(), fType);
             fTextArea.setText(scripts);
 
             fDialog.setLocationRelativeTo(getEnv().getTopLevelComponent());

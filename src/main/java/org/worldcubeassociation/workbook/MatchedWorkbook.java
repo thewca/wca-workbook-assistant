@@ -17,7 +17,6 @@ public class MatchedWorkbook {
     private String fWorkbookFileName;
     private List<MatchedSheet> fMatchedSheets = new ArrayList<MatchedSheet>();
     private List<RegisteredPerson> fNewPersons = new ArrayList<RegisteredPerson>();
-    private String fCompetitionId;
 
     public MatchedWorkbook(Workbook aWorkbook, String aWorkbookFileName) {
         fWorkbook = aWorkbook;
@@ -30,14 +29,6 @@ public class MatchedWorkbook {
 
     public String getWorkbookFileName() {
         return fWorkbookFileName;
-    }
-
-    public String getCompetitionId() {
-        return fCompetitionId;
-    }
-
-    public void setCompetitionId(String aCompetitionId) {
-        fCompetitionId = aCompetitionId;
     }
 
     public List<MatchedSheet> sheets() {
