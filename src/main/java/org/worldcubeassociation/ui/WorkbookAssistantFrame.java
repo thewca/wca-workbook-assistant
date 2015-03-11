@@ -80,7 +80,7 @@ public class WorkbookAssistantFrame extends JFrame {
                         addScramblesAction.open(TEST_SCRAMBLE_FILES);
                     }
                     if (TEST_JSON_EXPORT) {
-                        new GenerateJSONAction(fEnv).actionPerformed(null);
+                        new ExportJSONAction(fEnv).actionPerformed(null);
                     }
                 }
             });
@@ -323,7 +323,7 @@ public class WorkbookAssistantFrame extends JFrame {
         c.weightx = 0;
         c.anchor = GridBagConstraints.EAST;
         c.insets.right = 4;
-        panel.add(new JButton(new GenerateJSONAction(fEnv)), c);
+        panel.add(new JButton(new ExportJSONAction(fEnv)), c);
 
         return panel;
     }
