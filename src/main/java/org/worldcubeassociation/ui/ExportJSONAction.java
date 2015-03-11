@@ -62,7 +62,10 @@ public class ExportJSONAction extends AbstractGenerateAction implements Property
                 PrintWriter pw = null;
                 try {
                     pw = new PrintWriter(f, "UTF-8");
-                    String scripts = JSONGenerator.generateJSON(getEnv().getMatchedWorkbook(), getEnv().getCompetitionId(), getEnv().getScrambles());
+                    String scripts = JSONGenerator.generateJSON(getEnv().getMatchedWorkbook(),
+                                                                getEnv().getCompetitionId(),
+                                                                getEnv().getScrambles(),
+                                                                getEnv().getDatabase());
                     pw.write(scripts);
                 }
                 catch (IOException e) {

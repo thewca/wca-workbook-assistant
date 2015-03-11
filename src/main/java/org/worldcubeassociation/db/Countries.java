@@ -1,22 +1,20 @@
 package org.worldcubeassociation.db;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * All countries that are currently in the WCA database.
  */
 public class Countries {
 
-    private List<Country> fCountries = new ArrayList<Country>();
+    private Map<String, Country> fCountries = new HashMap<String, Country>();
 
-    public void add(Country aCountries) {
-        fCountries.add(aCountries);
+    public void add(Country aCountry) {
+        fCountries.put(aCountry.getId(), aCountry);
     }
 
-    public List<Country> getList() {
-        return Collections.unmodifiableList(fCountries);
+    public Country findById(String aId) {
+        return fCountries.get(aId);
     }
 
 }

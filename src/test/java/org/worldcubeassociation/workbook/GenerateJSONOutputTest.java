@@ -1,9 +1,11 @@
 package org.worldcubeassociation.workbook;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.worldcubeassociation.db.Database;
+import org.worldcubeassociation.db.WCADatabaseExportDecoder;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -12,6 +14,7 @@ import java.io.PrintWriter;
 public class GenerateJSONOutputTest extends AbstractWorkbookTest {
 
     private PrintWriter fWriter;
+    private Database fDatabase;
 
     public static void main(String[] args) {
         new GenerateJSONOutputTest().start(args[0]);
@@ -21,8 +24,9 @@ public class GenerateJSONOutputTest extends AbstractWorkbookTest {
     public void start(String aPath) {
         try {
             fWriter = new PrintWriter("results.json");
+            fDatabase = WCADatabaseExportDecoder.decodeMostRecentExport(null);
         }
-        catch (FileNotFoundException e) {
+        catch (IOException e) {
             e.printStackTrace();
             System.exit(0);
         }
@@ -45,7 +49,7 @@ public class GenerateJSONOutputTest extends AbstractWorkbookTest {
             WorkbookValidator.validate(matchedWorkbook, null, null);
 
             String competitionId = aWorkbookFile.getName().substring(0, aWorkbookFile.getName().indexOf("."));
-            String results = JSONGenerator.generateJSON(matchedWorkbook, competitionId, null);
+            String results = JSONGenerator.generateJSON(matchedWorkbook, competitionId, null, fDatabase);
             fWriter.println(results);
             fWriter.println();
         }

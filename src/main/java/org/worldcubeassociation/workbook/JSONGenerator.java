@@ -6,15 +6,14 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.workbook.parse.CellParser;
-import org.worldcubeassociation.workbook.parse.ParsedRecord;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
 import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
 import org.worldcubeassociation.workbook.wcajson.*;
 
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -27,32 +26,11 @@ public class JSONGenerator {
     public static final JSONVersion DEFAULT_VERSION = JSONVersion.WCA_COMPETITION_0_2;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static Map<String, String> sCountryCodes;
-
-    static {
-        sCountryCodes = new HashMap<String, String>();
-
-        InputStream countriesStream = JSONGenerator.class.getClassLoader().
-                getResourceAsStream("org/worldcubeassociation/workbook/countries.tsv");
-
-        Scanner scanner = new Scanner(countriesStream, "UTF-8");
-        scanner.useDelimiter("[\t\n\r\f]");
-        while (scanner.hasNext()) {
-            String countryId = scanner.next();
-            String iso3166Code = scanner.next();
-            if(scanner.hasNext()) {
-            	scanner.next();
-            }
-            sCountryCodes.put(countryId, iso3166Code);
-        }
-        scanner.close();
+    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles, Database aDatabase) throws ParseException {
+        return generateJSON(aMatchedWorkbook, aCompetitionId, scrambles, aDatabase, DEFAULT_VERSION);
     }
 
-    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles) throws ParseException {
-        return generateJSON(aMatchedWorkbook, aCompetitionId, scrambles, DEFAULT_VERSION);
-    }
-
-    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles, JSONVersion aVersion) throws ParseException {
+    public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles, Database aDatabase, JSONVersion aVersion) throws ParseException {
         if (aVersion != JSONVersion.WCA_COMPETITION_0_2) {
             throw new IllegalArgumentException("Unsupported version: " + aVersion);
         }
@@ -62,7 +40,7 @@ public class JSONGenerator {
 
         WcaCompetitionJson competitionJson = new WcaCompetitionJson();
         competitionJson.competitionId = aCompetitionId;
-        competitionJson.persons = generatePersons(aMatchedWorkbook);
+        competitionJson.persons = generatePersons(aMatchedWorkbook, aDatabase);
         competitionJson.formatVersion = aVersion.toString();
         competitionJson.events = generateEvents(aMatchedWorkbook);
         competitionJson.scrambleProgram = scrambles == null ? null : scrambles.getScrambleProgram();
@@ -231,29 +209,29 @@ public class JSONGenerator {
         return results.toArray(new WcaResultJson[0]);
     }
 
-    private static WcaPersonJson[] generatePersons(MatchedWorkbook aMatchedWorkbook) {
+    private static WcaPersonJson[] generatePersons(MatchedWorkbook aMatchedWorkbook, Database aDatabase) {
         for (MatchedSheet matchedSheet : aMatchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.REGISTRATIONS &&
                     matchedSheet.getValidationErrors(Severity.HIGH).isEmpty()) {
                 // There is only one valid registrations sheet
-                return generatePersons(matchedSheet);
+                return generatePersons(matchedSheet, aDatabase);
             }
         }
         return null;
     }
 
-    public static WcaPersonJson[] generatePersons(MatchedSheet aMatchedSheet) {
+    public static WcaPersonJson[] generatePersons(MatchedSheet aMatchedSheet, Database aDatabase) {
         List<WcaPersonJson> persons = new ArrayList<WcaPersonJson>();
         for (int rowIdx = aMatchedSheet.getFirstDataRow(); rowIdx <= aMatchedSheet.getLastDataRow(); rowIdx++) {
             Row row = aMatchedSheet.getSheet().getRow(rowIdx);
             int personId = rowIdx - aMatchedSheet.getFirstDataRow() + 1;
-            WcaPersonJson person = generatePerson(aMatchedSheet, personId, row);
+            WcaPersonJson person = generatePerson(aMatchedSheet, personId, row, aDatabase);
             persons.add(person);
         }
         return persons.toArray(new WcaPersonJson[0]);
     }
 
-    private static WcaPersonJson generatePerson(MatchedSheet aMatchedSheet, int aPersonId, Row aRow) {
+    private static WcaPersonJson generatePerson(MatchedSheet aMatchedSheet, int aPersonId, Row aRow, Database aDatabase) {
         Cell nameCell = aRow.getCell(aMatchedSheet.getNameHeaderColumn());
         Cell wcaIdCell = aRow.getCell(aMatchedSheet.getWcaIdHeaderColumn());
         Cell countryCell = aRow.getCell(aMatchedSheet.getCountryHeaderColumn());
@@ -276,7 +254,7 @@ public class JSONGenerator {
         String name = CellParser.parseMandatoryText(nameCell);
         String wcaId = CellParser.parseOptionalText(wcaIdCell);
         String country = CellParser.parseMandatoryText(countryCell);
-        String countryCode = sCountryCodes.get(country);
+        String countryCode = aDatabase.getCountries().findById(country).getIso2();
         String dob;
         if (date != null) {
             dob = DATE_FORMAT.format(date);
