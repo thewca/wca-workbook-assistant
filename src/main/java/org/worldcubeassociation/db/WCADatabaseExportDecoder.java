@@ -45,9 +45,15 @@ public class WCADatabaseExportDecoder {
         Competitions competitions = decodeCompetitionsTSV(competitionsInputStream);
         competitionsInputStream.close();
 
+        // Decode countries
+        ZipEntry countriesEntry = zipFile.getEntry("WCA_export_Countries.tsv");
+        InputStream countriesInputStream = zipFile.getInputStream(countriesEntry);
+        Countries countries = decodeCountriesTSV(countriesInputStream);
+        countriesInputStream.close();
+
         zipFile.close();
 
-        return new Database(aFileName, persons, competitions);
+        return new Database(aFileName, persons, competitions, countries);
     }
 
     public static Persons decodePersonsTSV(InputStream aInputStream) {
@@ -105,6 +111,28 @@ public class WCADatabaseExportDecoder {
         }
 
         return competitions;
+    }
+
+    private static Countries decodeCountriesTSV(InputStream aInputStream) {
+        Countries countries = new Countries();
+
+        Scanner scanner = new Scanner(aInputStream, "UTF-8");
+        scanner.useDelimiter("[\t\n\r\f]");
+        scanner.nextLine();
+        while (scanner.hasNext()) {
+            String id = scanner.next();
+            String name = scanner.next();
+            String continentId = scanner.next();
+            String latitude = scanner.next();
+            String longitude = scanner.next();
+            String zoom = scanner.next();
+            String iso2 = scanner.next();
+
+            Country country = new Country(id, name, continentId, latitude, longitude, zoom, iso2);
+            countries.add(country);
+        }
+
+        return countries;
     }
 
     public static String getExportDate(String aExportFileName) {
