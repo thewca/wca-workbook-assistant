@@ -114,7 +114,7 @@ public class GenerateJSONAction extends AbstractGenerateAction implements Proper
             fc.setDialogTitle("Save competition JSON");
         	ExtensionFileFilter jsonFileFilter = new ExtensionFileFilter("Competition JSON", ".json");
         	fc.setFileFilter(jsonFileFilter);
-            String jsonFileName = getEnv().getCompetitionId() + ".json";
+            String jsonFileName = "Results for " + getEnv().getCompetitionId() + ".json";
             fc.setSelectedFile(new File(jsonFileName));
 
         	int returnVal = fc.showSaveDialog(getEnv().getTopLevelComponent());
