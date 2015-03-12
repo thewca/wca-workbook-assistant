@@ -190,7 +190,7 @@ public class WorkbookValidator {
 
     public static void validateResultsSheet(MatchedSheet aMatchedSheet,
                                              MatchedWorkbook aMatchedWorkbook,
-                                             Database bDatabase,
+                                             Database aDatabase,
                                              Scrambles scrambles) {
         // Clear validation errors.
         aMatchedSheet.getValidationErrors().clear();
@@ -407,13 +407,13 @@ public class WorkbookValidator {
                 aMatchedSheet.getResultFormat() != null &&
                 validRoundFormat &&
                 validResultFormat) {
-            validateResults(aMatchedSheet, formulaEvaluator);
+            validateResults(aMatchedSheet, formulaEvaluator, aDatabase);
         }
 
         aMatchedSheet.setValidated(true);
     }
 
-    private static void validateResults(MatchedSheet aMatchedSheet, FormulaEvaluator aFormulaEvaluator) {
+    private static void validateResults(MatchedSheet aMatchedSheet, FormulaEvaluator aFormulaEvaluator, Database aDatabase) {
         List<ValidationError> validationErrors = aMatchedSheet.getValidationErrors();
         Sheet sheet = aMatchedSheet.getSheet();
         Event event = aMatchedSheet.getEvent();
@@ -602,6 +602,14 @@ public class WorkbookValidator {
                                     allResultsInRowValid = false;
                                     allRowsValid = false;
                                 }
+
+                                // Give a warning for unlikely low times (average per tried cube faster than 3x3x3 blindfolded single world record)
+                                double avgPerTriedCubeSeconds = seconds.doubleValue() / cubesTried.doubleValue();
+                                double singleWrSeconds = aDatabase.getSingleRanks().findByEvent("333bf").get(0).getBest() / 100.0;
+                                if(avgPerTriedCubeSeconds < singleWrSeconds) {
+                                    validationErrors.add(new ValidationError(Severity.LOW, "Unlikely low time for # tried cubes", aMatchedSheet, sheetRow, secondsCol));
+                                }
+
                             }
                             else {
                                 if (result != -1) {
