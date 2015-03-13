@@ -143,6 +143,30 @@ public class WorkbookValidator {
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
+            // If we have no WCA ID, check spelling of name.
+            if (name != null && wcaIdEmpty) {
+                if (!Character.isUpperCase(name.codePointAt(0))) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Name does not start with capital letter", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if(name.matches(".*[ \\t\\r\\n\\v\\f]{2}.*")){
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Name contains double spaces", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if(name.matches(".*\\([ \\t\\r\\n\\v\\f].*")){
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Localized part of name starts with space", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if(name.matches(".*[ \\t\\r\\n\\v\\f]\\).*")){
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Localized part of name ends with space", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if(name.matches(".*[^ \\t\\r\\n\\v\\f]\\(.*")){
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "No space between Latinized and localized part of name", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+            }
+
             // If we have a name and a country, check that the name, country and WCA ID is distinguishable from other
             // persons.
             if (name != null && country != null) {
