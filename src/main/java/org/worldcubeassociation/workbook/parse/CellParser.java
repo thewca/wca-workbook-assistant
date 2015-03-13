@@ -50,8 +50,9 @@ public class CellParser {
         String cellFormatString = getCellFormatString(cell);
         CellFormat cellFormat = CellFormat.getInstance(cellFormatString);
         CellFormatResult formatResult = cellFormat.apply(cell);
-        String text = formatResult.text.trim();
+        String text = formatResult.text;
         text = text.replace('\u00A0', ' ');
+        text = text.trim();
 
         if ("".equals(text)) {
             return aMandatory ? null : "";
