@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.worldcubeassociation.db.Country;
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.db.Person;
 import org.worldcubeassociation.workbook.parse.CellFormatter;
@@ -115,6 +116,10 @@ public class WorkbookValidator {
             String country = CellParser.parseMandatoryText(row.getCell(countryColIdx));
             if (country == null) {
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Missing country", aMatchedSheet, rowIdx, countryColIdx);
+                aMatchedSheet.getValidationErrors().add(validationError);
+            }
+            else if (aDatabase.getCountries().findById(country) == null) {
+                ValidationError validationError = new ValidationError(Severity.HIGH, "Country not found in WCA database", aMatchedSheet, rowIdx, countryColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
 
