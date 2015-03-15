@@ -111,6 +111,29 @@ public class WorkbookValidator {
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Missing name", aMatchedSheet, rowIdx, headerColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
+            else{
+                // Check spelling of name.
+                if (!Character.isUpperCase(name.codePointAt(0))) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Name does not start with capital letter", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if (name.matches(".*[ \\t\\r\\n\\v\\f]{2}.*")) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Name contains double spaces", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if (name.matches(".*\\([ \\t\\r\\n\\v\\f].*")) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Localized part of name starts with space", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if (name.matches(".*[ \\t\\r\\n\\v\\f]\\).*")) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Localized part of name ends with space", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+                if (name.matches(".*[^ \\t\\r\\n\\v\\f]\\(.*")) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "No space between Latinized and localized part of name", aMatchedSheet, rowIdx, 1);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                }
+            }
 
             int countryColIdx = aMatchedSheet.getCountryHeaderColumn();
             String country = CellParser.parseMandatoryText(row.getCell(countryColIdx));
@@ -146,30 +169,6 @@ public class WorkbookValidator {
             if (!wcaIdEmpty && !wcaIdValid) {
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Misformatted WCA id", aMatchedSheet, rowIdx, 3);
                 aMatchedSheet.getValidationErrors().add(validationError);
-            }
-
-            // If we have no WCA ID, check spelling of name.
-            if (name != null && wcaIdEmpty) {
-                if (!Character.isUpperCase(name.codePointAt(0))) {
-                    ValidationError validationError = new ValidationError(Severity.HIGH, "Name does not start with capital letter", aMatchedSheet, rowIdx, 1);
-                    aMatchedSheet.getValidationErrors().add(validationError);
-                }
-                if(name.matches(".*[ \\t\\r\\n\\v\\f]{2}.*")){
-                    ValidationError validationError = new ValidationError(Severity.HIGH, "Name contains double spaces", aMatchedSheet, rowIdx, 1);
-                    aMatchedSheet.getValidationErrors().add(validationError);
-                }
-                if(name.matches(".*\\([ \\t\\r\\n\\v\\f].*")){
-                    ValidationError validationError = new ValidationError(Severity.HIGH, "Localized part of name starts with space", aMatchedSheet, rowIdx, 1);
-                    aMatchedSheet.getValidationErrors().add(validationError);
-                }
-                if(name.matches(".*[ \\t\\r\\n\\v\\f]\\).*")){
-                    ValidationError validationError = new ValidationError(Severity.HIGH, "Localized part of name ends with space", aMatchedSheet, rowIdx, 1);
-                    aMatchedSheet.getValidationErrors().add(validationError);
-                }
-                if(name.matches(".*[^ \\t\\r\\n\\v\\f]\\(.*")){
-                    ValidationError validationError = new ValidationError(Severity.HIGH, "No space between Latinized and localized part of name", aMatchedSheet, rowIdx, 1);
-                    aMatchedSheet.getValidationErrors().add(validationError);
-                }
             }
 
             // If we have a name and a country, check that the name, country and WCA ID is distinguishable from other
