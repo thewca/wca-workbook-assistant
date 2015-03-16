@@ -141,7 +141,7 @@ public class WorkbookValidator {
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Missing country", aMatchedSheet, rowIdx, countryColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
-            else if (aDatabase.getCountries().findById(country) == null) {
+            else if (aDatabase != null && aDatabase.getCountries().findById(country) == null) {
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Country not found in WCA database", aMatchedSheet, rowIdx, countryColIdx);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
