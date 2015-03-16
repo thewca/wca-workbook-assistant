@@ -3,6 +3,7 @@ package org.worldcubeassociation.ui;
 import org.worldcubeassociation.WorkbookAssistantEnv;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -57,7 +58,7 @@ public class SelectCompetitionIdController implements PropertyChangeListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             fSelectCompetitionIdDialog.reset();
-            fSelectCompetitionIdDialog.pack();
+            fSelectCompetitionIdDialog.setSize(new Dimension(600, 400));
             fSelectCompetitionIdDialog.setLocationRelativeTo(fSelectCompetitionIdDialog.getParent());
             fSelectCompetitionIdDialog.setVisible(true);
             if (fSelectCompetitionIdDialog.getSelectedOption() == JOptionPane.OK_OPTION) {
