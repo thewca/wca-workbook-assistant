@@ -56,6 +56,8 @@ public class SelectCompetitionIdController implements PropertyChangeListener {
     private class SelectCompetitionAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+            fSelectCompetitionIdDialog.reset();
+            fSelectCompetitionIdDialog.pack();
             fSelectCompetitionIdDialog.setLocationRelativeTo(fSelectCompetitionIdDialog.getParent());
             fSelectCompetitionIdDialog.setVisible(true);
             if (fSelectCompetitionIdDialog.getSelectedOption() == JOptionPane.OK_OPTION) {

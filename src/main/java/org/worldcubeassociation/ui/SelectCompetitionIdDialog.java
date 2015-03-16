@@ -10,12 +10,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.*;
 
 /**
  * A dialog for selecting the competition ID, that allows searching a competition based on a keyword.
  */
-public class SelectCompetitionIdDialog extends JDialog {
+public class SelectCompetitionIdDialog extends JDialog implements PropertyChangeListener {
 
     private static final Calendar CALENDAR = Calendar.getInstance();
     private static long ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
@@ -34,6 +36,7 @@ public class SelectCompetitionIdDialog extends JDialog {
     public SelectCompetitionIdDialog(Frame aFrame, WorkbookAssistantEnv aEnv) {
         super(aFrame, "Select competition ID", true);
         fEnv = aEnv;
+        fEnv.addPropertyChangeListener(this);
 
         setLayout(new GridBagLayout());
 
@@ -55,17 +58,17 @@ public class SelectCompetitionIdDialog extends JDialog {
         fFilterTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                updateCompetitionList();
+                updateSearchResult();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                updateCompetitionList();
+                updateSearchResult();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                updateCompetitionList();
+                updateSearchResult();
             }
         });
         contentPane.add(fFilterTextField, c);
@@ -102,6 +105,47 @@ public class SelectCompetitionIdDialog extends JDialog {
         JPanel buttonPanel = createButtonPanel();
         contentPane.add(buttonPanel, c);
 
+        updateCompetitions();
+
+        fKeyEventDispatcher = new DialogKeyEventDispatcher();
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(fKeyEventDispatcher);
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(fKeyEventDispatcher);
+            }
+        });
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets.right = 4;
+        c.weightx = 1;
+        c.fill = GridBagConstraints.BOTH;
+        fOnlyShowRecentCheckBox = new JCheckBox("Only show current competitions");
+        fOnlyShowRecentCheckBox.setSelected(true);
+        fOnlyShowRecentCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateSearchResult();
+            }
+        });
+        buttonPanel.add(fOnlyShowRecentCheckBox, c);
+        c.weightx = 0;
+        fOkButton = new JButton(new OKAction());
+        updateOkButtonState();
+        buttonPanel.add(fOkButton, c);
+        fCancelButton = new JButton(new CancelAction());
+        buttonPanel.add(fCancelButton, c);
+        return buttonPanel;
+    }
+
+    private void updateCompetitions() {
         fSortedCompetitions = new Vector<Competition>(fEnv.getDatabase().getCompetitions().getList());
         Collections.sort(fSortedCompetitions, new CompetitionDateComparator());
 
@@ -116,49 +160,10 @@ public class SelectCompetitionIdDialog extends JDialog {
 
         fFilteredCompetitions = new Vector<Competition>(fSortedCompetitions.size());
 
-        updateCompetitionList();
-
-        fKeyEventDispatcher = new DialogKeyEventDispatcher();
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-                KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(fKeyEventDispatcher);
-            }
-
-            @Override
-            public void windowActivated(WindowEvent e) {
-                KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(fKeyEventDispatcher);
-            }
-        });
-
-        pack();
+        updateSearchResult();
     }
 
-    private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets.right = 4;
-        c.weightx = 1;
-        c.fill = GridBagConstraints.BOTH;
-        fOnlyShowRecentCheckBox = new JCheckBox("Only show current competitions");
-        fOnlyShowRecentCheckBox.setSelected(true);
-        fOnlyShowRecentCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateCompetitionList();
-            }
-        });
-        buttonPanel.add(fOnlyShowRecentCheckBox, c);
-        c.weightx = 0;
-        fOkButton = new JButton(new OKAction());
-        updateOkButtonState();
-        buttonPanel.add(fOkButton, c);
-        fCancelButton = new JButton(new CancelAction());
-        buttonPanel.add(fCancelButton, c);
-        return buttonPanel;
-    }
-
-    private void updateCompetitionList() {
+    private void updateSearchResult() {
         Vector<Competition> competitions;
         if (fOnlyShowRecentCheckBox.isSelected()) {
             competitions = fSortedRecentCompetitions;
@@ -204,6 +209,19 @@ public class SelectCompetitionIdDialog extends JDialog {
         return competition == null ? null : competition.getId();
     }
 
+    public void reset() {
+        fOnlyShowRecentCheckBox.setSelected(true);
+        fFilterTextField.setText(null);
+        fFilterTextField.requestFocus();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (WorkbookAssistantEnv.DATABASE.equals(evt.getPropertyName())) {
+            updateCompetitions();
+        }
+    }
+
     private class OKAction extends AbstractAction {
 
         private OKAction() {
@@ -233,6 +251,7 @@ public class SelectCompetitionIdDialog extends JDialog {
     }
 
     private static Date dateOf(Competition aCompetition) {
+        CALENDAR.clear();
         CALENDAR.set(aCompetition.getYear(), aCompetition.getMonth() - 1, aCompetition.getDay(), 0, 0, 0);
         return CALENDAR.getTime();
     }
