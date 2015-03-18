@@ -1,9 +1,20 @@
 <h2>Release Notes</h2>
 <br/>
+<h3>v2.1 (19th March 2015)</h3>
+<ul>
+    <li><strong>Improvement #67</strong><br>The validation now checks for common mistakes in the spelling of names.</li>
+    <li><strong>Improvement #68</strong><br>The validation now checks that the naming of the rounds is in line with the naming used on the WCA website.</li>
+    <li><strong>Improvement #95</strong><br>The JSON export has been simplified by removing the JSON preview window.</li>
+    <li><strong>Improvement #96</strong><br>The name of the exported JSON file now starts with "Results for " so that it does not get mixed up with the TNoodle scrambles.</li>
+    <li><strong>Bug fix #97</strong><br>The validation now checks that the country entered for new members exists in the WCA database.</li>
+    <li><strong>Improvement #99</strong><br>The validation now checks that the times of multiple blindfolded results are reasonable.</li>
+    <li><strong>Improvement #100</strong><br>The competition ID can now be selected from a list of recent competitions instead of having to enter it manually.</li>
+    <li><strong>Improvement #101</strong><br>The ISO country codes are now retrieved from the WCA database export instead of separate resource file.</li>
+</ul>
 <h3>v2.0 (15th March 2014)</h3>
 <ul>
-    <li><strong>Improvement/bug #69, #73, #74, #75, #76, #77, #79, #80 and #92</strong><br>TNoodle scrambles can be attached to the results.</li>
-    <li><strong>Improvement/bug #48, #70, #72, #88 and #89</strong><br>Exporting results to JSON is now the main output format and follows version 0.2 of the competition JSON exchange format.</li>
+    <li><strong>Improvement/bug fix #69, #73, #74, #75, #76, #77, #79, #80 and #92</strong><br>TNoodle scrambles can be attached to the results.</li>
+    <li><strong>Improvement/bug fix #48, #70, #72, #88 and #89</strong><br>Exporting results to JSON is now the main output format and follows version 0.2 of the competition JSON exchange format.</li>
     <li><strong>Improvement #40 and #90</strong><br>The validation and now checks that combined rounds are actually combined.</li>
     <li><strong>Improvement #87</strong><br>All file choosers start from the same working directory.</li>
 </ul>
