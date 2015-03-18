@@ -1,19 +1,9 @@
 package org.worldcubeassociation.workbook;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.worldcubeassociation.db.Country;
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.db.Person;
 import org.worldcubeassociation.workbook.parse.CellFormatter;
@@ -23,6 +13,9 @@ import org.worldcubeassociation.workbook.parse.RowTokenizer;
 import org.worldcubeassociation.workbook.scrambles.RoundScrambles;
 import org.worldcubeassociation.workbook.scrambles.Scrambles;
 import org.worldcubeassociation.workbook.scrambles.TNoodleSheetJson;
+
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * @author Lars Vandenbergh
@@ -70,7 +63,7 @@ public class WorkbookValidator {
             }
         }
     }
-    
+
 
 	public static void validateSheetsWithRoundScrambles(MatchedWorkbook matchedWorkbook, RoundScrambles newRoundScrambles, Database database, Scrambles scrambles) {
         for (MatchedSheet matchedSheet : matchedWorkbook.sheets()) {
@@ -217,13 +210,13 @@ public class WorkbookValidator {
     }
 
     public static void validateResultsSheet(MatchedSheet aMatchedSheet,
-                                             MatchedWorkbook aMatchedWorkbook,
-                                             Database aDatabase,
-                                             Scrambles scrambles) {
+                                            MatchedWorkbook aMatchedWorkbook,
+                                            Database aDatabase,
+                                            Scrambles scrambles) {
         // Clear validation errors.
         aMatchedSheet.getValidationErrors().clear();
         aMatchedSheet.setValidated(false);
-        
+
         // Check that every round has scrambles.
         // Currently, we don't make any effort to notify users about unused scrambles,
         // or the same scrambles being applied to different rounds.  
@@ -255,7 +248,7 @@ public class WorkbookValidator {
                 ValidationError duplicateGroupError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(duplicateGroupError);
         	}
-        	
+
         	// ***** HACK ALERT *****
         	// Here we assume that the groups generated for multiblind were used for each of the attempts.
         	// See https://github.com/cubing/wca-workbook-assistant/issues/74#issuecomment-36166131 for
@@ -304,7 +297,6 @@ public class WorkbookValidator {
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Duplicate scrambles for sheets " + sheetNames, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(validationError);
             }
-        
         }
 
         // Validate round, event, format and result format.
@@ -371,6 +363,56 @@ public class WorkbookValidator {
                 }
                 ValidationError validationError = new ValidationError(Severity.HIGH, "Duplicate round for event in sheets " + sheetNames, aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(validationError);
+            }
+            else {
+                // Check if round naming complies with WCA website guidelines.
+                List<MatchedSheet> sameEventRounds = new ArrayList<MatchedSheet>();
+                for (MatchedSheet sheet : sheets) {
+                    if (aMatchedSheet.getEvent().equals(sheet.getEvent())) {
+                        sameEventRounds.add(sheet);
+                    }
+                }
+
+                Collections.sort(sameEventRounds, new DecreasingCompetitorCountComparator());
+                int roundIndex = sameEventRounds.indexOf(aMatchedSheet);
+                Round round = aMatchedSheet.getRound();
+                boolean combined = round.isCombined();
+
+                if (sameEventRounds.size() == 1) {
+                    Round expectedOnlyRound = combined ? Round.COMBINED_FINAL : Round.FINAL;
+                    if (round != expectedOnlyRound) {
+                        ValidationError validationError = new ValidationError(Severity.HIGH, "Only round of event should be called " + expectedOnlyRound.toString(), aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+                }
+                else {
+                    Round expectedFirstRound = combined ? Round.COMBINED_FIRST_ROUND : Round.FIRST_ROUND;
+                    if (roundIndex == 0 && round != expectedFirstRound) {
+                        ValidationError validationError = new ValidationError(Severity.HIGH, "First round of event should be called " + expectedFirstRound.toString(), aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+
+                    Round expectedLastRound = combined ? Round.COMBINED_FINAL : Round.FINAL;
+                    if (roundIndex == sameEventRounds.size() - 1 && round != expectedLastRound) {
+                        ValidationError validationError = new ValidationError(Severity.HIGH, "Last round of event should be called " + expectedLastRound.toString(), aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+
+                    if (sameEventRounds.size() == 3) {
+                        Round expectedSecondRound = combined ? Round.COMBINED_SECOND_ROUND : Round.SECOND_ROUND;
+                        if (roundIndex == 1 && round != expectedSecondRound) {
+                            ValidationError validationError = new ValidationError(Severity.HIGH, "Second round of event should be called " + expectedSecondRound.toString(), aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
+                            aMatchedSheet.getValidationErrors().add(validationError);
+                        }
+                    }
+                    else if (sameEventRounds.size() == 4) {
+                        Round expectedThirdRound = combined ? Round.COMBINED_THIRD_ROUND : Round.SEMI_FINAL;
+                        if (roundIndex == 2 && round != expectedThirdRound) {
+                            ValidationError validationError = new ValidationError(Severity.HIGH, "Third round of event should be called " + expectedThirdRound.toString(), aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX);
+                            aMatchedSheet.getValidationErrors().add(validationError);
+                        }
+                    }
+                }
             }
         }
 
@@ -455,7 +497,7 @@ public class WorkbookValidator {
         Long[] bestResults = new Long[nbDataRows];
         Long[] averageResults = new Long[nbDataRows];
         boolean allCellsPresent = true;
-        
+
         for (int rowIdx = 0; rowIdx < nbDataRows; rowIdx++) {
             Row row = sheet.getRow(rowIdx + aMatchedSheet.getFirstDataRow());
             int sheetRow = rowIdx + aMatchedSheet.getFirstDataRow();
@@ -498,7 +540,7 @@ public class WorkbookValidator {
                     allRowsValid = false;
                 }
             }
-            
+
             if(!allResultsInRowPresent) {
             	allCellsPresent = false;
             }
@@ -758,7 +800,7 @@ public class WorkbookValidator {
                 }
             }
         }
-        
+
         if(allCellsPresent) {
         	// If all time cells were filled in, the format of the round should *not* be combined.
         	if(aMatchedSheet.getRound().isCombined()) {
@@ -905,6 +947,16 @@ public class WorkbookValidator {
                     }
                 }
             }
+        }
+
+    }
+
+    private static class DecreasingCompetitorCountComparator implements Comparator<MatchedSheet> {
+
+        @Override
+        public int compare(MatchedSheet aFirstMatchedSheet, MatchedSheet aSecondMatchedSheet) {
+            return (aSecondMatchedSheet.getLastDataRow() - aSecondMatchedSheet.getFirstDataRow()) -
+                    (aFirstMatchedSheet.getLastDataRow() - aFirstMatchedSheet.getFirstDataRow());
         }
 
     }
