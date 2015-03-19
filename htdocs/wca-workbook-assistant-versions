@@ -4,6 +4,7 @@
 <ul>
     <li><strong>Improvement #67</strong><br>The validation now checks for common mistakes in the spelling of names.</li>
     <li><strong>Improvement #68</strong><br>The validation now checks that the naming of the rounds is in line with the naming used on the WCA website.</li>
+    <li><strong>Improvement #94</strong><br>Database exports that became corrupted while downloading are handled better and are simply ignored.</li>
     <li><strong>Improvement #95</strong><br>The JSON export has been simplified by removing the JSON preview window.</li>
     <li><strong>Improvement #96</strong><br>The name of the exported JSON file now starts with "Results for " so that it does not get mixed up with the TNoodle scrambles.</li>
     <li><strong>Bug fix #97</strong><br>The validation now checks that the country entered for new members exists in the WCA database.</li>
