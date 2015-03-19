@@ -1,6 +1,6 @@
 <p style="text-align:center">
-    <a style="font-size:20pt;font-weight:bold" href="https://www.worldcubeassociation.org/files/wca-workbook-assistant-2.0.jar">Download WCA Workbook Assistant v2.0</a><br/><br/>
-    <span style="font-size:12pt">Last update: March 15, 2014</span><br/>
+    <a style="font-size:20pt;font-weight:bold" href="https://www.worldcubeassociation.org/files/wca-workbook-assistant-2.1.jar">Download WCA Workbook Assistant v2.1</a><br/><br/>
+    <span style="font-size:12pt">Last update: March 19, 2015</span><br/>
     (<a href="https://www.worldcubeassociation.org/wca-workbook-assistant-versions">version history</a>)
 </p>
 <br/>
@@ -38,17 +38,22 @@ The scrambles for the additional group can be dragged and dropped on the round t
 <p>Mistakes can be fixed by opening the workbook in a spreadsheet application and editing and saving it from there. The updated workbook can then be loaded again in the WCA Workbook Assistant by pressing the <em>Refresh</em> button. This will only reload the results but will leave all the other changes you made intact, like the scrambles that were added.</p>
 <p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-refresh-workbook.gif"></p>
 
-<h3 style="font-weight:bold">Step 5: Fill out the correct competition ID</h3>
-<p>Make sure that the correct competition ID is filled out on the top right.</p>
-<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-fill-out-competition-ID.gif"></p>
-<p>You can find out what your competition ID is by going to the results page on the WCA website.</p>
-<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-find-out-competition-ID.gif"></p>
+<h3 style="font-weight:bold">Step 5: Select the competition ID</h3>
+<p>Select the correct competition ID by clicking the <em>Select...</em> button next to the <em>Competition ID</em> field.</p>
+<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-select-competition-ID-button.gif"></p>
 
-<h3 style="font-weight:bold">Step 6: Export the competition data to JSON</h3>
-<p>Click the <em>Generate competition JSON</em> button on the bottom right.</p>
-<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-generate-JSON-button.gif"></p>
-<p>You will see a preview of the competition JSON. Save it to a file using the <em>Save as...</em> button.</p>
-<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-save-JSON-button.gif"></p>
+<p>A dialog will show up with a list of competitions to choose from.</p>
+<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-select-competition-ID-dialog.gif"></p>
 
-<h3 style="font-weight:bold">Step 7: Send the competition JSON to the WCA</h3>
+<p>You can filter the list by typing a part of the name of the competition or the WCA Delegate.</p>
+<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-select-competition-ID-filter.gif"></p>
+
+To start off with, only competitions that took place less than one week ago or that will take place less than one week in the future will be shown. If you need to select a competition outside of this time window, deselect <em>Only show current competitions</em>.
+<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-select-competition-ID-show-all.gif"></p>
+
+<h3 style="font-weight:bold">Step 6: Export the results data to JSON</h3>
+<p>Save the results data to a JSON file using the <em>Export results JSON...</em> button on the bottom right.</p>
+<p style="text-align:center"><img style="box-shadow: 5px 5px 2px #888888;" src="https://www.worldcubeassociation.org/files/WA-export-JSON.gif"></p>
+
+<h3 style="font-weight:bold">Step 7: Send the results JSON to the WCA</h3>
 <p>E-mail the JSON file exported by the WCA Workbook Assistant to <a href="mailto:results@worldcubeassociation.org">results@worldcubeassociation.org</a></p>
