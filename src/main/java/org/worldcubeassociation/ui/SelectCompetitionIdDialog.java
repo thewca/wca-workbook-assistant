@@ -2,6 +2,7 @@ package org.worldcubeassociation.ui;
 
 import org.worldcubeassociation.WorkbookAssistantEnv;
 import org.worldcubeassociation.db.Competition;
+import org.worldcubeassociation.db.Database;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -146,8 +147,14 @@ public class SelectCompetitionIdDialog extends JDialog implements PropertyChange
     }
 
     private void updateCompetitions() {
-        fSortedCompetitions = new Vector<Competition>(fEnv.getDatabase().getCompetitions().getList());
-        Collections.sort(fSortedCompetitions, new CompetitionDateComparator());
+        Database database = fEnv.getDatabase();
+        if ( database == null ) {
+            fSortedCompetitions = new Vector<Competition>();
+        }
+        else {
+            fSortedCompetitions = new Vector<Competition>( database.getCompetitions().getList() );
+        }
+        Collections.sort( fSortedCompetitions, new CompetitionDateComparator() );
 
         fSortedRecentCompetitions = new Vector<Competition>();
         long now = System.currentTimeMillis();
