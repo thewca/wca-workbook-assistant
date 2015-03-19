@@ -15,16 +15,24 @@ import java.util.zip.ZipFile;
  */
 public class WCADatabaseExportDecoder {
 
-    public static Database decodeMostRecentExport(Database aCurrentDatabase) throws IOException {
+    public static Database decodeMostRecentExport(Database aCurrentDatabase) {
         String[] exportFiles = new File(".").list(new WCADatabaseFilenameFilter());
         if (exportFiles.length > 0) {
             Arrays.sort(exportFiles, new SortByExportDate());
-            String mostRecentExportFile = exportFiles[exportFiles.length - 1];
-            if (aCurrentDatabase != null && mostRecentExportFile.equals(aCurrentDatabase.getFileName())) {
-                return aCurrentDatabase;
-            }
-            else {
-                return decodeDatabaseZippedTSV(mostRecentExportFile);
+            for ( int exportIndex = exportFiles.length - 1; exportIndex >= 0; exportIndex-- ) {
+                String mostRecentExportFile = exportFiles[exportIndex];
+                if ( aCurrentDatabase != null && mostRecentExportFile.equals( aCurrentDatabase.getFileName() ) ) {
+                    return aCurrentDatabase;
+                }
+                else {
+                    try {
+                        return decodeDatabaseZippedTSV( mostRecentExportFile );
+                    }
+                    catch ( IOException e ) {
+                        System.err.println( "Could not decode database export: " + mostRecentExportFile );
+                        e.printStackTrace();
+                    }
+                }
             }
         }
         return null;
@@ -161,7 +169,24 @@ public class WCADatabaseExportDecoder {
 
         return ranks;
     }
-    
+
+  /**
+   * Extracts the export date from the file name.
+   *
+   * Database exports have a file name that looks like this:
+   * WCA_export<NNN>_<YYYY><MM><DD>.tsv.zip
+   *
+   * The different parts of the file name are explained as follows:
+   * <NNN>  is a 3-digit number between 000 and 999 that is increased every time a new export is generated
+   * <YYYY> is a 4-digit number that denotes the year
+   * <MM>   is a 2-digit number that denotes the month of the year
+   * <DD>   is a 2-digit number that denotes the day of the month
+   *
+   * This method returns the <YYYY><MM><DD> part.
+   *
+   * @param aExportFileName the file name of the database export.
+   * @return the date part of the export file name.
+   */
     public static String getExportDate(String aExportFileName) {
         return aExportFileName.substring(14, 22);
     }

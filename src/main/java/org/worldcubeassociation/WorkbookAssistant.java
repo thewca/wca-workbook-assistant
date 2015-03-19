@@ -26,13 +26,8 @@ public class WorkbookAssistant {
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_TITLE);
 
         // Attempt to read WCA database export for the first time.
-        try {
-            Database database = WCADatabaseExportDecoder.decodeMostRecentExport(null);
-            workbookAssistantEnv.setDatabase(database);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+        Database database = WCADatabaseExportDecoder.decodeMostRecentExport( null );
+        workbookAssistantEnv.setDatabase( database );
 
         // Init UI.
         SwingUtilities.invokeLater(new Runnable() {
