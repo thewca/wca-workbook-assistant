@@ -218,6 +218,7 @@ public class SelectCompetitionIdDialog extends JDialog implements PropertyChange
 
     public void reset() {
         fOnlyShowRecentCheckBox.setSelected(true);
+        fCompetitionList.clearSelection();
         fFilterTextField.setText(null);
         fFilterTextField.requestFocus();
     }
