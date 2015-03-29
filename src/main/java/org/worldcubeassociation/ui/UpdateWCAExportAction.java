@@ -61,7 +61,7 @@ public class UpdateWCAExportAction extends AbstractAction {
                 }
 
                 // Then look for remote update to export.
-                URL url = new URL("http://worldcubeassociation.org/results/misc/export.html");
+                URL url = new URL("https://worldcubeassociation.org/results/misc/export.html");
                 InputStream inputStream = url.openStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 String line;
@@ -104,7 +104,7 @@ public class UpdateWCAExportAction extends AbstractAction {
                     if (option == JOptionPane.YES_OPTION) {
                         showDialog();
 
-                        URL exportUrl = new URL("http://worldcubeassociation.org/results/misc/" + exportRelativeUrl);
+                        URL exportUrl = new URL("https://worldcubeassociation.org/results/misc/" + exportRelativeUrl);
                         InputStream exportInputStream = exportUrl.openStream();
                         BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(exportRelativeUrl));
                         byte[] buffer = new byte[1 << 14];
