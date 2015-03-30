@@ -1,5 +1,9 @@
 <h2>Release Notes</h2>
 <br/>
+<h3>v2.2 (29th March 2015)</h3>
+<ul>
+    <li><strong>Bug fix #107</strong><br>The database export download now uses HTTPS, as required by the WCA website.</li>
+</ul>
 <h3>v2.1 (19th March 2015)</h3>
 <ul>
     <li><strong>Improvement #67</strong><br>The validation now checks for common mistakes in the spelling of names.</li>
