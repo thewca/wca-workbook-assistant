@@ -24,7 +24,7 @@ import java.util.*;
  */
 public class JSONGenerator {
 
-    public static final JSONVersion DEFAULT_VERSION = JSONVersion.WCA_COMPETITION_0_2;
+    public static final JSONVersion DEFAULT_VERSION = JSONVersion.WCA_COMPETITION_0_3;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles, Database aDatabase) throws ParseException {
@@ -32,7 +32,7 @@ public class JSONGenerator {
     }
 
     public static String generateJSON(MatchedWorkbook aMatchedWorkbook, String aCompetitionId, Scrambles scrambles, Database aDatabase, JSONVersion aVersion) throws ParseException {
-        if (aVersion != JSONVersion.WCA_COMPETITION_0_2) {
+        if (aVersion != JSONVersion.WCA_COMPETITION_0_3) {
             throw new IllegalArgumentException("Unsupported version: " + aVersion);
         }
 
