@@ -19,6 +19,7 @@
         <jar basedir="target/classes" jarfile="target/wca-workbook-assistant-lib-${version}.jar">
             <manifest>
                 <attribute name="Main-Class" value="org.worldcubeassociation.WorkbookAssistant"/>
+                <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
         </jar>
     </target>

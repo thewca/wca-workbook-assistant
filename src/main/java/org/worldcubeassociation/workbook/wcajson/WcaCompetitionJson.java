@@ -9,4 +9,5 @@ public class WcaCompetitionJson {
 	public WcaPersonJson[] persons;
 	public WcaEventJson[] events;
 	public String scrambleProgram;
+	public String resultsProgram;
 }

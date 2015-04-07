@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.worldcubeassociation.WorkbookAssistant;
 import org.worldcubeassociation.db.Database;
 import org.worldcubeassociation.workbook.parse.CellParser;
 import org.worldcubeassociation.workbook.parse.RowTokenizer;
@@ -44,6 +45,7 @@ public class JSONGenerator {
         competitionJson.formatVersion = aVersion.toString();
         competitionJson.events = generateEvents(aMatchedWorkbook);
         competitionJson.scrambleProgram = scrambles == null ? null : scrambles.getScrambleProgram();
+        competitionJson.resultsProgram = "WCA Workbook Assistant v" + WorkbookAssistant.class.getPackage().getImplementationVersion();
         return GSON.toJson(competitionJson);
     }
 
