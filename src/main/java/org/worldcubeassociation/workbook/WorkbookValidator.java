@@ -150,9 +150,17 @@ public class WorkbookValidator {
             Cell dobCell = row.getCell(dobColIdx);
             Date dob = CellParser.parseDateCell(dobCell);
             String dobText = CellParser.parseText(dobCell, false);
-            if (dobText != null && !dobText.equals("") && dob == null) {
-                ValidationError validationError = new ValidationError(Severity.HIGH, "Misformatted date of birth", aMatchedSheet, rowIdx, dobColIdx);
-                aMatchedSheet.getValidationErrors().add(validationError);
+            if (dobText != null && dobText.length() > 0) {
+                if (dob == null) {
+                    ValidationError validationError = new ValidationError(Severity.HIGH, "Misformatted date of birth", aMatchedSheet, rowIdx, dobColIdx);
+                    aMatchedSheet.getValidationErrors().add(validationError);
+                } else {
+                    double age = (System.currentTimeMillis() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+                    if (age < 5 || age > 90) {
+                        ValidationError validationError = new ValidationError(Severity.LOW, "Incorrect date of birth?", aMatchedSheet, rowIdx, dobColIdx);
+                        aMatchedSheet.getValidationErrors().add(validationError);
+                    }
+                }
             }
 
             int wcaColIdx = aMatchedSheet.getWcaIdHeaderColumn();
@@ -193,6 +201,15 @@ public class WorkbookValidator {
                         ValidationError validationError = new ValidationError(Severity.LOW, "Country does not match country in WCA database: " + person.getCountry(), aMatchedSheet, rowIdx, 2);
                         aMatchedSheet.getValidationErrors().add(validationError);
                     }
+                }
+            }
+
+            // Check that newcomers (no WCA ID) do not match existing persons
+            if (wcaIdEmpty && name != null && country != null && aDatabase != null) {
+                List<Person> existing = aDatabase.getPersons().findByNameAndCountry(name, country);
+                if (!existing.isEmpty()) {
+                    ValidationError validationError = new ValidationError(Severity.LOW, "Name and country match existing person, WCA ID missing?", aMatchedSheet, rowIdx, 3);
+                    aMatchedSheet.getValidationErrors().add(validationError);
                 }
             }
         }

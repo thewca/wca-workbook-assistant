@@ -31,7 +31,7 @@ public class Persons {
         List<Person> existingPersons = new ArrayList<Person>();
         Collection<Person> persons = fPersons.values();
         for (Person person : persons) {
-            if (aName.endsWith(person.getName()) && aCountry.equals(person.getCountry())) {
+            if (aName.equals(person.getName()) && aCountry.equals(person.getCountry())) {
                 existingPersons.add(person);
             }
         }
