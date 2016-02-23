@@ -59,7 +59,7 @@ public class WCADatabaseExportDecoder {
         Countries countries = decodeCountriesTSV(countriesInputStream);
         countriesInputStream.close();
 
-        // Decode countries
+        // Decode ranks single
         ZipEntry ranksSingleEntry = zipFile.getEntry("WCA_export_RanksSingle.tsv");
         InputStream ranksSingleInputStream = zipFile.getInputStream(ranksSingleEntry);
         Ranks singleRanks = decodeRanksTSV(ranksSingleInputStream);
