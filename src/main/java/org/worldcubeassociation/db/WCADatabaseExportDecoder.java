@@ -137,12 +137,9 @@ public class WCADatabaseExportDecoder {
             String id = scanner.next();
             String name = scanner.next();
             String continentId = scanner.next();
-            String latitude = scanner.next();
-            String longitude = scanner.next();
-            String zoom = scanner.next();
             String iso2 = scanner.next();
 
-            Country country = new Country(id, name, continentId, latitude, longitude, zoom, iso2);
+            Country country = new Country(id, name, continentId, iso2);
             countries.add(country);
         }
 
