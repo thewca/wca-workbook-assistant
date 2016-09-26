@@ -1,7 +1,7 @@
 package org.worldcubeassociation.workbook.wcajson;
 
 /*
- * See documentation here https://github.com/cubing/wca-workbook-assistant/issues/48#issue-16730558
+ * See documentation here https://github.com/thewca/worldcubeassociation.org/wiki/WCA-Competition-JSON-Format
  */
 public class WcaPersonJson {
 	public int id;

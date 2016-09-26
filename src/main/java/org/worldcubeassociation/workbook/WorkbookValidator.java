@@ -65,13 +65,13 @@ public class WorkbookValidator {
     }
 
 
-	public static void validateSheetsWithRoundScrambles(MatchedWorkbook matchedWorkbook, RoundScrambles newRoundScrambles, Database database, Scrambles scrambles) {
+    public static void validateSheetsWithRoundScrambles(MatchedWorkbook matchedWorkbook, RoundScrambles newRoundScrambles, Database database, Scrambles scrambles) {
         for (MatchedSheet matchedSheet : matchedWorkbook.sheets()) {
             if (matchedSheet.getSheetType() == SheetType.RESULTS && newRoundScrambles == matchedSheet.getRoundScrambles()) {
                 validateResultsSheet(matchedSheet, matchedWorkbook, database, scrambles);
             }
         }
-	}
+    }
 
     public static void validateSheet(MatchedSheet aMatchedSheet, MatchedWorkbook aMatchedWorkbook, Database aDatabase, Scrambles scrambles) {
         if (aMatchedSheet.getSheetType() == SheetType.REGISTRATIONS) {
@@ -236,7 +236,7 @@ public class WorkbookValidator {
 
         // Check that every round has scrambles.
         // Currently, we don't make any effort to notify users about unused scrambles,
-        // or the same scrambles being applied to different rounds.  
+        // or the same scrambles being applied to different rounds.
         RoundScrambles roundScrambles = aMatchedSheet.getRoundScrambles();
         boolean missingScrambles;
         if(roundScrambles == null) {
@@ -245,62 +245,62 @@ public class WorkbookValidator {
             missingScrambles = roundScrambles.getSheetsExcludingDeleted().size() == 0;
         }
         if(missingScrambles) {
-	        ValidationError missingScramblesError = new ValidationError(Severity.LOW, "Missing scrambles", aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
-	        aMatchedSheet.getValidationErrors().add(missingScramblesError);
+            ValidationError missingScramblesError = new ValidationError(Severity.LOW, "Missing scrambles", aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+            aMatchedSheet.getValidationErrors().add(missingScramblesError);
         } else {
-        	// The round has scrambles, lets make sure we have the correct number of scrambles.
-        	List<TNoodleSheetJson> scrambleSheets = roundScrambles.getSheetsExcludingDeleted();
+            // The round has scrambles, lets make sure we have the correct number of scrambles.
+            List<TNoodleSheetJson> scrambleSheets = roundScrambles.getSheetsExcludingDeleted();
 
             // Check that that the groupIds for these scrambles are unique
-        	HashSet<String> seenGroupsIds = new HashSet<String>();
-        	HashSet<String> duplicateGroupIds = new HashSet<String>();
-        	for(TNoodleSheetJson scrambleSheet : scrambleSheets) {
-        	    if(seenGroupsIds.contains(scrambleSheet.group)) {
-        	        duplicateGroupIds.add(scrambleSheet.group);
-        	    }
-        	    seenGroupsIds.add(scrambleSheet.group);
-        	}
-        	for(String duplicateGroupId : duplicateGroupIds) {
+            HashSet<String> seenGroupsIds = new HashSet<String>();
+            HashSet<String> duplicateGroupIds = new HashSet<String>();
+            for(TNoodleSheetJson scrambleSheet : scrambleSheets) {
+                if(seenGroupsIds.contains(scrambleSheet.group)) {
+                    duplicateGroupIds.add(scrambleSheet.group);
+                }
+                seenGroupsIds.add(scrambleSheet.group);
+            }
+            for(String duplicateGroupId : duplicateGroupIds) {
                 String msg = "Duplicate scramble group " + duplicateGroupId;
                 ValidationError duplicateGroupError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
                 aMatchedSheet.getValidationErrors().add(duplicateGroupError);
-        	}
+            }
 
-        	// ***** HACK ALERT *****
-        	// Here we assume that the groups generated for multiblind were used for each of the attempts.
-        	// See https://github.com/cubing/wca-workbook-assistant/issues/74#issuecomment-36166131 for
-        	// the full discussion.
-    		if(aMatchedSheet.getEvent() == Event._333mbf) {
-    			int actualCount = scrambleSheets.size();
-				int expectedCount = aMatchedSheet.getFormat().getResultCount();
-				if(actualCount != expectedCount) {
-					String msg = "Incorrect number of attempts (groups are treated as attempts) for " + aMatchedSheet.getEventId() + " round: " + aMatchedSheet.getRound() + " (found: " + actualCount + ", expected: " + expectedCount + ")";
-					ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
-					aMatchedSheet.getValidationErrors().add(missingScramblesError);
-				}
-    		} else {
-    			for(TNoodleSheetJson sheet : scrambleSheets) {
-    				int actualCount = sheet.scrambles.length;
-    				int expectedCount = aMatchedSheet.getFormat().getResultCount();
-    				if(actualCount != expectedCount) {
-    					String msg = "Incorrect number of scrambles in group: " + sheet.group + " (found: " + actualCount + ", expected: " + expectedCount + ")";
-    					ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
-    					aMatchedSheet.getValidationErrors().add(missingScramblesError);
-    				}
-    			}
-    		}
+            // ***** HACK ALERT *****
+            // Here we assume that the groups generated for multiblind were used for each of the attempts.
+            // See https://github.com/thewca/wca-workbook-assistant/issues/74#issuecomment-36166131 for
+            // the full discussion.
+            if(aMatchedSheet.getEvent() == Event._333mbf) {
+                int actualCount = scrambleSheets.size();
+                int expectedCount = aMatchedSheet.getFormat().getResultCount();
+                if(actualCount != expectedCount) {
+                    String msg = "Incorrect number of attempts (groups are treated as attempts) for " + aMatchedSheet.getEventId() + " round: " + aMatchedSheet.getRound() + " (found: " + actualCount + ", expected: " + expectedCount + ")";
+                    ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+                    aMatchedSheet.getValidationErrors().add(missingScramblesError);
+                }
+            } else {
+                for(TNoodleSheetJson sheet : scrambleSheets) {
+                    int actualCount = sheet.scrambles.length;
+                    int expectedCount = aMatchedSheet.getFormat().getResultCount();
+                    if(actualCount != expectedCount) {
+                        String msg = "Incorrect number of scrambles in group: " + sheet.group + " (found: " + actualCount + ", expected: " + expectedCount + ")";
+                        ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
+                        aMatchedSheet.getValidationErrors().add(missingScramblesError);
+                    }
+                }
+            }
 
             // Check for duplicate scrambles.
             List<MatchedSheet> sheets = aMatchedWorkbook.sheets();
             List<MatchedSheet> duplicateScrambles = new ArrayList<MatchedSheet>();
             for (MatchedSheet sheet : sheets) {
                 if (sheet.getRoundScrambles() == roundScrambles) {
-                	duplicateScrambles.add(sheet);
+                    duplicateScrambles.add(sheet);
                 }
             }
 
             if (duplicateScrambles.size() > 1) {
-            	StringBuilder sheetNames = new StringBuilder();
+                StringBuilder sheetNames = new StringBuilder();
                 for (int i = 0, duplicateScramblesSize = duplicateScrambles.size(); i < duplicateScramblesSize; i++) {
                     if (i == duplicateScramblesSize - 1) {
                         sheetNames.append(" and ");
@@ -559,7 +559,7 @@ public class WorkbookValidator {
             }
 
             if(!allResultsInRowPresent) {
-            	allCellsPresent = false;
+                allCellsPresent = false;
             }
 
             // For multiple blindfolded, check that the score is calculated correctly.
@@ -819,12 +819,12 @@ public class WorkbookValidator {
         }
 
         if(allCellsPresent) {
-        	// If all time cells were filled in, the format of the round should *not* be combined.
-        	if(aMatchedSheet.getRound().isCombined()) {
-        		validationErrors.add(new ValidationError(Severity.HIGH,
+            // If all time cells were filled in, the format of the round should *not* be combined.
+            if(aMatchedSheet.getRound().isCombined()) {
+                validationErrors.add(new ValidationError(Severity.HIGH,
                         "Sheet with all cells filled in should not be a combined round",
                         aMatchedSheet, -1, ValidationError.ROUND_CELL_IDX));
-        	}
+            }
         }
 
         // Check sorting.
