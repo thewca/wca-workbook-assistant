@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/thewca/wca-workbook-assistant.png?branch=master)](https://travis-ci.org/thewca/wca-workbook-assistant)
 
-A Java application for preparing Excel workbooks with WCA competition results for submission to the WCA via [JSON](https://github.com/thewca/wca-website/wiki/WCA-Competition-Results-JSON-Format).
+A Java application for preparing Excel workbooks with WCA competition results for submission to the WCA via [JSON](https://github.com/thewca/worldcubeassociation.org/wiki/WCIF).
 
 # Building the application
 
