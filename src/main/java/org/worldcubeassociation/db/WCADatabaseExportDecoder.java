@@ -132,11 +132,17 @@ public class WCADatabaseExportDecoder {
 
         Scanner scanner = new Scanner(aInputStream, "UTF-8");
         scanner.useDelimiter("[\t\n\r\f]");
-        scanner.nextLine();
+        String firstLine = scanner.nextLine();
+        boolean hasLatitude = firstLine.contains("latitude");
         while (scanner.hasNext()) {
             String id = scanner.next();
             String name = scanner.next();
             String continentId = scanner.next();
+            if(hasLatitude) {
+                scanner.next(); // latitude
+                scanner.next(); // longitude
+                scanner.next(); // zoom
+            }
             String iso2 = scanner.next();
 
             Country country = new Country(id, name, continentId, iso2);
