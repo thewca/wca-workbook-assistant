@@ -266,27 +266,13 @@ public class WorkbookValidator {
                 aMatchedSheet.getValidationErrors().add(duplicateGroupError);
             }
 
-            // ***** HACK ALERT *****
-            // Here we assume that the groups generated for multiblind were used for each of the attempts.
-            // See https://github.com/thewca/wca-workbook-assistant/issues/74#issuecomment-36166131 for
-            // the full discussion.
-            if(aMatchedSheet.getEvent() == Event._333mbf) {
-                int actualCount = scrambleSheets.size();
+            for(TNoodleSheetJson sheet : scrambleSheets) {
+                int actualCount = sheet.scrambles.length;
                 int expectedCount = aMatchedSheet.getFormat().getResultCount();
                 if(actualCount != expectedCount) {
-                    String msg = "Incorrect number of attempts (groups are treated as attempts) for " + aMatchedSheet.getEventId() + " round: " + aMatchedSheet.getRound() + " (found: " + actualCount + ", expected: " + expectedCount + ")";
+                    String msg = "Incorrect number of scrambles in group: " + sheet.group + " (found: " + actualCount + ", expected: " + expectedCount + ")";
                     ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
                     aMatchedSheet.getValidationErrors().add(missingScramblesError);
-                }
-            } else {
-                for(TNoodleSheetJson sheet : scrambleSheets) {
-                    int actualCount = sheet.scrambles.length;
-                    int expectedCount = aMatchedSheet.getFormat().getResultCount();
-                    if(actualCount != expectedCount) {
-                        String msg = "Incorrect number of scrambles in group: " + sheet.group + " (found: " + actualCount + ", expected: " + expectedCount + ")";
-                        ValidationError missingScramblesError = new ValidationError(Severity.HIGH, msg, aMatchedSheet, -1, ValidationError.ROUND_SCRAMBLES_CELL_IDX);
-                        aMatchedSheet.getValidationErrors().add(missingScramblesError);
-                    }
                 }
             }
 
