@@ -71,6 +71,9 @@ public class CellParser {
         if ("m".equals(text) || "男".equals(text) || "male".equals(text)) {
             return new ParsedGender(Gender.MALE);
         }
+        if ("o".equals(text)) {
+            return new ParsedGender(Gender.OTHER);
+        }
         if ("".equals(text)) {
             return new ParsedGender(null);
         }
